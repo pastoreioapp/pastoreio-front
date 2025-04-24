@@ -1,22 +1,18 @@
-"use client";
-import { baselightTheme } from "@/utils/theme/DefaultColors";
-import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import ProviderStore from "./ProviderStore";
+import ProviderTheme from "./ProviderTheme";
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>
-        <ThemeProvider theme={baselightTheme}>
-          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="pt-BR">
+            <body>
+                <ProviderStore>
+                    <ProviderTheme>{children}</ProviderTheme>
+                </ProviderStore>
+            </body>
+        </html>
+    );
 }
