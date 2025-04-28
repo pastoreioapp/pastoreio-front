@@ -1,10 +1,10 @@
 import PageContainer from "@/components/PageContainer";
-import Blog from "@/app/(private)/dashboard/components/Blog";
-import MonthlyEarnings from "@/app/(private)/dashboard/components/MonthlyEarnings";
-import ProductPerformance from "@/app/(private)/dashboard/components/ProductPerformance";
-import RecentTransactions from "@/app/(private)/dashboard/components/RecentTransactions";
-import SalesOverview from "@/app/(private)/dashboard/components/SalesOverview";
-import YearlyBreakup from "@/app/(private)/dashboard/components/YearlyBreakup";
+import Blog from "@/app/(pastas do template)/dashboard/components/Blog";
+import MonthlyEarnings from "@/app/(pastas do template)/dashboard/components/MonthlyEarnings";
+import ProductPerformance from "@/app/(pastas do template)/dashboard/components/ProductPerformance";
+import RecentTransactions from "@/app/(pastas do template)/dashboard/components/RecentTransactions";
+import SalesOverview from "@/app/(pastas do template)/dashboard/components/SalesOverview";
+import YearlyBreakup from "@/app/(pastas do template)/dashboard/components/YearlyBreakup";
 import { Grid, Box } from "@mui/material";
 
 export default function Dashboard() {
