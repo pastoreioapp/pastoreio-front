@@ -1,15 +1,17 @@
-"use client";
-
-import { Box, Card, Typography, Stack } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
+import { Box, Card, Stack, Typography } from "@mui/material";
 import PageContainer from "@/components/PageContainer";
-import AuthRegister from "../components/AuthRegister";
 import ImageCarousel from "@/components/ImageCarousel/ImageCarousel";
+import ReceiveCode from "../components/ReceiveCode";
+import { wrap } from "module";
 
-export default function RegisterPage() {
+export default function PageReceiveCode() {
   return (
-    <PageContainer title="Registro | Pastore.io" description="Crie sua conta">
+    <PageContainer
+      title="Recuperar Senha | Pastore.io"
+      description="Recuperar Senha"
+    >
       <Box
         sx={{
           position: "relative",
@@ -86,32 +88,54 @@ export default function RegisterPage() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <AuthRegister
-              subtext={
-                <Typography variant="h3" textAlign="center" mb={1}>
-                  Login
+            <ReceiveCode
+              subtitle={
+                <Typography variant="h3" textAlign="center" fontWeight="900">
+                  Recuperar senha
                 </Typography>
               }
-              subtitle={
+              subtext={
+                <Stack
+                  width={"100%"}
+                  display={"flex"}
+                  alignContent={"center"}
+                  alignItems={"center"}
+                  direction="row"
+                  justifyContent="center"
+                  flexWrap={"wrap"}
+                  textAlign={"center"}
+                  spacing={1}
+                  p={1}
+                  mb={10}
+                  color={"#173D8A"}
+                >
+                  <Typography variant="body1" fontWeight="600">
+                    Enviamos um código para pasto******@gmail.com
+                  </Typography>
+                </Stack>
+              }
+              subtext2={
                 <Stack
                   direction="row"
                   justifyContent="center"
+                  flexWrap={"wrap"}
                   spacing={1}
-                  mt={3}
+                  mt={1}
                 >
                   <Typography variant="body1" fontWeight="400">
-                    Já tem uma conta?
+                    Não recebeu o código ?
                   </Typography>
                   <Typography
+                    variant="body1"
                     component={Link}
-                    href="/auth/login"
+                    href="/auth/receiveCode"
                     fontWeight="700"
                     sx={{
                       textDecoration: "underline",
                       color: "#173D8A",
                     }}
                   >
-                    Login
+                    Reenviar 30s
                   </Typography>
                 </Stack>
               }

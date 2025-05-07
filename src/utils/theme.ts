@@ -12,9 +12,9 @@ export const theme = createTheme({
     direction: "ltr",
     palette: {
         primary: {
-            main: "#5D87FF",
+            main: "#173D8A",
             light: "#ECF2FF",
-            dark: "#4570EA",
+            dark: "#647aa8",
         },
         secondary: {
             main: "#49BEFF",
@@ -54,7 +54,7 @@ export const theme = createTheme({
             600: "#2A3547",
         },
         text: {
-            primary: "#2A3547",
+            primary: "#000000",
             secondary: "#5A6A85",
         },
         action: {

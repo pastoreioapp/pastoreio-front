@@ -1,15 +1,18 @@
-"use client";
-
-import { Box, Card, Typography, Stack } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
+import { Box, Card, Stack, Typography } from "@mui/material";
 import PageContainer from "@/components/PageContainer";
-import AuthRegister from "../components/AuthRegister";
 import ImageCarousel from "@/components/ImageCarousel/ImageCarousel";
+import ReceiveCode from "../components/ReceiveCode";
+import { wrap } from "module";
+import NewPassword from "../components/NewPassword";
 
-export default function RegisterPage() {
+export default function PageNewPassword() {
   return (
-    <PageContainer title="Registro | Pastore.io" description="Crie sua conta">
+    <PageContainer
+      title="Recuperar Senha | Pastore.io"
+      description="Recuperar Senha"
+    >
       <Box
         sx={{
           position: "relative",
@@ -86,32 +89,28 @@ export default function RegisterPage() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <AuthRegister
-              subtext={
-                <Typography variant="h3" textAlign="center" mb={1}>
-                  Login
+            <NewPassword
+              subtitle={
+                <Typography variant="h3" textAlign="center" fontWeight="900">
+                  Recuperar senha
                 </Typography>
               }
-              subtitle={
+              subtext={
                 <Stack
+                  width={"100%"}
+                  display={"flex"}
+                  alignContent={"center"}
+                  alignItems={"center"}
                   direction="row"
                   justifyContent="center"
+                  flexWrap={"wrap"}
+                  textAlign={"center"}
                   spacing={1}
-                  mt={3}
+                  p={1}
+                  color={"#173D8A"}
                 >
-                  <Typography variant="body1" fontWeight="400">
-                    Já tem uma conta?
-                  </Typography>
-                  <Typography
-                    component={Link}
-                    href="/auth/login"
-                    fontWeight="700"
-                    sx={{
-                      textDecoration: "underline",
-                      color: "#173D8A",
-                    }}
-                  >
-                    Login
+                  <Typography variant="body1" fontWeight="600">
+                    Seu e-mail foi verificado, vamos criar uma nova senha
                   </Typography>
                 </Stack>
               }

@@ -15,7 +15,7 @@ export default function Logo() {
     return (
         <LinkStyled href="/dashboard">
             <Image
-                src="/images/logos/dark-logo.svg"
+                src="/images/logos/logo-horizontal.svg"
                 alt="logo"
                 height={70}
                 width={174}
