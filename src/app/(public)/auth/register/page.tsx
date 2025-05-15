@@ -1,103 +1,68 @@
-import { Grid, Box, Card, Typography, Stack } from "@mui/material";
-import Link from "next/link";
+"use client";
+
+import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/PageContainer";
-import Logo from "../components/Logo";
 import AuthRegister from "../components/AuthRegister";
+import LeftContent from "../components/LeftContent";
 
 export default function RegisterPage() {
-    return (
-        <PageContainer title="Register" description="this is Register page">
-            <Box
-                sx={{
-                    position: "relative",
-                    "&:before": {
-                        content: '""',
-                        background:
-                            "radial-gradient(#d2f1df, #d3d7fa, #bad8f4)",
-                        backgroundSize: "400% 400%",
-                        animation: "gradient 15s ease infinite",
-                        position: "absolute",
-                        height: "100%",
-                        width: "100%",
-                        opacity: "0.3",
-                    },
-                }}
-            >
-                <Grid
-                    container
-                    spacing={0}
-                    justifyContent="center"
-                    sx={{ height: "100vh" }}
-                >
-                    <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        lg={4}
-                        xl={3}
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
-                        <Card
-                            elevation={9}
-                            sx={{
-                                p: 4,
-                                zIndex: 1,
-                                width: "100%",
-                                maxWidth: "500px",
-                            }}
-                        >
-                            <Box
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center"
-                            >
-                                <Logo />
-                            </Box>
-                            <AuthRegister
-                                subtext={
-                                    <Typography
-                                        variant="subtitle1"
-                                        textAlign="center"
-                                        color="textSecondary"
-                                        mb={1}
-                                    >
-                                        Your Social Campaigns
-                                    </Typography>
-                                }
-                                subtitle={
-                                    <Stack
-                                        direction="row"
-                                        justifyContent="center"
-                                        spacing={1}
-                                        mt={3}
-                                    >
-                                        <Typography
-                                            color="textSecondary"
-                                            variant="h6"
-                                            fontWeight="400"
-                                        >
-                                            Already have an Account?
-                                        </Typography>
-                                        <Typography
-                                            component={Link}
-                                            href="/auth/login"
-                                            fontWeight="500"
-                                            sx={{
-                                                textDecoration: "none",
-                                                color: "primary.main",
-                                            }}
-                                        >
-                                            Sign In
-                                        </Typography>
-                                    </Stack>
-                                }
-                            />
-                        </Card>
-                    </Grid>
-                </Grid>
-            </Box>
-        </PageContainer>
-    );
+  return (
+    <PageContainer title="Registro | Pastore.io" description="Crie sua conta">
+      <Box
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: { xs: "column", lg: "row" },
+          backgroundColor: "#EFF4FF",
+        }}
+      >
+        <Box
+          sx={{
+            width: { xs: 0, lg: "45%" },
+            height: { xs: 0, lg: "100vh" },
+            overflow: "hidden",
+            display: { xs: "none", lg: "flex" },
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            color: "#173D8A",
+            padding: 4,
+            transition: "all 0.3s ease",
+          }}
+        >
+          <LeftContent />
+        </Box>
+
+        <Box
+          sx={{
+            width: { xs: "100%", lg: "55%" },
+            height: { xs: "auto", lg: "100vh" },
+            minHeight: { xs: "100vh", lg: "auto" },
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#ffffff",
+            p: { xs: 2, sm: 4 },
+            borderRadius: "30px 0px 0px 30px",
+          }}
+        >
+          <Card
+            elevation={9}
+            sx={{
+              p: { xs: 3, sm: 6 },
+              py: { xs: 5, sm: 6 },
+              width: "100%",
+              maxWidth: "550px",
+              backgroundColor: "#EFF4FF",
+              borderRadius: "30px",
+              my: { xs: 4, lg: 0 },
+            }}
+          >
+            <AuthRegister />
+          </Card>
+        </Box>
+      </Box>
+    </PageContainer>
+  );
 }

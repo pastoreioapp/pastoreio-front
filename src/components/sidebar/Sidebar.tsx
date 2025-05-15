@@ -90,7 +90,7 @@ export default function SidebarComponent() {
                             themeSecondaryColor="#49beff"
                             showProfile={false}
                         >
-                            <Logo img="/images/logos/Logo.png" />
+                            <Logo img="/images/logos/Logo.svg" />
                             <Box>
                                 <SidebarItems />
                                 {/* <Upgrade /> */}
@@ -127,7 +127,7 @@ export default function SidebarComponent() {
                     themeSecondaryColor="#49beff"
                     showProfile={false}
                 >
-                    <Logo img="/images/logos/dark-logo.svg" />
+                    <Logo img="/images/logos/Logo.svg" />
                     <SidebarItems />
                     {/* <Upgrade /> */}
                 </Sidebar>

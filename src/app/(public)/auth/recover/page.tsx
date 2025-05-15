@@ -1,11 +1,14 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/PageContainer";
-import AuthLogin from "../components/AuthLogin";
+import RecoverPassword from "../components/RecoverPassword";
 import LeftContent from "../components/LeftContent";
 
-export default function LoginPage() {
+export default function RecoverPage() {
   return (
-    <PageContainer title="Login | Pastore.io" description="Faça seu login">
+    <PageContainer
+      title="Recuperar Senha | Pastore.io"
+      description="Recuperar Senha"
+    >
       <Box
         sx={{
           position: "relative",
@@ -57,7 +60,7 @@ export default function LoginPage() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <AuthLogin />
+            <RecoverPassword />
           </Card>
         </Box>
       </Box>
