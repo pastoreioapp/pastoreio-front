@@ -2,31 +2,43 @@
 
 import Link from "next/link";
 import { Box, Typography, Button, Stack, Divider } from "@mui/material";
-
-import { loginType } from "../types/loginType";
 import CustomTextField from "@/components/ui/CustomTextField";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
-export default function RecoverPassword({
-  subtitle,
-  subtext,
-}: loginType) {
+export default function RecoverPassword() {
   return (
     <Box>
-      {subtitle}
+      <Typography variant="h3" textAlign="center" mb={5} fontWeight="900">
+        Recuperar senha
+      </Typography>
 
-      {subtext}
+      <Stack
+        display={"flex"}
+        alignContent={"center"}
+        alignItems={"center"}
+        direction="row"
+        justifyContent="center"
+        spacing={1}
+        p={1}
+      >
+        <ErrorOutlineIcon sx={{ color: "#173D8A" }} />
+        <Typography variant="body1" fontWeight="900">
+          <span>Problemas para entrar?</span>
+          <br />
+          Vamos recuperar a sua senha !
+        </Typography>
+      </Stack>
       <Box
         sx={{
           width: "80%",
           display: "flex",
           alignItems: "center",
           mb: 6,
-          marginX: "auto"
+          marginX: "auto",
         }}
       >
         <Divider
           sx={{
-
             flexGrow: 1,
             bgcolor: "#173D8A",
             height: 2,

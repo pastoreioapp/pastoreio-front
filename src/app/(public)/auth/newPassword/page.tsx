@@ -1,11 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
-import { Box, Card, Stack, Typography } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/PageContainer";
-import ImageCarousel from "@/components/ImageCarousel/ImageCarousel";
-import ReceiveCode from "../components/ReceiveCode";
-import { wrap } from "module";
 import NewPassword from "../components/NewPassword";
+import LeftContent from "../components/LeftContent";
 
 export default function PageNewPassword() {
   return (
@@ -22,7 +18,6 @@ export default function PageNewPassword() {
           backgroundColor: "#EFF4FF",
         }}
       >
-        {/* Parte Esquerda */}
         <Box
           sx={{
             width: { xs: 0, lg: "45%" },
@@ -37,33 +32,9 @@ export default function PageNewPassword() {
             transition: "all 0.3s ease",
           }}
         >
-          {/* Logo */}
-          <Box sx={{ position: "absolute", top: 0, left: 0, padding: 4 }}>
-            <Link href={"/dashboard"}>
-              <Image
-                src="/images/logos/logo-horizontal.svg"
-                alt="Google Login"
-                width={230}
-                height={60}
-                unoptimized
-              />
-            </Link>
-          </Box>
-
-          {/* Carrossel de Imagens */}
-          <Box sx={{ width: "100%", maxWidth: "650px", mb: 4 }}>
-            <ImageCarousel
-              images={[
-                "/images/Carousel/image.png",
-                "/images/Carousel/image.png",
-                "/images/Carousel/image.png",
-              ]}
-              autoPlay={true}
-            />
-          </Box>
+          <LeftContent />
         </Box>
 
-        {/* Parte Direita */}
         <Box
           sx={{
             width: { xs: "100%", lg: "55%" },
@@ -89,32 +60,7 @@ export default function PageNewPassword() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <NewPassword
-              subtitle={
-                <Typography variant="h3" textAlign="center" fontWeight="900">
-                  Recuperar senha
-                </Typography>
-              }
-              subtext={
-                <Stack
-                  width={"100%"}
-                  display={"flex"}
-                  alignContent={"center"}
-                  alignItems={"center"}
-                  direction="row"
-                  justifyContent="center"
-                  flexWrap={"wrap"}
-                  textAlign={"center"}
-                  spacing={1}
-                  p={1}
-                  color={"#173D8A"}
-                >
-                  <Typography variant="body1" fontWeight="600">
-                    Seu e-mail foi verificado, vamos criar uma nova senha
-                  </Typography>
-                </Stack>
-              }
-            />
+            <NewPassword />
           </Card>
         </Box>
       </Box>

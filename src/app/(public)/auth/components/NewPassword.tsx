@@ -11,13 +11,9 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { loginType } from "../types/loginType";
 import CustomTextField from "@/components/ui/CustomTextField";
 
-export default function NewPassword({
-  subtitle,
-  subtext
-}: loginType) {
+export default function NewPassword() {
   const [showPasswordNew, setShowPasswordNew] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
@@ -31,9 +27,27 @@ export default function NewPassword({
 
   return (
     <Box>
-      {subtitle}
+      <Typography variant="h3" textAlign="center" fontWeight="900">
+        Recuperar senha
+      </Typography>
 
-      {subtext}
+      <Stack
+        width={"100%"}
+        display={"flex"}
+        alignContent={"center"}
+        alignItems={"center"}
+        direction="row"
+        justifyContent="center"
+        flexWrap={"wrap"}
+        textAlign={"center"}
+        spacing={1}
+        p={1}
+        color={"#173D8A"}
+      >
+        <Typography variant="body1" fontWeight="600">
+          Seu e-mail foi verificado, vamos criar uma nova senha
+        </Typography>
+      </Stack>
 
       <Stack>
         <Typography

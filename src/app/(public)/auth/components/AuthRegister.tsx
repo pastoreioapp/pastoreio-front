@@ -1,13 +1,8 @@
 "use client";
 
-// Importações React
 import { useState } from "react";
-
-// Importações Next
 import Link from "next/link";
 import Image from "next/image";
-
-// Importações Mui/material
 import {
   FormControlLabel,
   Checkbox,
@@ -22,10 +17,7 @@ import { Stack } from "@mui/system";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CustomTextField from "@/components/ui/CustomTextField";
 
-// Importações Types
-import { registerType } from "../types/registerType";
-
-export default function AuthRegister({ subtitle, subtext }: registerType) {
+export default function AuthRegister() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
@@ -34,10 +26,10 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
 
   return (
     <>
-      {/* texto Login */}
-      {subtext}
+      <Typography variant="h3" textAlign="center" mb={1}>
+        Login
+      </Typography>
 
-      {/* Links das redes sociais */}
       <Box
         sx={{
           display: "flex",
@@ -46,7 +38,6 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
           my: 3,
         }}
       >
-        {/* Icon Google */}
         <IconButton>
           <Link href={"#"}>
             <Image
@@ -59,11 +50,10 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
           </Link>
         </IconButton>
 
-        {/* Icon Facebook */}
         <IconButton>
           <Link href={"#"}>
             <Image
-              src="/images/icons/icon-facebook.png"
+              src="/images/icons/icon-facebook.svg"
               alt="Google Login"
               width={28}
               height={28}
@@ -72,7 +62,6 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
           </Link>
         </IconButton>
 
-        {/* Icon Apple*/}
         <IconButton>
           <Link href={"#"}>
             <Image
@@ -86,7 +75,6 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
         </IconButton>
       </Box>
 
-      {/* -- ou -- */}
       <Box
         sx={{
           display: "flex",
@@ -120,8 +108,7 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
           }}
         />
       </Box>
-      
-      {/* Inputs | Checkbox | Button */}
+
       <Box>
         <Stack mb={3}>
           <Typography
@@ -252,13 +239,28 @@ export default function AuthRegister({ subtitle, subtext }: registerType) {
           href="/auth/login"
           sx={{
             borderRadius: "50px",
-            height: "50px"
+            height: "50px",
           }}
         >
           Criar
         </Button>
       </Box>
-      {subtitle}
+      <Stack direction="row" justifyContent="center" spacing={1} mt={3}>
+        <Typography variant="body1" fontWeight="400">
+          Já tem uma conta?
+        </Typography>
+        <Typography
+          component={Link}
+          href="/auth/login"
+          fontWeight="700"
+          sx={{
+            textDecoration: "underline",
+            color: "#173D8A",
+          }}
+        >
+          Login
+        </Typography>
+      </Stack>
     </>
   );
 }

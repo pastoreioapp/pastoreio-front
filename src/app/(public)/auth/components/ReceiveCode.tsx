@@ -1,21 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Box, Typography, Button, Stack, Divider } from "@mui/material";
-
-import { loginType } from "../types/loginType";
+import { Box, Typography, Button, Stack } from "@mui/material";
 import CustomTextField from "@/components/ui/CustomTextField";
 
-export default function ReceiveCode({
-  subtitle,
-  subtext,
-  subtext2,
-}: loginType) {
+export default function ReceiveCode() {
   return (
     <Box>
-      {subtitle}
+      <Typography variant="h3" textAlign="center" fontWeight="900">
+        Recuperar senha
+      </Typography>
 
-      {subtext}
+      <Stack
+        width={"100%"}
+        display={"flex"}
+        alignContent={"center"}
+        alignItems={"center"}
+        direction="row"
+        justifyContent="center"
+        flexWrap={"wrap"}
+        textAlign={"center"}
+        spacing={1}
+        p={1}
+        mb={10}
+        color={"#173D8A"}
+      >
+        <Typography variant="body1" fontWeight="600">
+          Enviamos um código para pasto******@gmail.com
+        </Typography>
+      </Stack>
 
       <Stack>
         <Typography
@@ -35,7 +48,29 @@ export default function ReceiveCode({
           required
         />
       </Stack>
-      {subtext2}
+      <Stack
+        direction="row"
+        justifyContent="center"
+        flexWrap={"wrap"}
+        spacing={1}
+        mt={1}
+      >
+        <Typography variant="body1" fontWeight="400">
+          Não recebeu o código ?
+        </Typography>
+        <Typography
+          variant="body1"
+          component={Link}
+          href="/auth/receiveCode"
+          fontWeight="700"
+          sx={{
+            textDecoration: "underline",
+            color: "#173D8A",
+          }}
+        >
+          Reenviar 30s
+        </Typography>
+      </Stack>
       <Button
         color="primary"
         variant="contained"

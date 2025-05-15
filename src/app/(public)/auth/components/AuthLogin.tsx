@@ -1,29 +1,21 @@
 "use client";
 
-// Importações Next
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-
 import {
   Box,
   Typography,
   Divider,
   IconButton,
   InputAdornment,
-  FormControlLabel,
   Button,
   Stack,
-  Checkbox,
 } from "@mui/material";
-
-import { loginType } from "../types/loginType";
 import CustomTextField from "@/components/ui/CustomTextField";
-
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Props } from "react-apexcharts";
 
-export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
+export default function AuthLogin() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
@@ -32,10 +24,10 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
 
   return (
     <>
-      {/* texto Login */}
-      {subtext}
+      <Typography variant="h3" textAlign="center" mb={1}>
+        Login
+      </Typography>
 
-      {/* Links das redes sociais */}
       <Box
         sx={{
           display: "flex",
@@ -44,7 +36,6 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
           my: 3,
         }}
       >
-        {/* Icon Google */}
         <IconButton>
           <Link href={"#"}>
             <Image
@@ -57,20 +48,18 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
           </Link>
         </IconButton>
 
-        {/* Icon Facebook */}
         <IconButton>
           <Link href={"#"}>
             <Image
-              src="/images/icons/icon-facebook.png"
+              src="/images/icons/icon-facebook.svg"
               alt="Google Login"
-              width={28}
-              height={28}
+              width={24}
+              height={24}
               unoptimized
             />
           </Link>
         </IconButton>
 
-        {/* Icon Apple*/}
         <IconButton>
           <Link href={"#"}>
             <Image
@@ -84,7 +73,6 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
         </IconButton>
       </Box>
 
-      {/* ----- */}
       <Box
         sx={{
           display: "flex",
@@ -101,7 +89,6 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
         />
       </Box>
 
-      {/* Inputs | Checkbox | Button */}
       <Box>
         <Stack mb={3}>
           <Typography
@@ -157,7 +144,25 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
             }}
           />
         </Stack>
-        <Box sx={{ width: "100%", textAlign: "left", mt: 2, mb: 5 }}>{subtext2}</Box>
+        <Box sx={{ width: "100%", textAlign: "left", mt: 2, mb: 5 }}>
+          <Stack direction="row" justifyContent="right" spacing={1} mt={3}>
+            <Typography variant="body1" fontWeight="400">
+              Esqueceu a Senha ?
+            </Typography>
+            <Typography
+              variant="body1"
+              component={Link}
+              href="/auth/recover"
+              fontWeight="700"
+              sx={{
+                textDecoration: "underline",
+                color: "#173D8A",
+              }}
+            >
+              Recuperar
+            </Typography>
+          </Stack>
+        </Box>
         <Button
           color="primary"
           variant="contained"
@@ -167,13 +172,40 @@ export default function AuthLogin({ subtitle, subtext, subtext2}: loginType) {
           href="/dashboard"
           sx={{
             borderRadius: "50px",
-            height: "50px"
+            height: "50px",
           }}
         >
           Login
         </Button>
       </Box>
-      {subtitle}
+      <Stack
+        direction="row"
+        justifyContent="center"
+        spacing={1}
+        mt={3}
+        sx={{
+          width: "100%",
+          maxWidth: "100%",
+          display: "flex",
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography variant="body1" fontWeight="400">
+          Ainda não possui uma conta ?
+        </Typography>
+        <Typography
+          variant="body1"
+          component={Link}
+          href="/auth/register"
+          fontWeight="700"
+          sx={{
+            textDecoration: "underline",
+            color: "#173D8A",
+          }}
+        >
+          Cadastre-se
+        </Typography>
+      </Stack>
     </>
   );
 }
