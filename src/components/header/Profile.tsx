@@ -11,12 +11,17 @@ import {
     ListItemText,
 } from "@mui/material";
 import { IconListCheck, IconMail, IconUser } from "@tabler/icons-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { clearLoggedUser } from "@/store/features/loggedUserSlice";
+import { useRouter } from "next/navigation";
 
 export default function Profile() {
+    const navigate = useRouter();
+    const dispatch = useDispatch();
     const loggedUser = useSelector<RootState>(state => state.loggedUser);
     console.log("Logged User:", loggedUser);
+
     const [anchorEl2, setAnchorEl2] = useState(null);
 
     const handleClick2 = (event: any) => {
@@ -26,6 +31,11 @@ export default function Profile() {
     const handleClose2 = () => {
         setAnchorEl2(null);
     };
+
+    function handleLogoutButtonClick(): void {
+        dispatch(clearLoggedUser());
+        navigate.push("/auth/login");
+    }
 
     return (
         <Box>
@@ -88,13 +98,12 @@ export default function Profile() {
                 </MenuItem>
                 <Box mt={1} py={1} px={2}>
                     <Button
-                        href="/auth/login"
                         variant="outlined"
                         color="primary"
-                        component={Link}
+                        onClick={handleLogoutButtonClick}
                         fullWidth
                     >
-                        Logout
+                        Sair
                     </Button>
                 </Box>
             </Menu>

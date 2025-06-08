@@ -12,12 +12,14 @@ const loggedUserSlice = createSlice({
     initialState: {} as LoggedUserState,
     reducers: {
         setLoggedUser: (state, action) => {
-            console.log("Setting logged user:", action.payload);
             return {...state, ...action.payload};
+        },
+        clearLoggedUser: () => {
+            return {} as LoggedUserState;
         }
     }
 })
 
-export const { setLoggedUser } = loggedUserSlice.actions;
+export const { setLoggedUser, clearLoggedUser } = loggedUserSlice.actions;
 
 export const { reducer: loggedUserReducer } = loggedUserSlice;
