@@ -11,8 +11,12 @@ import {
     ListItemText,
 } from "@mui/material";
 import { IconListCheck, IconMail, IconUser } from "@tabler/icons-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 export default function Profile() {
+    const loggedUser = useSelector<RootState>(state => state.loggedUser);
+    console.log("Logged User:", loggedUser);
     const [anchorEl2, setAnchorEl2] = useState(null);
 
     const handleClick2 = (event: any) => {

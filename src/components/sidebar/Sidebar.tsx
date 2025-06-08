@@ -5,7 +5,7 @@ import { Sidebar, Logo } from "react-mui-sidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
-import { toggleSidebar } from "@/features/sidebarSlice";
+import { toggleSidebar } from "@/store/features/sidebarSlice";
 
 export default function SidebarComponent() {
     const dispatch = useDispatch();

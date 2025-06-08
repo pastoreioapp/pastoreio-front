@@ -21,5 +21,4 @@ const sidebarSlice = createSlice({
 });
 
 export const { toggleSidebar } = sidebarSlice.actions;
-
-export default sidebarSlice.reducer;
+export const { reducer: sidebarReducer } = sidebarSlice;
