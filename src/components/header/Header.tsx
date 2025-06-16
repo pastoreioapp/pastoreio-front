@@ -1,80 +1,58 @@
+"use client";
+
 import {
-    Box,
-    AppBar,
-    Toolbar,
-    styled,
-    Stack,
-    IconButton,
-    Badge,
-    Button,
+  Box,
+  AppBar,
+  Toolbar,
+  styled,
+  Stack,
+  IconButton,
+  Typography,
 } from "@mui/material";
-import PropTypes from "prop-types";
-import Link from "next/link";
 import Profile from "./Profile";
-import { IconBellRinging, IconMenu } from "@tabler/icons-react";
+import { IconBellRingingFilled } from "@tabler/icons-react";
+import { usePathname } from "next/navigation";
+import { Menuitems } from "../sidebar/MenuItems";
+
+const AppBarStyled = styled(AppBar)({
+  boxShadow: "none",
+  background: "#fff",
+  backdropFilter: "blur(4px)",
+  padding: "30px",
+});
+
+const ToolbarStyled = styled(Toolbar)({
+  width: "100%",
+  display: "flex",
+  color: "#929ead",
+  justifyContent: "space-between",
+});
 
 export default function Header() {
-    const AppBarStyled = styled(AppBar)(({ theme }) => ({
-        boxShadow: "none",
-        background: theme.palette.background.paper,
-        justifyContent: "center",
-        backdropFilter: "blur(4px)",
-        [theme.breakpoints.up("lg")]: {
-            minHeight: "70px",
-        },
-    }));
+  const pathname = usePathname();
+  const currentItem = Menuitems.find((item) => item.href === pathname);
+  const pageTitle = currentItem ? currentItem.title : "Central da Célula";
 
-    const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
-        width: "100%",
-        color: theme.palette.text.secondary,
-    }));
-
-    return (
-        <AppBarStyled position="sticky" color="default">
-            <ToolbarStyled>
-                <IconButton
-                    color="inherit"
-                    aria-label="menu"
-                    onClick={() => {}}
-                    sx={{
-                        display: {
-                            lg: "none",
-                            xs: "inline",
-                        },
-                    }}
-                >
-                    <IconMenu width="20" height="20" />
-                </IconButton>
-
-                <IconButton
-                    size="large"
-                    aria-label="show 11 new notifications"
-                    color="inherit"
-                    aria-controls="msgs-menu"
-                    aria-haspopup="true"
-                >
-                    <Badge variant="dot" color="primary">
-                        <IconBellRinging size="21" stroke="1.5" />
-                    </Badge>
-                </IconButton>
-                <Box flexGrow={1} />
-                <Stack spacing={1} direction="row" alignItems="center">
-                    <Button
-                        variant="contained"
-                        component={Link}
-                        href="/auth/login"
-                        disableElevation
-                        color="primary"
-                    >
-                        Login
-                    </Button>
-                    <Profile />
-                </Stack>
-            </ToolbarStyled>
-        </AppBarStyled>
-    );
+  return (
+    <AppBarStyled position="sticky">
+      <ToolbarStyled>
+        <Box>
+          <Typography variant="h3" fontWeight={600} color="#000">
+            {pageTitle}
+          </Typography>
+        </Box>
+        <Stack direction="row" alignItems="center">
+          <IconButton
+            size="small"
+            aria-label="notificações"
+            color="inherit"
+            sx={{ marginLeft: "100px", padding: "10px" }}
+          >
+            <IconBellRingingFilled size={28} stroke="1.5" />
+          </IconButton>
+          <Profile />
+        </Stack>
+      </ToolbarStyled>
+    </AppBarStyled>
+  );
 }
-
-Header.propTypes = {
-    sx: PropTypes.object,
-};

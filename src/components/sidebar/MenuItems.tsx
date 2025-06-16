@@ -1,99 +1,53 @@
 import {
-    IconAperture,
-    IconCopy,
-    IconLayoutDashboard,
-    IconLogin,
-    IconMoodHappy,
-    IconTypography,
-    IconUserPlus,
-    IconHome,
-    IconUser,
-    IconCalendar,
-    IconUsersGroup,
+  IconHome,
+  IconUser,
+  IconLayoutDashboard,
+  IconMessage2,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import { uniqueId } from "lodash";
+import React from "react";
 
-export const Menuitems = [
-    {
-        id: uniqueId(),
-        title: "Página Inicial",
-        icon: IconHome,
-        href: "/dashboard",
-    },
-    {
-        id: uniqueId(),
-        title: "Membros",
-        icon: IconUser,
-        href: "/membros",
-    },
-    {
-        id: uniqueId(),
-        title: "Encontros",
-        icon: IconCalendar,
-        href: "/encontros",
-    },
-    {
-        id: uniqueId(),
-        title: "Multiplicação",
-        icon: IconUsersGroup,
-        href: "/multiplicacao",
-    },
-    // {
-    //     navlabel: true,
-    //     subheader: "Home",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Dashboard",
-    //     icon: IconLayoutDashboard,
-    //     href: "/dashboard",
-    // },
-    // {
-    //     navlabel: true,
-    //     subheader: "Utilities",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Typography",
-    //     icon: IconTypography,
-    //     href: "/utilities/typography",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Shadow",
-    //     icon: IconCopy,
-    //     href: "/utilities/shadow",
-    // },
-    // {
-    //     navlabel: true,
-    //     subheader: "Auth",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Login",
-    //     icon: IconLogin,
-    //     href: "/auth/login",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Register",
-    //     icon: IconUserPlus,
-    //     href: "/auth/register",
-    // },
-    // {
-    //     navlabel: true,
-    //     subheader: "Extra",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Icons",
-    //     icon: IconMoodHappy,
-    //     href: "/icons",
-    // },
-    // {
-    //     id: uniqueId(),
-    //     title: "Sample Page",
-    //     icon: IconAperture,
-    //     href: "/sample-page",
-    // },
+export interface MenuItemType {
+  id: string;
+  title: string;
+  icon: React.ElementType<{
+    size?: string | number;
+    stroke?: string | number;
+    variant?: string;
+  }>;
+  href: string;
+}
+
+export const Menuitems: MenuItemType[] = [
+  {
+    id: uniqueId(),
+    title: "Central da célula",
+    icon: IconHome,
+    href: "/dashboard",
+  },
+  {
+    id: uniqueId(),
+    title: "Membros",
+    icon: IconUser,
+    href: "/membros",
+  },
+  {
+    id: uniqueId(),
+    title: "Orgonograma",
+    icon: IconLayoutDashboard,
+    href: "/orgonograma",
+  },
+  {
+    id: uniqueId(),
+    title: "Encontros",
+    icon: IconMessage2,
+    href: "/encontros",
+  },
+  {
+    id: uniqueId(),
+    title: "Multiplicação",
+    icon: IconUsersGroup,
+    href: "/multiplicacao",
+  },
 ];
