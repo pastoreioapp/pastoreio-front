@@ -14,13 +14,30 @@ import {
 } from "@mui/material";
 import CustomTextField from "@/components/ui/CustomTextField";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { LoggedUserState, setLoggedUser } from "@/store/features/loggedUserSlice";
 
 export default function AuthLogin() {
-  const [showPassword, setShowPassword] = useState(false);
+    const navigate = useRouter();
+    const dispatch = useDispatch();
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    function handleLoginButtonClick(): void {
+        const mockedUser: LoggedUserState = {
+            id: "1",
+            name: "John Doe",
+            email: "",
+            role: "lider-celula",
+        }
+        dispatch(setLoggedUser(mockedUser))
+        navigate.push("/dashboard");
+    }
 
   return (
     <>
@@ -168,8 +185,7 @@ export default function AuthLogin() {
           variant="contained"
           size="large"
           fullWidth
-          component={Link}
-          href="/dashboard"
+          onClick={handleLoginButtonClick}
           sx={{
             borderRadius: "50px",
             height: "50px",

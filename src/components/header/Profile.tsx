@@ -24,6 +24,9 @@ import {
   IconCaretDownFilled,
   IconLogout2,
 } from "@tabler/icons-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { clearLoggedUser } from "@/store/features/loggedUserSlice";
 
 const onlineBadgeStyle = {
   "& .MuiBadge-badge": {
@@ -61,7 +64,16 @@ interface ProfileProps {
 export default function Profile({ onMenuItemClick }: ProfileProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [activeItem, setActiveItem] = useState<string | null>(null);
+
   const router = useRouter();
+  const dispatch = useDispatch();
+  const loggedUser = useSelector<RootState>(state => state.loggedUser);
+  console.log("Logged User:", loggedUser);
+
+  function handleLogoutButtonClick(): void {
+      dispatch(clearLoggedUser());
+      router.push("/auth/login");
+  }
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -73,7 +85,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
 
   const handleItemClick = (item: string) => {
     if (item === "Sair") {
-      router.push("/auth/login");
+      handleLogoutButtonClick();
     }
 
     if (item !== "Tema") {
