@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Box } from "@mui/material";
-import ImageCarousel from "@/components/ImageCarousel/ImageCarousel";
+import ImageCarousel from "./ImageCarousel";
 
 export default function LeftContent() {
   return (
