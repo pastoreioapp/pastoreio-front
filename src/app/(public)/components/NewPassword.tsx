@@ -123,7 +123,7 @@ export default function NewPassword() {
         size="large"
         fullWidth
         component={Link}
-        href="/auth/login"
+        href="//login"
         sx={{
           borderRadius: "50px",
           marginTop: "50px",

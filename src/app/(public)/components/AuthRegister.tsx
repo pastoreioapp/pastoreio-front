@@ -236,7 +236,7 @@ export default function AuthRegister() {
           size="large"
           fullWidth
           component={Link}
-          href="/auth/login"
+          href="/login"
           sx={{
             borderRadius: "50px",
             height: "50px",
@@ -251,7 +251,7 @@ export default function AuthRegister() {
         </Typography>
         <Typography
           component={Link}
-          href="/auth/login"
+          href="/login"
           fontWeight="700"
           sx={{
             textDecoration: "underline",

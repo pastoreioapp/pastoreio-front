@@ -61,7 +61,7 @@ export default function ReceiveCode() {
         <Typography
           variant="body1"
           component={Link}
-          href="/auth/receiveCode"
+          href="//receiveCode"
           fontWeight="700"
           sx={{
             textDecoration: "underline",
@@ -77,7 +77,7 @@ export default function ReceiveCode() {
         size="large"
         fullWidth
         component={Link}
-        href="/auth/newPassword"
+        href="//newPassword"
         sx={{
           borderRadius: "50px",
           marginTop: "50px",

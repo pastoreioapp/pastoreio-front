@@ -72,7 +72,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
 
   function handleLogoutButtonClick(): void {
       dispatch(clearLoggedUser());
-      router.push("/auth/login");
+      router.push("//login");
   }
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {

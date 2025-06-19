@@ -169,7 +169,7 @@ export default function AuthLogin() {
             <Typography
               variant="body1"
               component={Link}
-              href="/auth/recover"
+              href="/recover"
               fontWeight="700"
               sx={{
                 textDecoration: "underline",
@@ -212,7 +212,7 @@ export default function AuthLogin() {
         <Typography
           variant="body1"
           component={Link}
-          href="/auth/register"
+          href="/register"
           fontWeight="700"
           sx={{
             textDecoration: "underline",

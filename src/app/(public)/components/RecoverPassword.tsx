@@ -72,7 +72,7 @@ export default function RecoverPassword() {
         size="large"
         fullWidth
         component={Link}
-        href="/auth/receiveCode"
+        href="//receiveCode"
         sx={{
           borderRadius: "50px",
           marginTop: "50px",
