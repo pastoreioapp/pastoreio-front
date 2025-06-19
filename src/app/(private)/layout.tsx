@@ -12,24 +12,13 @@ export default function RootLayout({
 }) {
     return (
         <MainWrapper className="mainwrapper">
-            {/* Sidebar */}
             <Sidebar />
-            {/* Main Wrapper */}
             <PageWrapper className="page-wrapper">
-                {/* Header */}
                 <Header />
-                {/* PageContent */}
-                <Container
-                    sx={{
-                        paddingTop: "20px",
-                        maxWidth: "1200px",
-                    }}
-                >
-                    {/* Page Route */}
+                <Container sx={{ paddingTop: "20px", maxWidth: "1200px" }}                >
                     <Box sx={{ minHeight: "calc(100vh - 170px)" }}>
                         {children}
                     </Box>
-                    {/* End Page */}
                 </Container>
             </PageWrapper>
         </MainWrapper>
