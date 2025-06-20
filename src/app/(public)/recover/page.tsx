@@ -1,5 +1,5 @@
 import { Box, Card } from "@mui/material";
-import PageContainer from "@/components/PageContainer";
+import PageContainer from "@/components/pages/PageContainer";
 import RecoverPassword from "../components/RecoverPassword";
 import LeftContent from "../components/LeftContent";
 

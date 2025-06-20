@@ -1,5 +1,5 @@
-import DashboardCard from "@/components/DashboardCard";
-import PageContainer from "@/components/PageContainer";
+import DashboardCard from "@/components/ui/DashboardCard";
+import PageContainer from "@/components/pages/PageContainer";
 import { Typography } from "@mui/material";
 
 export default function Membros() {

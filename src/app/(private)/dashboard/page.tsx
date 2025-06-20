@@ -1,4 +1,4 @@
-import PageContainer from "@/components/PageContainer";
+import PageContainer from "@/components/pages/PageContainer";
 import Blog from "@/app/(private)/dashboard/components/Blog";
 import MonthlyEarnings from "@/app/(private)/dashboard/components/MonthlyEarnings";
 import ProductPerformance from "@/app/(private)/dashboard/components/ProductPerformance";

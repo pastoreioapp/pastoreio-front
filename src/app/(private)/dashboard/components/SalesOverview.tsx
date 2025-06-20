@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import dynamic from "next/dynamic";
-import DashboardCard from "@/components/DashboardCard";
+import DashboardCard from "@/components/ui/DashboardCard";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function SalesOverview() {

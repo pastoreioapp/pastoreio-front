@@ -1,4 +1,4 @@
-import DashboardCard from "@/components/DashboardCard";
+import DashboardCard from "@/components/ui/DashboardCard";
 import {
     Typography,
     Box,

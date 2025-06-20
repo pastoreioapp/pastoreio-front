@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { IconBasket } from "@tabler/icons-react";
-import BlankCard from "@/components/BlankCard";
+import SimpleCard from "@/components/ui/SimpleCard";
 
 const ecoCard = [
     {
@@ -52,7 +52,7 @@ export default function Blog() {
         <Grid container spacing={3}>
             {ecoCard.map((product, index) => (
                 <Grid item xs={12} md={4} lg={3} key={index}>
-                    <BlankCard>
+                    <SimpleCard>
                         <Typography component={Link} href="/dashboard">
                             <Avatar
                                 src={product.photo}
@@ -106,7 +106,7 @@ export default function Blog() {
                                 />
                             </Stack>
                         </CardContent>
-                    </BlankCard>
+                    </SimpleCard>
                 </Grid>
             ))}
         </Grid>

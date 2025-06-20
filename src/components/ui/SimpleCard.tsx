@@ -5,7 +5,7 @@ type Props = {
     children: JSX.Element | JSX.Element[];
 };
 
-export default function BlankCard({ children, className }: Props) {
+export default function SimpleCard({ children, className }: Props) {
     return (
         <Card
             sx={{ p: 0, position: "relative" }}
