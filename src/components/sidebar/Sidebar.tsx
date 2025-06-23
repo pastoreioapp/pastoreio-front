@@ -1,137 +1,197 @@
-import { useMediaQuery, Box, Drawer } from "@mui/material";
-import SidebarItems from "./SidebarItems";
-// import { Upgrade } from "./Updrade";
-import { Sidebar, Logo } from "react-mui-sidebar";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
-import { toggleSidebar } from "@/store/features/sidebarSlice";
+"use client";
 
-export default function SidebarComponent() {
-    const dispatch = useDispatch();
-    const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up("lg"));
+import {
+    Box,
+    Drawer,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    ListItemButton,
+    styled,
+} from "@mui/material";
+import Link from "next/link";
+import { Menuitems, MenuItemType } from "./MenuItems";
+import { usePathname } from "next/navigation";
 
-    const isSidebarOpen = useSelector(
-        (state: RootState) => state.sidebar.isSidebarOpen
-    );
-    const isMobileSidebarOpen = useSelector(
-        (state: RootState) => state.sidebar.isMobileSidebarOpen
-    );
-
-    const sidebarWidth = isSidebarOpen ? "310px" : "75px";
-
-    // Custom CSS for short scrollbar
-    const scrollbarStyles = {
-        "&::-webkit-scrollbar": {
-            width: "7px",
+const StyledListItem = styled(ListItem)(() => ({
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "2px",
+    ".MuiButtonBase-root": {
+        width: "240px",
+        height: "52px",
+        borderRadius: "8px",
+        color: "#929ead",
+        justifyContent: "center",
+        alignItems: "center",
+        transition: "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
+        ".MuiListItemIcon-root": {
+            minWidth: "auto",
+            color: "inherit",
+            marginRight: "15px",
+            display: "flex",
+            alignItems: "center",
         },
-        "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#eff2f7",
-            borderRadius: "15px",
+        ".MuiListItemText-root": {
+            opacity: 1,
+            whiteSpace: "nowrap",
         },
-    };
+        ".MuiListItemText-primary": {
+            fontSize: "17px",
+            fontWeight: "600",
+            color: "inherit",
+        },
+        "&:hover": {
+            backgroundColor: "#dce8e6",
+        },
+        "&.Mui-selected": {
+            color: "#1c222e",
+            backgroundColor: "#dce8e6",
+            "&:hover": {
+                backgroundColor: "#dce8e6",
+            },
+            ".MuiListItemIcon-root": {
+                color: "#1c222e",
+            },
+        },
+    },
+}));
 
-    if (lgUp) {
-        return (
-            <Box
-                sx={{
-                    width: sidebarWidth,
-                    flexShrink: 0,
-                }}
-            >
-                {/* Sidebar for desktop */}
-                <Drawer
-                    anchor="left"
-                    open={isSidebarOpen}
-                    variant="permanent"
-                    PaperProps={{
-                        sx: {
-                            boxSizing: "border-box",
-                            ...scrollbarStyles,
-                        },
-                    }}
-                >
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "0",
-                        }}
-                    >
-                        {isSidebarOpen ? (
-                            <IconArrowLeft
-                                style={{
-                                    background: "#173D8A",
-                                    borderTopLeftRadius: "10px",
-                                    borderBottomLeftRadius: "10px",
-                                    color: "#fff",
-                                }}
-                                onClick={() => dispatch(toggleSidebar())}
-                            />
-                        ) : (
-                            <IconArrowRight
-                                style={{
-                                    background: "#173D8A",
-                                    borderTopLeftRadius: "10px",
-                                    borderBottomLeftRadius: "10px",
-                                    color: "#fff",
-                                }}
-                                onClick={() => dispatch(toggleSidebar())}
-                            />
-                        )}
-                    </Box>
-
-                    <Box sx={{ height: "100%" }}>
-                        <Sidebar
-                            width={sidebarWidth}
-                            collapsewidth="80px"
-                            open={isSidebarOpen}
-                            themeColor="#5d87ff"
-                            themeSecondaryColor="#49beff"
-                            showProfile={false}
-                        >
-                            <Logo img="/images/logos/Logo.svg" />
-                            <Box>
-                                <SidebarItems />
-                                {/* <Upgrade /> */}
-                            </Box>
-                        </Sidebar>
-                    </Box>
-                </Drawer>
-            </Box>
-        );
-    }
+const NavItem = ({
+    item,
+    pathDirect,
+}: {
+    item: MenuItemType;
+    pathDirect: string;
+}) => {
+    const Icon = item.icon;
+    const itemIcon = <Icon size={"24px"} stroke={2} />;
 
     return (
-        <Drawer
-            anchor="left"
-            open={isMobileSidebarOpen}
-            onClose={() => dispatch(toggleSidebar())}
-            variant="temporary"
-            PaperProps={{
-                sx: {
-                    boxShadow: (theme) => theme.shadows[8],
-                    ...scrollbarStyles,
-                },
+        <StyledListItem disablePadding>
+            <ListItemButton
+                component={Link}
+                href={item.href}
+                selected={pathDirect === item.href}
+            >
+                <ListItemIcon>{itemIcon}</ListItemIcon>
+                <ListItemText primary={item.title} />
+            </ListItemButton>
+        </StyledListItem>
+    );
+};
+
+const SidebarItemsList = () => {
+    const pathDirect = usePathname();
+    return (
+        <List component="nav" sx={{ pt: "50px" }}>
+            {Menuitems.map((item) => (
+                <NavItem key={item.id} item={item} pathDirect={pathDirect} />
+            ))}
+        </List>
+    );
+};
+
+const LogoArea = () => (
+    <Box
+        sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            width: "100%",
+        }}
+    >
+        <Box
+            sx={{
+                width: "240px",
+                height: "154px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
             }}
         >
-            {/* Sidebar For Mobile */}
-            <Box px={2}>
-                <Sidebar
-                    width={"270px"}
-                    collapsewidth="80px"
-                    isCollapse={false}
-                    mode="light"
-                    direction="ltr"
-                    themeColor="#5d87ff"
-                    themeSecondaryColor="#49beff"
-                    showProfile={false}
+            <img src="/images/logos/Logo.svg" alt="Logo" />
+        </Box>
+    </Box>
+);
+
+const CardBottom = () => (
+    <Box
+        sx={{
+            width: "100%",
+            height: "auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Box
+            sx={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <img
+                src="/images/cards/versiculo.svg"
+                alt="Card"
+                style={{ width: "240px", height: "132.05px" }}
+            />
+        </Box>
+    </Box>
+);
+
+export default function SidebarComponent() {
+    return (
+        <Box
+            sx={{
+                width: "300px",
+                flexShrink: 0,
+                transition: "width 0.3s ease",
+            }}
+        >
+            <Drawer
+                anchor="left"
+                open
+                variant="permanent"
+                PaperProps={{
+                    sx: {
+                        width: "300px",
+                        borderRight: "none",
+                        overflowX: "hidden",
+                        backgroundColor: "#fafafa",
+                    },
+                }}
+            >
+                <Box
+                    sx={{
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        bgcolor: "#fafafa",
+                        py: "36px",
+                        px: "30px",
+                    }}
                 >
-                    <Logo img="/images/logos/Logo.svg" />
-                    <SidebarItems />
-                    {/* <Upgrade /> */}
-                </Sidebar>
-            </Box>
-        </Drawer>
+                    <LogoArea />
+                    <Box
+                        sx={{
+                            flexGrow: 1,
+                            overflowY: "auto",
+                            overflowX: "hidden",
+                        }}
+                    >
+                        <SidebarItemsList />
+                    </Box>
+                    <Box sx={{ mt: "auto" }}>
+                        <CardBottom />
+                    </Box>
+                </Box>
+            </Drawer>
+        </Box>
     );
 }

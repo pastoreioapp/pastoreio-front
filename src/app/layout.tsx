@@ -1,5 +1,5 @@
-import ProviderStore from "./ProviderStore";
-import ProviderTheme from "./ProviderTheme";
+import ProviderStore from "../store/ProviderStore";
+import ProviderTheme from "../utils/ProviderTheme";
 
 export default function RootLayout({
     children,

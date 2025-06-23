@@ -1,5 +1,5 @@
 {
-  "name": "modernize-next-free",
+  "name": "pastoreio-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "@emotion/server": "11.11.0",
     "@emotion/styled": "11.11.0",
     "@mui/icons-material": "5.15.15",
-    "@mui/lab": "5.0.0-alpha.170",
+    "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "5.15.15",
     "@reduxjs/toolkit": "^2.7.0",
     "@tabler/icons-react": "2.30.0",
