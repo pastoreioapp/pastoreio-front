@@ -15,7 +15,7 @@ export default function RootLayout({
             <Sidebar />
             <PageWrapper className="page-wrapper">
                 <Header />
-                <Container sx={{ paddingTop: "20px", maxWidth: "1200px" }}                >
+                <Container sx={{ paddingTop: "20px", maxWidth: "1200px"}}>
                     <Box sx={{ minHeight: "calc(100vh - 170px)" }}>
                         {children}
                     </Box>

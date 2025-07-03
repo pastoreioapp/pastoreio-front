@@ -26,6 +26,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearLoggedUser } from "@/store/features/loggedUserSlice";
+import UserProfileDialog from "@/components/header/UserProfileDialog";
 
 const onlineBadgeStyle = {
     "& .MuiBadge-badge": {
@@ -63,6 +64,7 @@ interface ProfileProps {
 export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
+    const [openProfileDialog, setOpenProfileDialog] = useState(false);
 
     const router = useRouter();
     const dispatch = useDispatch();
@@ -85,13 +87,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const handleItemClick = (item: string) => {
         if (item === "Sair") {
             handleLogoutButtonClick();
-        }
-
-        if (item !== "Tema") {
+        } else if (item === "Perfil") {
+            setOpenProfileDialog(true);
+            handleClose();
+        } else {
             setActiveItem(item);
-            if (onMenuItemClick) {
-                onMenuItemClick(item);
-            }
+            if (onMenuItemClick) onMenuItemClick(item);
         }
         handleClose();
     };
@@ -317,6 +318,15 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                     </ListItemIcon>
                     <ListItemText primary="Sair" />
                 </MenuItem>
+                <UserProfileDialog
+                    open={openProfileDialog}
+                    onClose={() => setOpenProfileDialog(false)}
+                    user={{
+                        name: "Samuel Oliveira",
+                        email: "samuel@gmail.com",
+                        initials: "SO",
+                    }}
+                />
             </Menu>
         </Box>
     );
