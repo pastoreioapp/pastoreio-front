@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, MouseEvent } from "react";
+import { useState, MouseEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     Avatar,
@@ -26,6 +26,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearLoggedUser } from "@/store/features/loggedUserSlice";
+import { getMembros } from "@/features/membros/membros.service";
+import { Membro } from "@/types/types";
 import UserProfileDialog from "@/components/header/UserProfileDialog";
 
 const onlineBadgeStyle = {
@@ -61,10 +63,25 @@ interface ProfileProps {
     onMenuItemClick?: (item: string) => void;
 }
 
+interface UserProfileDialogProps {
+    user: Membro;
+}
+
+export function getInitials(nome: string): string {
+    const partes = nome.trim().split(" ");
+    if (partes.length === 1) {
+        return partes[0][0].toUpperCase();
+    }
+    return (
+        partes[0][0].toUpperCase() + partes[partes.length - 1][0].toUpperCase()
+    );
+}
+
 export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
+    const [usuario, setUsuario] = useState<Membro | null>(null);
 
     const router = useRouter();
     const dispatch = useDispatch();
@@ -96,6 +113,14 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
         }
         handleClose();
     };
+
+    useEffect(() => {
+        const fetchUsuario = async () => {
+            const membros = await getMembros();
+            setUsuario(membros[0]);
+        };
+        fetchUsuario();
+    }, []);
 
     const isOpen = Boolean(anchorEl);
 
@@ -150,10 +175,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         color: "#fff",
                     }}
                 >
-                    SO
+                    {usuario ? getInitials(usuario.nome) : "U"}
                 </Avatar>
                 <Typography variant="body1" fontWeight="600" sx={{ mx: 1.5 }}>
-                    Samuel Oliveira
+                    {usuario ? usuario.nome : "Usuário"}
                 </Typography>
                 <IconCaretDownFilled
                     size="18"
@@ -207,7 +232,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                                 color: "#fff",
                             }}
                         >
-                            SO
+                            {usuario ? getInitials(usuario.nome) : "U"}
                         </Avatar>
                     </Badge>
                     <Box ml={2}>
@@ -216,10 +241,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             component="h2"
                             fontWeight="600"
                         >
-                            Samuel Oliveira
+                            {usuario ? usuario.nome : "Usuário"}
                         </Typography>
                         <Typography variant="body2" color="#6b7280">
-                            samuel@gmail.com
+                            {usuario ? usuario.email : "não possui um email"}
                         </Typography>
                     </Box>
                 </Box>
@@ -318,15 +343,13 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                     </ListItemIcon>
                     <ListItemText primary="Sair" />
                 </MenuItem>
-                <UserProfileDialog
-                    open={openProfileDialog}
-                    onClose={() => setOpenProfileDialog(false)}
-                    user={{
-                        name: "Samuel Oliveira",
-                        email: "samuel@gmail.com",
-                        initials: "SO",
-                    }}
-                />
+                {usuario && (
+                    <UserProfileDialog
+                        open={openProfileDialog}
+                        onClose={() => setOpenProfileDialog(false)}
+                        user={usuario}
+                    />
+                )}
             </Menu>
         </Box>
     );
