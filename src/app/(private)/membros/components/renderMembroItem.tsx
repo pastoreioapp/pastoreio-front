@@ -1,3 +1,4 @@
+import { Membro } from "@/features/membros/types";
 import {
     Avatar,
     Box,
@@ -6,7 +7,6 @@ import {
     ListItemAvatar,
     Typography,
 } from "@mui/material";
-import { Membro } from "../../../../types/types";
 
 export function renderMembroItem(
     membro: Membro,

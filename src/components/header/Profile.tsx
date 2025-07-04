@@ -26,8 +26,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearLoggedUser } from "@/store/features/loggedUserSlice";
-import { getMembros } from "@/features/membros/membros.service";
-import { Membro } from "@/types/types";
+import { getUsuarioLogado } from "@/features/usuarios/usuarios.service";
+import { Usuario } from "@/features/usuarios/types";
 import UserProfileDialog from "@/components/header/UserProfileDialog";
 
 const onlineBadgeStyle = {
@@ -63,25 +63,20 @@ interface ProfileProps {
     onMenuItemClick?: (item: string) => void;
 }
 
-interface UserProfileDialogProps {
-    user: Membro;
-}
-
-export function getInitials(nome: string): string {
+export function getInitials(nome?: string): string {
+    if (!nome) return "U";
     const partes = nome.trim().split(" ");
-    if (partes.length === 1) {
-        return partes[0][0].toUpperCase();
-    }
-    return (
-        partes[0][0].toUpperCase() + partes[partes.length - 1][0].toUpperCase()
-    );
+    return partes.length === 1
+        ? partes[0][0].toUpperCase()
+        : partes[0][0].toUpperCase() +
+              partes[partes.length - 1][0].toUpperCase();
 }
 
 export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
-    const [usuario, setUsuario] = useState<Membro | null>(null);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
     const router = useRouter();
     const dispatch = useDispatch();
@@ -116,8 +111,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
 
     useEffect(() => {
         const fetchUsuario = async () => {
-            const membros = await getMembros();
-            setUsuario(membros[0]);
+            try {
+                const usuario = await getUsuarioLogado();
+                setUsuario(usuario);
+            } catch (error) {
+                console.error("Erro ao buscar usuário:", error);
+            }
         };
         fetchUsuario();
     }, []);

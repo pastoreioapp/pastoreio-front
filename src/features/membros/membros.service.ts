@@ -1,8 +1,8 @@
-import { Membro } from "@/types/types";
 import axios from "axios";
+import { Membro } from "./types";
 
 export const api = axios.create({
-    baseURL: "/mooks",
+    baseURL: "/mocks",
 });
 
 export async function getMembros(): Promise<Membro[]> {
