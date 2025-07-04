@@ -3,8 +3,8 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useState } from "react";
-import { Membro } from "../../../../types/types";
 import { renderMembroItem } from "./renderMembroItem";
+import { Membro } from "@/features/membros/types";
 
 export function Filtro({
     data,

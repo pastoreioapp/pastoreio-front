@@ -8,7 +8,7 @@ import { InformacoesGroup } from "./informacoesGroup";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { EtapaCard } from "./etapaCard";
 import { listaTrajetoria } from "./listaTrajetoria";
-import { Membro } from "../../../../types/types";
+import { Membro } from "@/features/membros/types";
 
 export function Informacao({ data }: { data: Membro }) {
     const [tab, setTab] = useState("1");
@@ -59,7 +59,7 @@ export function Informacao({ data }: { data: Membro }) {
                 <InformacoesGroup
                     titulo="Dados Familiares"
                     campos={[
-                        { label: "Estado Civil", valor: data.estado_civil },
+                        { label: "Estado Civil", valor: data.estadoCivil },
                         { label: "Cônjuge", valor: data.conjuge },
                         { label: "Filhos", valor: data.filhos },
                     ]}

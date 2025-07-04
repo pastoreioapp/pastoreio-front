@@ -7,8 +7,8 @@ import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/filtro";
 import { Informacao } from "./components/informacao";
 import { useEffect, useState } from "react";
-import { Membro } from "@/types/types";
 import { getMembros } from "@/features/membros/membros.service";
+import { Membro } from "@/features/membros/types";
 
 export default function Membros() {
     const [membros, setMembros] = useState<Membro[]>([]);
