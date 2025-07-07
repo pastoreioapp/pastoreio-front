@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, MouseEvent } from "react";
+import { useState, MouseEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     Avatar,
@@ -26,6 +26,9 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearLoggedUser } from "@/store/features/loggedUserSlice";
+import { getUsuarioLogado } from "@/features/usuarios/usuarios.service";
+import { Usuario } from "@/features/usuarios/types";
+import UserProfileDialog from "@/components/header/UserProfileDialog";
 
 const onlineBadgeStyle = {
     "& .MuiBadge-badge": {
@@ -60,9 +63,20 @@ interface ProfileProps {
     onMenuItemClick?: (item: string) => void;
 }
 
+export function getInitials(nome?: string): string {
+    if (!nome) return "U";
+    const partes = nome.trim().split(" ");
+    return partes.length === 1
+        ? partes[0][0].toUpperCase()
+        : partes[0][0].toUpperCase() +
+              partes[partes.length - 1][0].toUpperCase();
+}
+
 export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
+    const [openProfileDialog, setOpenProfileDialog] = useState(false);
+    const [usuario, setUsuario] = useState<Usuario | null>(null);
 
     const router = useRouter();
     const dispatch = useDispatch();
@@ -85,16 +99,27 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const handleItemClick = (item: string) => {
         if (item === "Sair") {
             handleLogoutButtonClick();
-        }
-
-        if (item !== "Tema") {
+        } else if (item === "Perfil") {
+            setOpenProfileDialog(true);
+            handleClose();
+        } else {
             setActiveItem(item);
-            if (onMenuItemClick) {
-                onMenuItemClick(item);
-            }
+            if (onMenuItemClick) onMenuItemClick(item);
         }
         handleClose();
     };
+
+    useEffect(() => {
+        const fetchUsuario = async () => {
+            try {
+                const usuario = await getUsuarioLogado();
+                setUsuario(usuario);
+            } catch (error) {
+                console.error("Erro ao buscar usuário:", error);
+            }
+        };
+        fetchUsuario();
+    }, []);
 
     const isOpen = Boolean(anchorEl);
 
@@ -149,10 +174,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         color: "#fff",
                     }}
                 >
-                    SO
+                    {usuario ? getInitials(usuario.nome) : "U"}
                 </Avatar>
                 <Typography variant="body1" fontWeight="600" sx={{ mx: 1.5 }}>
-                    Samuel Oliveira
+                    {usuario ? usuario.nome : "Usuário"}
                 </Typography>
                 <IconCaretDownFilled
                     size="18"
@@ -206,7 +231,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                                 color: "#fff",
                             }}
                         >
-                            SO
+                            {usuario ? getInitials(usuario.nome) : "U"}
                         </Avatar>
                     </Badge>
                     <Box ml={2}>
@@ -215,10 +240,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             component="h2"
                             fontWeight="600"
                         >
-                            Samuel Oliveira
+                            {usuario ? usuario.nome : "Usuário"}
                         </Typography>
                         <Typography variant="body2" color="#6b7280">
-                            samuel@gmail.com
+                            {usuario ? usuario.email : "não possui um email"}
                         </Typography>
                     </Box>
                 </Box>
@@ -317,6 +342,13 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                     </ListItemIcon>
                     <ListItemText primary="Sair" />
                 </MenuItem>
+                {usuario && (
+                    <UserProfileDialog
+                        open={openProfileDialog}
+                        onClose={() => setOpenProfileDialog(false)}
+                        user={usuario}
+                    />
+                )}
             </Menu>
         </Box>
     );
