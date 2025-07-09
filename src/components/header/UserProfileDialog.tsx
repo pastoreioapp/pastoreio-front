@@ -25,6 +25,8 @@ import { Usuario } from "@/features/usuarios/types";
 import InputMask from "react-input-mask";
 import { AlertColor } from "@mui/material/Alert";
 import { Dispatch, SetStateAction } from "react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 interface UserProfileDialogProps {
     open: boolean;
@@ -141,7 +143,6 @@ export default function UserProfileDialog({
                 color: "#000",
             },
         },
-        InputLabelProps: { sx: { color: "#666" } },
     };
 
     return (
@@ -219,7 +220,7 @@ export default function UserProfileDialog({
                         </>
                     )}
                     <Typography variant="h5" fontWeight={600}>
-                        {user.nome}
+                        {formData.nome}
                     </Typography>
                     <Typography
                         variant="body2"
@@ -236,69 +237,185 @@ export default function UserProfileDialog({
                     </Typography>
                 </Box>
                 <Grid container spacing={2}>
+                    {isEditing ? (
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Nome"
+                                variant="filled"
+                                value={formData.nome}
+                                onChange={(e) =>
+                                    handleChange("nome", e.target.value)
+                                }
+                                {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
+                            />
+                        </Grid>
+                    ) : null}
+
                     <Grid item xs={12}>
-                        <InputMask
-                            mask="(99) 99999-9999"
-                            value={formData.telefone}
-                            onChange={(e) =>
-                                handleChange("telefone", e.target.value)
-                            }
-                            disabled={!isEditing}
-                        >
-                            {(inputProps: any) => (
-                                <TextField
-                                    {...inputProps}
-                                    fullWidth
-                                    label="Telefone"
-                                    variant="filled"
-                                    {...commonInputProps}
-                                />
-                            )}
-                        </InputMask>
+                        {isEditing ? (
+                            <InputMask
+                                mask="(99) 99999-9999"
+                                value={formData.telefone}
+                                onChange={(e) =>
+                                    handleChange("telefone", e.target.value)
+                                }
+                                disabled={!isEditing}
+                            >
+                                {(inputProps: any) => (
+                                    <TextField
+                                        {...inputProps}
+                                        fullWidth
+                                        label="Telefone"
+                                        variant="filled"
+                                        {...commonInputProps}
+                                        sx={{
+                                            "& .MuiInputLabel-root": {
+                                                color: theme.palette.primary
+                                                    .main,
+                                            },
+                                        }}
+                                    />
+                                )}
+                            </InputMask>
+                        ) : (
+                            <InputMask
+                                mask="(99) 99999-9999"
+                                value={formData.telefone}
+                                disabled={true}
+                            >
+                                {(inputProps: any) => (
+                                    <TextField
+                                        {...inputProps}
+                                        disabled={true}
+                                        fullWidth
+                                        label="Telefone"
+                                        variant="filled"
+                                        {...commonInputProps}
+                                        sx={{
+                                            "& .MuiInputLabel-root": {
+                                                color: theme.palette.primary
+                                                    .main,
+                                            },
+                                        }}
+                                    />
+                                )}
+                            </InputMask>
+                        )}
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Endereço"
-                            variant="filled"
-                            value={formData.endereco}
-                            onChange={(e) =>
-                                handleChange("endereco", e.target.value)
-                            }
-                            {...commonInputProps}
-                        />
+                        {isEditing ? (
+                            <TextField
+                                fullWidth
+                                label="Endereço"
+                                variant="filled"
+                                value={formData.endereco}
+                                onChange={(e) =>
+                                    handleChange("endereco", e.target.value)
+                                }
+                                {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
+                            />
+                        ) : (
+                            <TextField
+                                fullWidth
+                                label="Endereço"
+                                variant="filled"
+                                disabled={true}
+                                value={formData.endereco}
+                                {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
+                            />
+                        )}
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField
-                            fullWidth
+                        <DatePicker
                             label="Data de Nascimento"
-                            type="date"
-                            variant="filled"
-                            value={formData.nascimento}
-                            onChange={(e) =>
-                                handleChange("nascimento", e.target.value)
+                            format="DD/MM/YYYY"
+                            value={
+                                formData.nascimento
+                                    ? dayjs(formData.nascimento)
+                                    : null
                             }
-                            InputProps={{
-                                ...commonInputProps.InputProps,
-                                readOnly: !isEditing,
+                            onChange={(date: Dayjs | null) =>
+                                handleChange(
+                                    "nascimento",
+                                    date && date.isValid()
+                                        ? date.toDate().toISOString()
+                                        : ""
+                                )
+                            }
+                            slots={
+                                !isEditing
+                                    ? { openPickerIcon: () => null }
+                                    : undefined
+                            }
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    variant: "filled",
+                                    disabled: !isEditing,
+                                    InputProps: {
+                                        readOnly: !isEditing,
+                                        disableUnderline: true,
+                                        sx: {
+                                            backgroundColor: "#eee",
+                                            borderRadius: 2,
+                                            color: "#000",
+                                        },
+                                    },
+                                    InputLabelProps: {
+                                        shrink: true,
+                                        sx: {
+                                            color: theme.palette.primary.main,
+                                        },
+                                    },
+                                    sx: {
+                                        "& .MuiInputBase-input.Mui-disabled": {
+                                            WebkitTextFillColor:
+                                                theme.palette.text.disabled,
+                                        },
+                                        "& .Mui-disabled": {
+                                            color: theme.palette.text.disabled,
+                                        },
+
+                                        "& .MuiInputLabel-root": {
+                                            color: theme.palette.primary.main,
+                                        },
+                                    },
+                                },
                             }}
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: "#666" },
-                            }}
+                            readOnly={!isEditing}
                         />
                     </Grid>
+
                     <Grid item xs={12}>
                         {isEditing ? (
                             <FormControl
                                 fullWidth
                                 variant="filled"
                                 sx={{
-                                    backgroundColor: "#eee",
                                     borderRadius: 2,
                                 }}
                             >
-                                <InputLabel sx={{ color: "#666" }}>
+                                <InputLabel
+                                    sx={{
+                                        color: theme.palette.primary.main,
+                                    }}
+                                >
                                     Estado Civil
                                 </InputLabel>
                                 <Select
@@ -312,13 +429,15 @@ export default function UserProfileDialog({
                                     disableUnderline
                                 >
                                     <MenuItem value="Solteiro">
-                                        Solteiro
+                                        Solteiro(a)
                                     </MenuItem>
-                                    <MenuItem value="Casado">Casado</MenuItem>
+                                    <MenuItem value="Casado">
+                                        Casado(a)
+                                    </MenuItem>
                                     <MenuItem value="Divorciado">
-                                        Divorciado
+                                        Divorciado(a)
                                     </MenuItem>
-                                    <MenuItem value="Viúvo">Viúvo</MenuItem>
+                                    <MenuItem value="Viúvo">Viúvo(a)</MenuItem>
                                 </Select>
                             </FormControl>
                         ) : (
@@ -326,8 +445,14 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Estado Civil"
                                 variant="filled"
+                                disabled={true}
                                 value={formData.estadoCivil}
                                 {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
                             />
                         )}
                     </Grid>
@@ -337,11 +462,14 @@ export default function UserProfileDialog({
                                 fullWidth
                                 variant="filled"
                                 sx={{
-                                    backgroundColor: "#eee",
                                     borderRadius: 2,
                                 }}
                             >
-                                <InputLabel sx={{ color: "#666" }}>
+                                <InputLabel
+                                    sx={{
+                                        color: theme.palette.primary.main,
+                                    }}
+                                >
                                     Filhos
                                 </InputLabel>
                                 <Select
@@ -360,8 +488,14 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Filhos"
                                 variant="filled"
+                                disabled={true}
                                 value={formData.filhos}
                                 {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
                             />
                         )}
                     </Grid>
@@ -370,21 +504,55 @@ export default function UserProfileDialog({
                             fullWidth
                             label="Ministério(s)"
                             variant="filled"
+                            disabled={true}
                             value={formData.ministerio}
                             InputProps={{
-                                readOnly: true,
+                                readOnly: !isEditing,
                                 disableUnderline: true,
                                 sx: {
-                                    backgroundColor: "#eee",
                                     borderRadius: 2,
-                                    color: "#000",
                                 },
                             }}
-                            InputLabelProps={{ sx: { color: "#666" } }}
+                            sx={{
+                                "& .MuiInputLabel-root": {
+                                    color: theme.palette.primary.main,
+                                },
+                            }}
                         />
                     </Grid>
                 </Grid>
                 <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>
+                    {isEditing ? (
+                        <Button
+                            onClick={() => {
+                                setIsEditing(false);
+                                setFormData({
+                                    nome: user.nome || "",
+                                    funcao: user.funcao || "",
+                                    telefone: user.telefone || "",
+                                    email: user.email || "",
+                                    nascimento: user.nascimento || "",
+                                    endereco: user.endereco || "",
+                                    estadoCivil: user.estadoCivil || "",
+                                    conjuge: user.conjuge || "",
+                                    filhos: user.filhos || "Não",
+                                    ministerio: user.ministerio || "",
+                                });
+                                setAvatarUrl(null);
+                            }}
+                            variant={"outlined"}
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: 500,
+                                borderRadius: 2,
+                                px: 4,
+                                mb: 1,
+                                minWidth: 100,
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                    ) : null}
                     <Button
                         variant={isEditing ? "contained" : "outlined"}
                         color="primary"

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@date-io/dayjs": "^3.2.0",
     "@emotion/cache": "11.11.0",
     "@emotion/react": "11.11.1",
     "@emotion/server": "11.11.0",
@@ -16,6 +17,7 @@
     "@mui/icons-material": "5.15.15",
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "5.15.15",
+    "@mui/x-date-pickers": "^8.7.0",
     "@reduxjs/toolkit": "^2.7.0",
     "@tabler/icons-react": "2.30.0",
     "@types/node": "20.4.5",
@@ -23,6 +25,7 @@
     "@types/react-dom": "18.2.7",
     "apexcharts": "3.41.1",
     "axios": "^1.10.0",
+    "dayjs": "^1.11.13",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "lodash": "4.17.21",

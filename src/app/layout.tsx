@@ -1,5 +1,9 @@
+"use client";
+
 import ProviderStore from "../store/ProviderStore";
 import ProviderTheme from "../utils/ProviderTheme";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 export default function RootLayout({
     children,
@@ -9,9 +13,11 @@ export default function RootLayout({
     return (
         <html lang="pt-BR">
             <body>
-                <ProviderStore>
-                    <ProviderTheme>{children}</ProviderTheme>
-                </ProviderStore>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <ProviderStore>
+                        <ProviderTheme>{children}</ProviderTheme>
+                    </ProviderStore>
+                </LocalizationProvider>
             </body>
         </html>
     );

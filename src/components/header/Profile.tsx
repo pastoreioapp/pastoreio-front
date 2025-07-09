@@ -66,7 +66,7 @@ interface ProfileProps {
 }
 
 export function getInitials(nome?: string): string {
-    if (!nome) return "U";
+    if (!nome) return "";
     const partes = nome.trim().split(" ");
     return partes.length === 1
         ? partes[0][0].toUpperCase()
@@ -178,10 +178,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         color: "#fff",
                     }}
                 >
-                    {!avatarUrl && (usuario ? getInitials(usuario.nome) : "U")}
+                    {!avatarUrl && (usuario ? getInitials(usuario.nome) : "")}
                 </Avatar>
                 <Typography variant="body1" fontWeight="600" sx={{ mx: 1.5 }}>
-                    {usuario ? usuario.nome : "Usuário"}
+                    {usuario ? usuario.nome : ""}
                 </Typography>
                 <IconCaretDownFilled
                     size="18"
@@ -237,7 +237,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             }}
                         >
                             {!avatarUrl &&
-                                (usuario ? getInitials(usuario.nome) : "U")}
+                                (usuario ? getInitials(usuario.nome) : "")}
                         </Avatar>
                     </Badge>
                     <Box ml={2}>
@@ -246,7 +246,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             component="h2"
                             fontWeight="600"
                         >
-                            {usuario ? usuario.nome : "Usuário"}
+                            {usuario ? usuario.nome : ""}
                         </Typography>
                         <Typography variant="body2" color="#6b7280">
                             {usuario
