@@ -133,15 +133,22 @@ export default function UserProfileDialog({
 
     const triggerFileInput = () => fileInputRef.current?.click();
 
+    const commonInputSxProps = {
+        backgroundColor: "#F8F8F8",
+        border: "1px solid #F5F5F5",
+        borderRadius: 2,
+        color: "#000",
+    };
+    const commonInputLabelProps = {
+        "& .MuiInputLabel-root": {
+            color: theme.palette.primary.main,
+        }       
+    }
     const commonInputProps = {
         InputProps: {
             readOnly: !isEditing,
             disableUnderline: true,
-            sx: {
-                backgroundColor: "#eee",
-                borderRadius: 2,
-                color: "#000",
-            },
+            sx: commonInputSxProps,
         },
     };
 
@@ -248,14 +255,10 @@ export default function UserProfileDialog({
                                     handleChange("nome", e.target.value)
                                 }
                                 {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
+                                sx={commonInputLabelProps}
                             />
                         </Grid>
-                    ) : null}
+                    ) : <></>}
 
                     <Grid item xs={12}>
                         {isEditing ? (
@@ -274,12 +277,7 @@ export default function UserProfileDialog({
                                         label="Telefone"
                                         variant="filled"
                                         {...commonInputProps}
-                                        sx={{
-                                            "& .MuiInputLabel-root": {
-                                                color: theme.palette.primary
-                                                    .main,
-                                            },
-                                        }}
+                                        sx={commonInputLabelProps}
                                     />
                                 )}
                             </InputMask>
@@ -297,12 +295,7 @@ export default function UserProfileDialog({
                                         label="Telefone"
                                         variant="filled"
                                         {...commonInputProps}
-                                        sx={{
-                                            "& .MuiInputLabel-root": {
-                                                color: theme.palette.primary
-                                                    .main,
-                                            },
-                                        }}
+                                        sx={commonInputLabelProps}
                                     />
                                 )}
                             </InputMask>
@@ -319,11 +312,7 @@ export default function UserProfileDialog({
                                     handleChange("endereco", e.target.value)
                                 }
                                 {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
+                                sx={commonInputLabelProps}
                             />
                         ) : (
                             <TextField
@@ -333,11 +322,7 @@ export default function UserProfileDialog({
                                 disabled={true}
                                 value={formData.endereco}
                                 {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
+                                sx={commonInputLabelProps}
                             />
                         )}
                     </Grid>
@@ -371,11 +356,7 @@ export default function UserProfileDialog({
                                     InputProps: {
                                         readOnly: !isEditing,
                                         disableUnderline: true,
-                                        sx: {
-                                            backgroundColor: "#eee",
-                                            borderRadius: 2,
-                                            color: "#000",
-                                        },
+                                        sx: commonInputSxProps,
                                     },
                                     InputLabelProps: {
                                         shrink: true,
@@ -385,16 +366,12 @@ export default function UserProfileDialog({
                                     },
                                     sx: {
                                         "& .MuiInputBase-input.Mui-disabled": {
-                                            WebkitTextFillColor:
-                                                theme.palette.text.disabled,
+                                            WebkitTextFillColor: theme.palette.text.disabled,
                                         },
                                         "& .Mui-disabled": {
                                             color: theme.palette.text.disabled,
                                         },
-
-                                        "& .MuiInputLabel-root": {
-                                            color: theme.palette.primary.main,
-                                        },
+                                        ...commonInputLabelProps
                                     },
                                 },
                             }}
@@ -426,6 +403,7 @@ export default function UserProfileDialog({
                                             e.target.value
                                         )
                                     }
+                                    sx={commonInputSxProps}
                                     disableUnderline
                                 >
                                     <MenuItem value="Solteiro">
@@ -448,11 +426,7 @@ export default function UserProfileDialog({
                                 disabled={true}
                                 value={formData.estadoCivil}
                                 {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
+                                sx={commonInputLabelProps}
                             />
                         )}
                     </Grid>
@@ -477,6 +451,8 @@ export default function UserProfileDialog({
                                     onChange={(e) =>
                                         handleChange("filhos", e.target.value)
                                     }
+                                    
+                                    sx={commonInputSxProps}
                                     disableUnderline
                                 >
                                     <MenuItem value="Sim">Sim</MenuItem>
@@ -491,11 +467,7 @@ export default function UserProfileDialog({
                                 disabled={true}
                                 value={formData.filhos}
                                 {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
+                                sx={commonInputLabelProps}
                             />
                         )}
                     </Grid>
@@ -509,15 +481,9 @@ export default function UserProfileDialog({
                             InputProps={{
                                 readOnly: !isEditing,
                                 disableUnderline: true,
-                                sx: {
-                                    borderRadius: 2,
-                                },
+                                sx: commonInputSxProps
                             }}
-                            sx={{
-                                "& .MuiInputLabel-root": {
-                                    color: theme.palette.primary.main,
-                                },
-                            }}
+                            sx={commonInputLabelProps}
                         />
                     </Grid>
                 </Grid>
