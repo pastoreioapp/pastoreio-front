@@ -44,6 +44,19 @@ export function getInitials(nome?: string): string {
               partes[partes.length - 1][0].toUpperCase();
 }
 
+const getDefaultFormData = (user: Partial<Usuario> = {}) => ({
+    nome: user.nome || "",
+    funcao: user.funcao || "",
+    telefone: user.telefone || "",
+    email: user.email || "",
+    nascimento: user.nascimento || "",
+    endereco: user.endereco || "",
+    estadoCivil: user.estadoCivil || "",
+    conjuge: user.conjuge || "",
+    filhos: user.filhos || "Não",
+    ministerio: user.ministerio || "",
+});
+
 export default function UserProfileDialog({
     open,
     onClose,
@@ -54,18 +67,7 @@ export default function UserProfileDialog({
     const [isSaving, setIsSaving] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [formData, setFormData] = useState<Usuario>({
-        nome: user.nome || "",
-        funcao: user.funcao || "",
-        telefone: user.telefone || "",
-        email: user.email || "",
-        nascimento: user.nascimento || "",
-        endereco: user.endereco || "",
-        estadoCivil: user.estadoCivil || "",
-        conjuge: user.conjuge || "",
-        filhos: user.filhos || "Não",
-        ministerio: user.ministerio || "",
-    });
+    const [formData, setFormData] = useState(() => getDefaultFormData(user));
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -115,18 +117,7 @@ export default function UserProfileDialog({
 
     const handleClose = () => {
         setIsEditing(false);
-        setFormData({
-            nome: user.nome || "",
-            funcao: user.funcao || "",
-            telefone: user.telefone || "",
-            email: user.email || "",
-            nascimento: user.nascimento || "",
-            endereco: user.endereco || "",
-            estadoCivil: user.estadoCivil || "",
-            conjuge: user.conjuge || "",
-            filhos: user.filhos || "Não",
-            ministerio: user.ministerio || "",
-        });
+        setFormData(getDefaultFormData(user));
         setAvatarUrl(null);
         onClose();
     };
@@ -258,89 +249,59 @@ export default function UserProfileDialog({
                     ) : null}
 
                     <Grid item xs={12}>
-                        {isEditing ? (
-                            <InputMask
-                                mask="(99) 99999-9999"
-                                value={formData.telefone}
-                                onChange={(e) =>
-                                    handleChange("telefone", e.target.value)
-                                }
-                                disabled={!isEditing}
-                            >
-                                {(inputProps: any) => (
-                                    <TextField
-                                        {...inputProps}
-                                        fullWidth
-                                        label="Telefone"
-                                        variant="filled"
-                                        {...commonInputProps}
-                                        sx={{
-                                            "& .MuiInputLabel-root": {
-                                                color: theme.palette.primary
-                                                    .main,
-                                            },
-                                        }}
-                                    />
-                                )}
-                            </InputMask>
-                        ) : (
-                            <InputMask
-                                mask="(99) 99999-9999"
-                                value={formData.telefone}
-                                disabled={true}
-                            >
-                                {(inputProps: any) => (
-                                    <TextField
-                                        {...inputProps}
-                                        disabled={true}
-                                        fullWidth
-                                        label="Telefone"
-                                        variant="filled"
-                                        {...commonInputProps}
-                                        sx={{
-                                            "& .MuiInputLabel-root": {
-                                                color: theme.palette.primary
-                                                    .main,
-                                            },
-                                        }}
-                                    />
-                                )}
-                            </InputMask>
-                        )}
+                        <InputMask
+                            mask="(99) 99999-9999"
+                            value={formData.telefone}
+                            onChange={(e) =>
+                                isEditing &&
+                                handleChange("telefone", e.target.value)
+                            }
+                            disabled={!isEditing}
+                        >
+                            {(inputProps: any) => (
+                                <TextField
+                                    {...inputProps}
+                                    fullWidth
+                                    label="Telefone"
+                                    variant="filled"
+                                    InputProps={{
+                                        ...commonInputProps.InputProps,
+                                        readOnly: !isEditing,
+                                        disabled: !isEditing,
+                                    }}
+                                    sx={{
+                                        "& .MuiInputLabel-root": {
+                                            color: theme.palette.primary.main,
+                                        },
+                                    }}
+                                />
+                            )}
+                        </InputMask>
                     </Grid>
+
                     <Grid item xs={12}>
-                        {isEditing ? (
-                            <TextField
-                                fullWidth
-                                label="Endereço"
-                                variant="filled"
-                                value={formData.endereco}
-                                onChange={(e) =>
-                                    handleChange("endereco", e.target.value)
-                                }
-                                {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
-                            />
-                        ) : (
-                            <TextField
-                                fullWidth
-                                label="Endereço"
-                                variant="filled"
-                                disabled={true}
-                                value={formData.endereco}
-                                {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
-                                    },
-                                }}
-                            />
-                        )}
+                        <TextField
+                            fullWidth
+                            label="Endereço"
+                            variant="filled"
+                            value={formData.endereco}
+                            onChange={(e) =>
+                                isEditing &&
+                                handleChange("endereco", e.target.value)
+                            }
+                            InputProps={{
+                                ...commonInputProps.InputProps,
+                                readOnly: !isEditing,
+                                disabled: !isEditing,
+                            }}
+                            sx={{
+                                "& .MuiInputLabel-root": {
+                                    color: theme.palette.primary.main,
+                                },
+                            }}
+                        />
                     </Grid>
+
                     <Grid item xs={12}>
                         <DatePicker
                             label="Data de Nascimento"
@@ -358,6 +319,7 @@ export default function UserProfileDialog({
                                         : ""
                                 )
                             }
+                            readOnly={!isEditing}
                             slots={
                                 !isEditing
                                     ? { openPickerIcon: () => null }
@@ -379,11 +341,13 @@ export default function UserProfileDialog({
                                     },
                                     InputLabelProps: {
                                         shrink: true,
-                                        sx: {
-                                            color: theme.palette.primary.main,
-                                        },
                                     },
                                     sx: {
+                                        "& label": {
+                                            color:
+                                                theme.palette.primary.main +
+                                                " !important",
+                                        },
                                         "& .MuiInputBase-input.Mui-disabled": {
                                             WebkitTextFillColor:
                                                 theme.palette.text.disabled,
@@ -391,14 +355,9 @@ export default function UserProfileDialog({
                                         "& .Mui-disabled": {
                                             color: theme.palette.text.disabled,
                                         },
-
-                                        "& .MuiInputLabel-root": {
-                                            color: theme.palette.primary.main,
-                                        },
                                     },
                                 },
                             }}
-                            readOnly={!isEditing}
                         />
                     </Grid>
 
@@ -407,14 +366,10 @@ export default function UserProfileDialog({
                             <FormControl
                                 fullWidth
                                 variant="filled"
-                                sx={{
-                                    borderRadius: 2,
-                                }}
+                                sx={{ borderRadius: 2 }}
                             >
                                 <InputLabel
-                                    sx={{
-                                        color: theme.palette.primary.main,
-                                    }}
+                                    sx={{ color: theme.palette.primary.main }}
                                 >
                                     Estado Civil
                                 </InputLabel>
@@ -428,16 +383,22 @@ export default function UserProfileDialog({
                                     }
                                     disableUnderline
                                 >
-                                    <MenuItem value="Solteiro">
-                                        Solteiro(a)
-                                    </MenuItem>
-                                    <MenuItem value="Casado">
-                                        Casado(a)
-                                    </MenuItem>
-                                    <MenuItem value="Divorciado">
-                                        Divorciado(a)
-                                    </MenuItem>
-                                    <MenuItem value="Viúvo">Viúvo(a)</MenuItem>
+                                    {[
+                                        "Solteiro",
+                                        "Casado",
+                                        "Divorciado",
+                                        "Viúvo",
+                                    ].map((item) => (
+                                        <MenuItem key={item} value={item}>
+                                            {item === "Solteiro"
+                                                ? "Solteiro(a)"
+                                                : item === "Casado"
+                                                ? "Casado(a)"
+                                                : item === "Divorciado"
+                                                ? "Divorciado(a)"
+                                                : "Viúvo(a)"}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         ) : (
@@ -445,30 +406,36 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Estado Civil"
                                 variant="filled"
-                                disabled={true}
+                                disabled
                                 value={formData.estadoCivil}
                                 {...commonInputProps}
                                 sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
+                                    "& label": {
+                                        color:
+                                            theme.palette.primary.main +
+                                            " !important",
+                                    },
+                                    "& .MuiInputBase-input.Mui-disabled": {
+                                        WebkitTextFillColor:
+                                            theme.palette.text.disabled,
+                                    },
+                                    "& .Mui-disabled": {
+                                        color: theme.palette.text.disabled,
                                     },
                                 }}
                             />
                         )}
                     </Grid>
+
                     <Grid item xs={12}>
                         {isEditing ? (
                             <FormControl
                                 fullWidth
                                 variant="filled"
-                                sx={{
-                                    borderRadius: 2,
-                                }}
+                                sx={{ borderRadius: 2 }}
                             >
                                 <InputLabel
-                                    sx={{
-                                        color: theme.palette.primary.main,
-                                    }}
+                                    sx={{ color: theme.palette.primary.main }}
                                 >
                                     Filhos
                                 </InputLabel>
@@ -479,8 +446,11 @@ export default function UserProfileDialog({
                                     }
                                     disableUnderline
                                 >
-                                    <MenuItem value="Sim">Sim</MenuItem>
-                                    <MenuItem value="Não">Não</MenuItem>
+                                    {["Sim", "Não"].map((item) => (
+                                        <MenuItem key={item} value={item}>
+                                            {item}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         ) : (
@@ -488,17 +458,27 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Filhos"
                                 variant="filled"
-                                disabled={true}
+                                disabled
                                 value={formData.filhos}
                                 {...commonInputProps}
                                 sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
+                                    "& label": {
+                                        color:
+                                            theme.palette.primary.main +
+                                            " !important",
+                                    },
+                                    "& .MuiInputBase-input.Mui-disabled": {
+                                        WebkitTextFillColor:
+                                            theme.palette.text.disabled,
+                                    },
+                                    "& .Mui-disabled": {
+                                        color: theme.palette.text.disabled,
                                     },
                                 }}
                             />
                         )}
                     </Grid>
+
                     <Grid item xs={12}>
                         <TextField
                             fullWidth
@@ -514,8 +494,17 @@ export default function UserProfileDialog({
                                 },
                             }}
                             sx={{
-                                "& .MuiInputLabel-root": {
-                                    color: theme.palette.primary.main,
+                                "& label": {
+                                    color:
+                                        theme.palette.primary.main +
+                                        " !important",
+                                },
+                                "& .MuiInputBase-input.Mui-disabled": {
+                                    WebkitTextFillColor:
+                                        theme.palette.text.disabled,
+                                },
+                                "& .Mui-disabled": {
+                                    color: theme.palette.text.disabled,
                                 },
                             }}
                         />
@@ -526,18 +515,7 @@ export default function UserProfileDialog({
                         <Button
                             onClick={() => {
                                 setIsEditing(false);
-                                setFormData({
-                                    nome: user.nome || "",
-                                    funcao: user.funcao || "",
-                                    telefone: user.telefone || "",
-                                    email: user.email || "",
-                                    nascimento: user.nascimento || "",
-                                    endereco: user.endereco || "",
-                                    estadoCivil: user.estadoCivil || "",
-                                    conjuge: user.conjuge || "",
-                                    filhos: user.filhos || "Não",
-                                    ministerio: user.ministerio || "",
-                                });
+                                setFormData(getDefaultFormData(user));
                                 setAvatarUrl(null);
                             }}
                             variant={"outlined"}
