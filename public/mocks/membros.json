@@ -1,7 +1,7 @@
 [
     {
         "nome": "Ana Silva",
-        "funcao": "Líder",
+        "funcao": "Líder de célula",
         "telefone": "(11) 91234-5678",
         "email": "ana.silva@email.com",
         "nascimento": "1985-07-12",
@@ -196,6 +196,206 @@
                 "cursoTlc": false,
                 "expresso2": false,
                 "aprovacaoPastor": false
+            }
+        }
+    },
+    {
+        "nome": "Fernanda Oliveira",
+        "funcao": "Líder em treinamento",
+        "telefone": "(62) 99812-3456",
+        "email": "fernanda.oliveira@email.com",
+        "nascimento": "1992-06-08",
+        "endereco": "Rua das Mangueiras, 88, Goiânia, GO",
+        "estadoCivil": "Solteira",
+        "conjuge": "",
+        "filhos": "Não",
+        "discipulador": "Ana Silva",
+        "discipulando": "Juliana Costa",
+        "ministerio": "Intercessão",
+        "trajetoria": {
+            "pastoreio1": {
+                "assiduoCulto": true,
+                "assiduoCelula": true,
+                "livroAcompInicial": true,
+                "cafeComPastor": true,
+                "cursoNovaCriatura": true,
+                "batismoAguas": true
+            },
+            "pastoreio2": {
+                "cursoVidaDevocional": true,
+                "cursoAutSubmissao": true,
+                "servirEmMinisterio": true,
+                "encontroComDeus": true
+            },
+            "discipuladoFlags": {
+                "assiduoTadel": true,
+                "cursoIdeFazeiDiscipulo": true,
+                "expresso1": true
+            },
+            "liderCelula": {
+                "cursoTlc": false,
+                "expresso2": true,
+                "aprovacaoPastor": false
+            }
+        }
+    },
+    {
+        "nome": "Lucas Pereira",
+        "funcao": "Membro",
+        "telefone": "(71) 98743-2100",
+        "email": "lucas.pereira@email.com",
+        "nascimento": "1988-12-04",
+        "endereco": "Rua do Sol, 321, Salvador, BA",
+        "estadoCivil": "Casado",
+        "conjuge": "Mariana Pereira",
+        "filhos": "Sim",
+        "discipulador": "Diego Martins",
+        "discipulando": "",
+        "ministerio": "Louvor",
+        "trajetoria": {
+            "pastoreio1": {
+                "assiduoCulto": true,
+                "assiduoCelula": true,
+                "livroAcompInicial": false,
+                "cafeComPastor": true,
+                "cursoNovaCriatura": true,
+                "batismoAguas": true
+            },
+            "pastoreio2": {
+                "cursoVidaDevocional": true,
+                "cursoAutSubmissao": false,
+                "servirEmMinisterio": true,
+                "encontroComDeus": false
+            },
+            "discipuladoFlags": {
+                "assiduoTadel": true,
+                "cursoIdeFazeiDiscipulo": false,
+                "expresso1": false
+            },
+            "liderCelula": {
+                "cursoTlc": false,
+                "expresso2": false,
+                "aprovacaoPastor": false
+            }
+        }
+    },
+    {
+        "nome": "Juliana Costa",
+        "funcao": "Auxiliar",
+        "telefone": "(84) 93333-2211",
+        "email": "juliana.costa@email.com",
+        "nascimento": "1996-04-19",
+        "endereco": "Av. das Rosas, 456, Natal, RN",
+        "estadoCivil": "Solteira",
+        "conjuge": "",
+        "filhos": "Não",
+        "discipulador": "Fernanda Oliveira",
+        "discipulando": "",
+        "ministerio": "Infantil",
+        "trajetoria": {
+            "pastoreio1": {
+                "assiduoCulto": true,
+                "assiduoCelula": true,
+                "livroAcompInicial": true,
+                "cafeComPastor": false,
+                "cursoNovaCriatura": false,
+                "batismoAguas": true
+            },
+            "pastoreio2": {
+                "cursoVidaDevocional": false,
+                "cursoAutSubmissao": true,
+                "servirEmMinisterio": true,
+                "encontroComDeus": true
+            },
+            "discipuladoFlags": {
+                "assiduoTadel": true,
+                "cursoIdeFazeiDiscipulo": false,
+                "expresso1": true
+            },
+            "liderCelula": {
+                "cursoTlc": false,
+                "expresso2": false,
+                "aprovacaoPastor": false
+            }
+        }
+    },
+    {
+        "nome": "Marcelo Lima",
+        "funcao": "Membro",
+        "telefone": "(27) 94456-7788",
+        "email": "marcelo.lima@email.com",
+        "nascimento": "1980-08-22",
+        "endereco": "Rua Vitória, 900, Vitória, ES",
+        "estadoCivil": "Viúvo",
+        "conjuge": "",
+        "filhos": "Sim",
+        "discipulador": "",
+        "discipulando": "",
+        "ministerio": "Segurança",
+        "trajetoria": {
+            "pastoreio1": {
+                "assiduoCulto": true,
+                "assiduoCelula": true,
+                "livroAcompInicial": false,
+                "cafeComPastor": true,
+                "cursoNovaCriatura": true,
+                "batismoAguas": true
+            },
+            "pastoreio2": {
+                "cursoVidaDevocional": true,
+                "cursoAutSubmissao": false,
+                "servirEmMinisterio": true,
+                "encontroComDeus": false
+            },
+            "discipuladoFlags": {
+                "assiduoTadel": false,
+                "cursoIdeFazeiDiscipulo": false,
+                "expresso1": false
+            },
+            "liderCelula": {
+                "cursoTlc": false,
+                "expresso2": false,
+                "aprovacaoPastor": false
+            }
+        }
+    },
+    {
+        "nome": "Tatiane Ribeiro",
+        "funcao": "Líder de célula",
+        "telefone": "(11) 90123-4567",
+        "email": "tatiane.ribeiro@email.com",
+        "nascimento": "1987-10-10",
+        "endereco": "Rua da Esperança, 45, São Paulo, SP",
+        "estadoCivil": "Casada",
+        "conjuge": "Rafael Ribeiro",
+        "filhos": "Sim",
+        "discipulador": "Ana Silva",
+        "discipulando": "Lucas Pereira",
+        "ministerio": "Louvor",
+        "trajetoria": {
+            "pastoreio1": {
+                "assiduoCulto": true,
+                "assiduoCelula": true,
+                "livroAcompInicial": true,
+                "cafeComPastor": true,
+                "cursoNovaCriatura": true,
+                "batismoAguas": true
+            },
+            "pastoreio2": {
+                "cursoVidaDevocional": true,
+                "cursoAutSubmissao": true,
+                "servirEmMinisterio": true,
+                "encontroComDeus": true
+            },
+            "discipuladoFlags": {
+                "assiduoTadel": true,
+                "cursoIdeFazeiDiscipulo": true,
+                "expresso1": true
+            },
+            "liderCelula": {
+                "cursoTlc": true,
+                "expresso2": true,
+                "aprovacaoPastor": true
             }
         }
     }
