@@ -384,19 +384,13 @@ export default function UserProfileDialog({
                                     disableUnderline
                                 >
                                     {[
-                                        "Solteiro",
-                                        "Casado",
-                                        "Divorciado",
-                                        "Viúvo",
+                                        {key: "Solteiro", name: "Solteiro(a)"},
+                                        {key: "Casado", name: "Casado(a)"},
+                                        {key: "Divorciado", name: "Divorciado(a)"},
+                                        {key: "Viúvo", name: "Viúvo(a)"}
                                     ].map((item) => (
-                                        <MenuItem key={item} value={item}>
-                                            {item === "Solteiro"
-                                                ? "Solteiro(a)"
-                                                : item === "Casado"
-                                                ? "Casado(a)"
-                                                : item === "Divorciado"
-                                                ? "Divorciado(a)"
-                                                : "Viúvo(a)"}
+                                        <MenuItem key={item.key} value={item.name}>
+                                            {item.name}
                                         </MenuItem>
                                     ))}
                                 </Select>
