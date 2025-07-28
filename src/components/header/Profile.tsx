@@ -14,6 +14,8 @@ import {
     Switch,
     Badge,
     Button,
+    Snackbar,
+    Alert as MuiAlert,
 } from "@mui/material";
 import {
     IconBrightnessUp,
@@ -64,7 +66,7 @@ interface ProfileProps {
 }
 
 export function getInitials(nome?: string): string {
-    if (!nome) return "U";
+    if (!nome) return "";
     const partes = nome.trim().split(" ");
     return partes.length === 1
         ? partes[0][0].toUpperCase()
@@ -77,11 +79,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
     const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [toastOpen, setToastOpen] = useState(false);
 
     const router = useRouter();
     const dispatch = useDispatch();
     const loggedUser = useSelector<RootState>((state) => state.loggedUser);
-    console.log("Logged User:", loggedUser);
 
     function handleLogoutButtonClick(): void {
         dispatch(clearLoggedUser());
@@ -105,8 +108,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
         } else {
             setActiveItem(item);
             if (onMenuItemClick) onMenuItemClick(item);
+            handleClose();
         }
-        handleClose();
     };
 
     useEffect(() => {
@@ -114,8 +117,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
             try {
                 const usuario = await getUsuarioLogado();
                 setUsuario(usuario);
-            } catch (error) {
-                console.error("Erro ao buscar usuário:", error);
+            } catch {
+                setToastOpen(true);
             }
         };
         fetchUsuario();
@@ -165,6 +168,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 }}
             >
                 <Avatar
+                    src={avatarUrl || undefined}
                     sx={{
                         width: 35,
                         height: 35,
@@ -174,10 +178,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         color: "#fff",
                     }}
                 >
-                    {usuario ? getInitials(usuario.nome) : "U"}
+                    {!avatarUrl && (usuario ? getInitials(usuario.nome) : "")}
                 </Avatar>
                 <Typography variant="body1" fontWeight="600" sx={{ mx: 1.5 }}>
-                    {usuario ? usuario.nome : "Usuário"}
+                    {usuario ? usuario.nome : ""}
                 </Typography>
                 <IconCaretDownFilled
                     size="18"
@@ -222,6 +226,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         sx={onlineBadgeStyle}
                     >
                         <Avatar
+                            src={avatarUrl || undefined}
                             sx={{
                                 bgcolor: "#0d3b8a",
                                 width: 48,
@@ -231,7 +236,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                                 color: "#fff",
                             }}
                         >
-                            {usuario ? getInitials(usuario.nome) : "U"}
+                            {!avatarUrl &&
+                                (usuario ? getInitials(usuario.nome) : "")}
                         </Avatar>
                     </Badge>
                     <Box ml={2}>
@@ -240,10 +246,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             component="h2"
                             fontWeight="600"
                         >
-                            {usuario ? usuario.nome : "Usuário"}
+                            {usuario ? usuario.nome : ""}
                         </Typography>
                         <Typography variant="body2" color="#6b7280">
-                            {usuario ? usuario.email : "não possui um email"}
+                            {usuario
+                                ? usuario.email
+                                : "usuário não autenticado"}
                         </Typography>
                     </Box>
                 </Box>
@@ -342,14 +350,27 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                     </ListItemIcon>
                     <ListItemText primary="Sair" />
                 </MenuItem>
+
                 {usuario && (
                     <UserProfileDialog
                         open={openProfileDialog}
                         onClose={() => setOpenProfileDialog(false)}
                         user={usuario}
+                        onAvatarChange={setAvatarUrl}
                     />
                 )}
             </Menu>
+
+            <Snackbar
+                open={toastOpen}
+                autoHideDuration={3000}
+                onClose={() => setToastOpen(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <MuiAlert severity="error" sx={{ width: "100%" }}>
+                    Algo deu errado ao carregar as informações do usuário.
+                </MuiAlert>
+            </Snackbar>
         </Box>
     );
 }
