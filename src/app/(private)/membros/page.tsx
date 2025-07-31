@@ -67,24 +67,36 @@ export default function Membros() {
                                 fontWeight: "600",
                                 display: "flex",
                                 gap: 1,
+                                color: "#fff",
                             }}
                         >
                             <IconPlus width={16} /> Registrar membro
                         </Button>
                     </Box>
 
-                    <Grid container spacing={3} sx={{ mt: 1 }}>
-                        <Grid item xs={4} sm={4} md={3}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            paddingTop: "24px",
+                        }}
+                    >
+                        <Box sx={{ width: "348px" }}>
                             <Filtro
                                 data={membros}
                                 onSelect={setMembroSelecionado}
                             />
-                        </Grid>
+                        </Box>
 
-                        <Grid item xs={8} sm={8} md={9}>
+                        <Box
+                            sx={{
+                                paddingLeft: "33px",
+                                paddingRight: "17px",
+                                width: "100%",
+                            }}
+                        >
                             <Informacao data={membroSelecionado!} />
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Box>
                 </Box>
             </DashboardCard>
         </PageContainer>

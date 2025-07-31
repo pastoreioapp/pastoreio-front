@@ -20,22 +20,25 @@ export default function Header() {
 
     return (
         <AppBar
+            position="sticky"
             sx={{
-                position: "sticky",
                 boxShadow: "none",
                 background: "#fff",
                 backdropFilter: "blur(4px)",
                 paddingTop: "36px",
-                paddingRight: "50px",
-                paddingLeft: "50px",
+                paddingBottom: "24px",
+                margin: 0,
             }}
         >
             <Toolbar
+                disableGutters
                 sx={{
                     width: "100%",
-                    display: "flex",
+                    minHeight: "unset",
                     color: "#929ead",
+                    display: "flex",
                     justifyContent: "space-between",
+                    px: "50px",
                 }}
             >
                 <Box>

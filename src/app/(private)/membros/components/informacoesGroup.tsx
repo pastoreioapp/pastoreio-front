@@ -15,30 +15,38 @@ export function InformacoesGroup({
     campos: { label: string; valor: string }[];
 }) {
     return (
-        <Grid item xs={6} sm={4} md={3}>
+        <Box
+            sx={{
+                marginTop: "32px",
+                width: "100%",
+            }}
+        >
             <Box>
-                <Typography
-                    variant="body1"
-                    fontWeight="bold"
-                    sx={{ color: "#C5C5C5", fontSize: "14px" }}
-                >
+                <Typography sx={{ color: "#C5C5C5", fontSize: "14px" }}>
                     {titulo}
                 </Typography>
-                <Divider sx={{ mb: 1, borderColor: "#C5C5C5" }} />
+                <Divider
+                    sx={{
+                        mt: "11px",
+                        marginBottom: "14px",
+                        borderColor: "#C5C5C5",
+                        width: "100%",
+                    }}
+                />
             </Box>
             {campos.map((campo, index) => (
-                <Box key={index}>
+                <Box key={index} sx={{ mb: "12px" }}>
                     <InputLabel sx={{ color: "#000", fontSize: "14px" }}>
                         {campo.label}
                     </InputLabel>
                     <Input
                         value={campo.valor}
-                        sx={{ fontSize: "11px" }}
+                        sx={{ fontSize: "11px", width: "100%" }}
                         disableUnderline
                         disabled
                     />
                 </Box>
             ))}
-        </Grid>
+        </Box>
     );
 }

@@ -20,31 +20,73 @@ export function Filtro({
     );
 
     return (
-        <Box>
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+            }}
+        >
             <TextField
                 variant="outlined"
                 placeholder="Pesquisar membros"
-                sx={{ width: "100%" }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                sx={{
+                    width: "330px",
+                    height: "50px",
+                    "& .MuiOutlinedInput-root": {
+                        backgroundColor: "#F8F8F8",
+                        borderRadius: 2,
+                        "& fieldset": {
+                            borderColor: "#F5F5F5",
+                        },
+                        "&:hover fieldset": {
+                            borderColor: "#E0E0E0",
+                        },
+                        "&.Mui-focused fieldset": {
+                            borderColor: "#5E79B3",
+                        },
+                        "& .MuiInputBase-input::placeholder": {
+                            color: "#929EAE",
+                            opacity: 1,
+                            fontSize: "14px",
+                        },
+                    },
+                }}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
-                            <Search />
+                            <Search
+                                sx={{
+                                    width: "24px",
+                                    height: "24px",
+                                    color: "#1B212D",
+                                    marginRight: "15px",
+                                }}
+                            />
                         </InputAdornment>
                     ),
-                    style: {
-                        backgroundColor: "#f0f0f0",
-                        borderRadius: 4,
-                    },
                 }}
             />
 
             <List
                 sx={{
-                    width: "100%",
-                    padding: 0,
-                    mt: 2,
+                    paddingTop: "15px",
+                    maxHeight: "655px",
+                    paddingRight: "9px",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    "&::-webkit-scrollbar": {
+                        width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "#C9C9C9",
+                        borderRadius: "10px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                        backgroundColor: "#F5F5F5",
+                    },
                 }}
             >
                 {filtered.map((membro, index) =>

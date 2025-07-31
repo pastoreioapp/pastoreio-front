@@ -19,12 +19,15 @@ export function renderMembroItem(
             onClick={onClick}
             sx={{
                 border: "1px solid #ECECEC",
-                borderRadius: 2,
-                mb: 1.5,
-                py: 1,
-                px: 2,
+                bgcolor: "#fff",
+                borderRadius: "7px",
+                marginBottom: "15px",
+                paddingY: "15px",
+                paddingX: "15.32px",
                 display: "flex",
-                gap: 2,
+                gap: "17px",
+                width: "330px",
+                height: "90px",
             }}
         >
             <ListItemAvatar>
@@ -34,7 +37,13 @@ export function renderMembroItem(
             </ListItemAvatar>
             <Box flex={1}>
                 <Typography sx={{ fontSize: "16px" }}>{membro.nome}</Typography>
-                <Divider sx={{ borderColor: "black" }} />
+                <Divider
+                    sx={{
+                        borderColor: "#1B212D",
+                        marginTop: "2.05px",
+                        marginBottom: "4.09px",
+                    }}
+                />
                 <Typography sx={{ fontSize: "12px", fontWeight: "600" }}>
                     {membro.funcao}
                 </Typography>

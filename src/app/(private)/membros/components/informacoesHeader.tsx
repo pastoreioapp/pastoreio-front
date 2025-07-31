@@ -8,7 +8,14 @@ export function InformacaoHeader({
     funcao: string;
 }) {
     return (
-        <Grid item xs={6} sm={4} md={3} sx={{ placeItems: "center" }}>
+        <Box
+            sx={{
+                marginTop: "32px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+            }}
+        >
             <Avatar
                 sx={{
                     width: "180px",
@@ -22,23 +29,24 @@ export function InformacaoHeader({
             >
                 {nome.charAt(0).toUpperCase()}
             </Avatar>
-            <Typography sx={{ fontSize: "18px", fontWeight: "500" }}>
+            <Typography
+                sx={{ marginTop: "12px", fontSize: "18px", fontWeight: "500" }}
+            >
                 {nome}
             </Typography>
             <Box
                 sx={{
                     bgcolor: "#5E79B3",
-                    py: 0.3,
-                    px: 1,
+                    py: "2px",
+                    px: "9px",
                     color: "#fff",
                     borderRadius: 1,
-                    mt: "1px",
                 }}
             >
                 <Typography sx={{ fontSize: "15px", fontWeight: "600" }}>
                     {funcao}
                 </Typography>
             </Box>
-        </Grid>
+        </Box>
     );
 }
