@@ -18,16 +18,25 @@ export default function Membros() {
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
 
+    function selecionarMembroInicial(membros: Membro[]) {
+        return (
+            membros.find((m) => m.funcao.toLowerCase().includes("líder")) ||
+            membros[0]
+        );
+    }
+
+    function toggleMembroSelecionado(membro: Membro) {
+        setMembroSelecionado((prev) =>
+            prev?.id === membro.id ? null : membro
+        );
+    }
+
     useEffect(() => {
         async function fetchData() {
             try {
                 const data = await getMembros();
                 setMembros(data);
-
-                const lider = data.find((m) =>
-                    m.funcao.toLowerCase().includes("líder")
-                );
-                setMembroSelecionado(lider || data[0]);
+                setMembroSelecionado(selecionarMembroInicial(data));
             } catch (error: any) {
                 setErro(error.message || "Erro ao carregar membros");
             } finally {
@@ -63,8 +72,8 @@ export default function Membros() {
                             variant="contained"
                             sx={{
                                 bgcolor: "#5E79B3",
-                                fontSize: "13px",
-                                fontWeight: "600",
+                                fontSize: 13,
+                                fontWeight: 600,
                                 display: "flex",
                                 gap: 1,
                                 color: "#fff",
@@ -74,27 +83,17 @@ export default function Membros() {
                         </Button>
                     </Box>
 
-                    <Box
-                        sx={{
-                            display: "flex",
-                            paddingTop: "24px",
-                        }}
-                    >
-                        <Box sx={{ width: "348px" }}>
+                    <Box sx={{ display: "flex", pt: "24px" }}>
+                        <Box width={348}>
                             <Filtro
                                 data={membros}
-                                onSelect={setMembroSelecionado}
+                                onSelect={toggleMembroSelecionado}
+                                membroSelecionado={membroSelecionado}
                             />
                         </Box>
 
-                        <Box
-                            sx={{
-                                paddingLeft: "33px",
-                                paddingRight: "17px",
-                                width: "100%",
-                            }}
-                        >
-                            <Informacao data={membroSelecionado!} />
+                        <Box flex={1} sx={{ pl: "33px", pr: "17px" }}>
+                            <Informacao data={membroSelecionado || null} />
                         </Box>
                     </Box>
                 </Box>

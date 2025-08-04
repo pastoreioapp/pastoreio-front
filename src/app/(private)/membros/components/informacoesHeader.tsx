@@ -1,4 +1,4 @@
-import { Avatar, Box, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 
 export function InformacaoHeader({
     nome,

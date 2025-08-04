@@ -3,15 +3,17 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useState } from "react";
-import { renderMembroItem } from "./renderMembroItem";
+import { MembroListItem } from "./membroListItem";
 import { Membro } from "@/features/membros/types";
 
 export function Filtro({
     data,
     onSelect,
+    membroSelecionado,
 }: {
     data: Membro[];
     onSelect: (membro: Membro) => void;
+    membroSelecionado: Membro | null;
 }) {
     const [search, setSearch] = useState("");
 
@@ -89,9 +91,14 @@ export function Filtro({
                     },
                 }}
             >
-                {filtered.map((membro, index) =>
-                    renderMembroItem(membro, index, () => onSelect(membro))
-                )}
+                {filtered.map((membro) => (
+                    <MembroListItem
+                        key={membro.id}
+                        membro={membro}
+                        selected={membroSelecionado?.id === membro.id}
+                        onClick={() => onSelect(membro)}
+                    />
+                ))}
             </List>
         </Box>
     );

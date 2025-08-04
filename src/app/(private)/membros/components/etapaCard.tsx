@@ -1,7 +1,4 @@
-import {
-    CheckBoxOutlineBlankOutlined,
-    CheckCircleOutline,
-} from "@mui/icons-material";
+import { CheckCircleOutline } from "@mui/icons-material";
 import { Avatar, Box, Checkbox, Paper, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
