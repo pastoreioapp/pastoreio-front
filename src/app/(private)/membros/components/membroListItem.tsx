@@ -32,6 +32,7 @@ export function MembroListItem({
                 width: "330px",
                 height: "90px",
                 transition: "background-color 0.2s ease-in-out",
+                cursor: "pointer",
                 "&:hover": {
                     backgroundColor: "#DCE8E7",
                 },

@@ -26,7 +26,7 @@ export default function DashboardCard({
     return (
         <Card
             sx={{ paddingX: "50px", paddingY: 0, margim: 0 }}
-            elevation={9}
+            elevation={0}
             variant={undefined}
         >
             {cardheading ? (
