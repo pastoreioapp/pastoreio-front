@@ -19,14 +19,13 @@ export function EtapaCard({
             elevation={1}
             variant="outlined"
             sx={{
-                p: 2,
+                width: "200px",
                 borderRadius: 2,
-                minHeight: 300,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                position: "relative",
                 bgcolor: "#F9F9F9",
+                paddingTop: "10px",
             }}
         >
             <Avatar
@@ -45,14 +44,16 @@ export function EtapaCard({
             </Avatar>
 
             <Typography
-                mt={1}
-                mb={1}
-                sx={{ fontSize: "14px", fontWeight: "600" }}
+                sx={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    paddingBottom: "8px",
+                }}
             >
                 {titulo}
             </Typography>
 
-            <Stack spacing={1} width="100%">
+            <Stack spacing={0}>
                 {itens.map((item, i) => (
                     <Box key={i} display="flex" alignItems="center">
                         <Checkbox
@@ -62,8 +63,8 @@ export function EtapaCard({
                                 <Box
                                     sx={{
                                         border: "1px solid #ccc",
-                                        width: 18,
-                                        height: 18,
+                                        width: 13,
+                                        height: 13,
                                         borderRadius: 1,
                                     }}
                                 />

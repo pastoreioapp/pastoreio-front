@@ -18,16 +18,25 @@ export default function Membros() {
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
 
+    function selecionarMembroInicial(membros: Membro[]) {
+        return (
+            membros.find((m) => m.funcao.toLowerCase().includes("líder")) ||
+            membros[0]
+        );
+    }
+
+    function toggleMembroSelecionado(membro: Membro) {
+        setMembroSelecionado((prev) =>
+            prev?.id === membro.id ? null : membro
+        );
+    }
+
     useEffect(() => {
         async function fetchData() {
             try {
                 const data = await getMembros();
                 setMembros(data);
-
-                const lider = data.find((m) =>
-                    m.funcao.toLowerCase().includes("líder")
-                );
-                setMembroSelecionado(lider || data[0]);
+                setMembroSelecionado(selecionarMembroInicial(data));
             } catch (error: any) {
                 setErro(error.message || "Erro ao carregar membros");
             } finally {
@@ -63,28 +72,30 @@ export default function Membros() {
                             variant="contained"
                             sx={{
                                 bgcolor: "#5E79B3",
-                                fontSize: "13px",
-                                fontWeight: "600",
+                                fontSize: 13,
+                                fontWeight: 600,
                                 display: "flex",
                                 gap: 1,
+                                color: "#fff",
                             }}
                         >
                             <IconPlus width={16} /> Registrar membro
                         </Button>
                     </Box>
 
-                    <Grid container spacing={3} sx={{ mt: 1 }}>
-                        <Grid item xs={4} sm={4} md={3}>
+                    <Box sx={{ display: "flex", pt: "24px" }}>
+                        <Box width={348}>
                             <Filtro
                                 data={membros}
-                                onSelect={setMembroSelecionado}
+                                onSelect={toggleMembroSelecionado}
+                                membroSelecionado={membroSelecionado}
                             />
-                        </Grid>
+                        </Box>
 
-                        <Grid item xs={8} sm={8} md={9}>
-                            <Informacao data={membroSelecionado!} />
-                        </Grid>
-                    </Grid>
+                        <Box flex={1} sx={{ pl: "33px", pr: "17px" }}>
+                            <Informacao data={membroSelecionado || null} />
+                        </Box>
+                    </Box>
                 </Box>
             </DashboardCard>
         </PageContainer>

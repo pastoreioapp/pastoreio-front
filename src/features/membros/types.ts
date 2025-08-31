@@ -34,6 +34,7 @@ interface Trajetoria {
 }
 
 export interface Membro {
+    id: string;
     nome: string;
     funcao: string;
     telefone: string;

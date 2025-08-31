@@ -24,7 +24,11 @@ export default function DashboardCard({
     middlecontent,
 }: Props) {
     return (
-        <Card sx={{ padding: 0 }} elevation={9} variant={undefined}>
+        <Card
+            sx={{ paddingX: "50px", paddingY: 0, margim: 0 }}
+            elevation={0}
+            variant={undefined}
+        >
             {cardheading ? (
                 <CardContent>
                     <Typography variant="h5">{headtitle}</Typography>
@@ -33,7 +37,7 @@ export default function DashboardCard({
                     </Typography>
                 </CardContent>
             ) : (
-                <CardContent sx={{ p: "30px" }}>
+                <CardContent sx={{ padding: 0, margim: 0 }}>
                     {title ? (
                         <Stack
                             direction="row"

@@ -4,7 +4,6 @@ import {
     Box,
     AppBar,
     Toolbar,
-    styled,
     Stack,
     IconButton,
     Typography,
@@ -14,28 +13,34 @@ import { IconBellRingingFilled } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { Menuitems } from "../sidebar/MenuItems";
 
-const AppBarStyled = styled(AppBar)({
-    boxShadow: "none",
-    background: "#fff",
-    backdropFilter: "blur(4px)",
-    padding: "30px",
-});
-
-const ToolbarStyled = styled(Toolbar)({
-    width: "100%",
-    display: "flex",
-    color: "#929ead",
-    justifyContent: "space-between",
-});
-
 export default function Header() {
     const pathname = usePathname();
     const currentItem = Menuitems.find((item) => item.href === pathname);
     const pageTitle = currentItem ? currentItem.title : "Central da Célula";
 
     return (
-        <AppBarStyled position="sticky">
-            <ToolbarStyled>
+        <AppBar
+            position="sticky"
+            sx={{
+                boxShadow: "none",
+                background: "#fff",
+                backdropFilter: "blur(4px)",
+                paddingTop: "36px",
+                paddingBottom: "24px",
+                margin: 0,
+            }}
+        >
+            <Toolbar
+                disableGutters
+                sx={{
+                    width: "100%",
+                    minHeight: "unset",
+                    color: "#929ead",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    px: "50px",
+                }}
+            >
                 <Box>
                     <Typography variant="h3" fontWeight={600} color="#000">
                         {pageTitle}
@@ -52,7 +57,7 @@ export default function Header() {
                     </IconButton>
                     <Profile />
                 </Stack>
-            </ToolbarStyled>
-        </AppBarStyled>
+            </Toolbar>
+        </AppBar>
     );
 }
