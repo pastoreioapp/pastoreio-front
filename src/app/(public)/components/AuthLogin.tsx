@@ -17,6 +17,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { LoggedUserState, setLoggedUser } from "@/store/features/loggedUserSlice";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 export default function AuthLogin() {
     const navigate = useRouter();
@@ -39,12 +41,23 @@ export default function AuthLogin() {
         navigate.push("/dashboard");
     }
 
+    const  handleGoogleLoginButtonClick = useGoogleLogin({
+      flow: "auth-code",
+      scope : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile email profile openid",
+      onSuccess: async tokenResponse => {
+        console.log(tokenResponse);
+        const response = await axios.post('http://localhost:8080/api/auth/code/google', tokenResponse.code, { headers: { 'Content-Type': 'text/plain' } });
+        console.log(response);
+        // dispatch(setLoggedUser(null))
+        // navigate.push("/dashboard");
+      },
+    });
+
   return (
     <>
       <Typography variant="h3" textAlign="center" mb={1}>
         Login
       </Typography>
-
       <Box
         sx={{
           display: "flex",
@@ -53,8 +66,7 @@ export default function AuthLogin() {
           my: 3,
         }}
       >
-        <IconButton>
-          <Link href={"#"}>
+        <IconButton onClick={handleGoogleLoginButtonClick}>
             <Image
               src="/images/icons/icon-google.svg"
               alt="Google Login"
@@ -62,7 +74,6 @@ export default function AuthLogin() {
               height={24}
               unoptimized
             />
-          </Link>
         </IconButton>
 
         <IconButton>
