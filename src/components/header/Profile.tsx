@@ -27,8 +27,7 @@ import {
 } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { clearLoggedUser } from "@/store/features/loggedUserSlice";
-import { getUsuarioLogado } from "@/features/usuarios/usuarios.service";
+import { clearLoggedUser, LoggedUserState } from "@/store/features/loggedUserSlice";
 import { Usuario } from "@/features/usuarios/types";
 import UserProfileDialog from "@/components/header/UserProfileDialog";
 
@@ -78,13 +77,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [toastOpen, setToastOpen] = useState(false);
 
     const router = useRouter();
     const dispatch = useDispatch();
-    const loggedUser = useSelector<RootState>((state) => state.loggedUser);
+    const usuario = useSelector<RootState>((state) => state.loggedUser) as LoggedUserState;
 
     function handleLogoutButtonClick(): void {
         dispatch(clearLoggedUser());
@@ -111,18 +109,6 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
             handleClose();
         }
     };
-
-    useEffect(() => {
-        const fetchUsuario = async () => {
-            try {
-                const usuario = await getUsuarioLogado();
-                setUsuario(usuario);
-            } catch {
-                setToastOpen(true);
-            }
-        };
-        fetchUsuario();
-    }, []);
 
     const isOpen = Boolean(anchorEl);
 

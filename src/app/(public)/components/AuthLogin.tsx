@@ -15,224 +15,198 @@ import {
 import CustomTextField from "@/components/ui/CustomTextField";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { LoggedUserState, setLoggedUser } from "@/store/features/loggedUserSlice";
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
+import { useAppAuthentication } from "@/features/auth/auth.service";
 
 export default function AuthLogin() {
     const navigate = useRouter();
-    const dispatch = useDispatch();
+    const appAuthentication = useAppAuthentication();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [userLogin, setUserLogin] = useState<string>();
+    const [userPassword, setUserPassword] = useState<string>();
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
-
-    function handleLoginButtonClick(): void {
-        const mockedUser: LoggedUserState = {
-            id: "1",
-            name: "John Doe",
-            email: "",
-            role: "lider-celula",
+    const handleGoogleLoginButtonClick = () => {
+        appAuthentication.useRunGoogleUserLogin(() => {
+            navigate.push("/dashboard");
+        });
+    };
+    const handleLoginButtonClick = () => {
+        if(userLogin && userPassword) {
+            const user = {
+                login: userLogin,
+                password: userPassword
+            }
+            appAuthentication.runPasswordUserLogin(user)
+                .then(() => {
+                     navigate.push("/dashboard");
+                });
         }
-        dispatch(setLoggedUser(mockedUser))
-        navigate.push("/dashboard");
-    }
+    };
 
-    const  handleGoogleLoginButtonClick = useGoogleLogin({
-      flow: "auth-code",
-      scope : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile email profile openid",
-      onSuccess: async tokenResponse => {
-        console.log(tokenResponse);
-        const response = await axios.post('http://localhost:8080/api/auth/code/google', tokenResponse.code, { headers: { 'Content-Type': 'text/plain' } });
-        console.log(response);
-        // dispatch(setLoggedUser(null))
-        // navigate.push("/dashboard");
-      },
-    });
+    return (<>
+        <Typography variant="h3" textAlign="center" mb={1}>
+            Login
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, my: 3 }}>
+            <IconButton onClick={handleGoogleLoginButtonClick}>
+                <Image
+                    src="/images/icons/icon-google.svg"
+                    alt="Google Login"
+                    width={24}
+                    height={24}
+                    unoptimized
+                />
+            </IconButton>
+            <IconButton>
+            <Link href={"#"}>
+                <Image
+                    src="/images/icons/icon-facebook.svg"
+                    alt="Facebook Login"
+                    width={24}
+                    height={24}
+                    unoptimized
+                />
+            </Link>
+            </IconButton>
+            <IconButton>
+            <Link href={"#"}>
+                <Image
+                    src="/images/icons/icon-apple.svg"
+                    alt="Apple Login"
+                    width={22}
+                    height={22}
+                    unoptimized
+                />
+            </Link>
+            </IconButton>
+        </Box>
 
-  return (
-    <>
-      <Typography variant="h3" textAlign="center" mb={1}>
-        Login
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 2,
-          my: 3,
-        }}
-      >
-        <IconButton onClick={handleGoogleLoginButtonClick}>
-            <Image
-              src="/images/icons/icon-google.svg"
-              alt="Google Login"
-              width={24}
-              height={24}
-              unoptimized
+        <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
+            <Divider sx={{ flexGrow: 1, bgcolor: "#173D8A", height: 2 }}/>
+        </Box>
+
+        <Box>
+            <Stack mb={3}>
+            <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                component="label"
+                htmlFor="email"
+                mb="5px"
+                color={"#173D8A"}
+                placeholder="Digite seu login"
+            >
+                Login <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <CustomTextField
+                id="email"
+                variant="outlined"
+                fullWidth
+                placeholder="Digite seu login"
+                required
+                value={userLogin}
+                onChange={(event) => setUserLogin(event.target.value)}
             />
-        </IconButton>
 
-        <IconButton>
-          <Link href={"#"}>
-            <Image
-              src="/images/icons/icon-facebook.svg"
-              alt="Google Login"
-              width={24}
-              height={24}
-              unoptimized
+            <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                component="label"
+                htmlFor="password"
+                mb="5px"
+                mt="25px"
+                color={"#173D8A"}
+            >
+                Senha <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <CustomTextField
+                id="password"
+                variant="outlined"
+                fullWidth
+                placeholder="Digite sua senha"
+                required
+                type={showPassword ? "text" : "password"}
+                value={userPassword}
+                onChange={(event) => setUserPassword(event.target.value)}
+                InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                    <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        edge="end"
+                        sx={{ color: "#173D8A" }}
+                    >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                    </InputAdornment>
+                ),
+                }}
             />
-          </Link>
-        </IconButton>
-
-        <IconButton>
-          <Link href={"#"}>
-            <Image
-              src="/images/icons/icon-apple.svg"
-              alt="Google Login"
-              width={22}
-              height={22}
-              unoptimized
-            />
-          </Link>
-        </IconButton>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          my: 3,
-        }}
-      >
-        <Divider
-          sx={{
-            flexGrow: 1,
-            bgcolor: "#173D8A",
-            height: 2,
-          }}
-        />
-      </Box>
-
-      <Box>
-        <Stack mb={3}>
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            component="label"
-            htmlFor="email"
-            mb="5px"
-            color={"#173D8A"}
-            placeholder="Digite seu endereço de e-mail"
-          >
-            Endereço de E-mail <span style={{ color: "red" }}>*</span>
-          </Typography>
-          <CustomTextField
-            id="email"
-            variant="outlined"
+            </Stack>
+            <Box sx={{ width: "100%", textAlign: "left", mt: 2, mb: 5 }}>
+            <Stack direction="row" justifyContent="right" spacing={1} mt={3}>
+                <Typography variant="body1" fontWeight="400">
+                Esqueceu a Senha ?
+                </Typography>
+                <Typography
+                variant="body1"
+                component={Link}
+                href="/recover"
+                fontWeight="700"
+                sx={{
+                    textDecoration: "underline",
+                    color: "#173D8A",
+                }}
+                >
+                Recuperar
+                </Typography>
+            </Stack>
+            </Box>
+            <Button
+            color="primary"
+            variant="contained"
+            size="large"
             fullWidth
-            placeholder="Digite seu endereço de e-mail"
-            required
-          />
-
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            component="label"
-            htmlFor="password"
-            mb="5px"
-            mt="25px"
-            color={"#173D8A"}
-          >
-            Senha <span style={{ color: "red" }}>*</span>
-          </Typography>
-          <CustomTextField
-            id="password"
-            variant="outlined"
-            fullWidth
-            placeholder="Senha"
-            required
-            type={showPassword ? "text" : "password"}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    edge="end"
-                    sx={{ color: "#173D8A" }}
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            onClick={handleLoginButtonClick}
+            sx={{
+                borderRadius: "50px",
+                height: "50px",
             }}
-          />
-        </Stack>
-        <Box sx={{ width: "100%", textAlign: "left", mt: 2, mb: 5 }}>
-          <Stack direction="row" justifyContent="right" spacing={1} mt={3}>
+            >
+            Login
+            </Button>
+        </Box>
+        <Stack
+            direction="row"
+            justifyContent="center"
+            spacing={1}
+            mt={3}
+            sx={{
+            width: "100%",
+            maxWidth: "100%",
+            display: "flex",
+            flexWrap: "wrap",
+            }}
+        >
             <Typography variant="body1" fontWeight="400">
-              Esqueceu a Senha ?
+            Ainda não possui uma conta ?
             </Typography>
             <Typography
-              variant="body1"
-              component={Link}
-              href="/recover"
-              fontWeight="700"
-              sx={{
+            variant="body1"
+            component={Link}
+            href="/register"
+            fontWeight="700"
+            sx={{
                 textDecoration: "underline",
                 color: "#173D8A",
-              }}
+            }}
             >
-              Recuperar
+            Cadastre-se
             </Typography>
-          </Stack>
-        </Box>
-        <Button
-          color="primary"
-          variant="contained"
-          size="large"
-          fullWidth
-          onClick={handleLoginButtonClick}
-          sx={{
-            borderRadius: "50px",
-            height: "50px",
-          }}
-        >
-          Login
-        </Button>
-      </Box>
-      <Stack
-        direction="row"
-        justifyContent="center"
-        spacing={1}
-        mt={3}
-        sx={{
-          width: "100%",
-          maxWidth: "100%",
-          display: "flex",
-          flexWrap: "wrap",
-        }}
-      >
-        <Typography variant="body1" fontWeight="400">
-          Ainda não possui uma conta ?
-        </Typography>
-        <Typography
-          variant="body1"
-          component={Link}
-          href="/register"
-          fontWeight="700"
-          sx={{
-            textDecoration: "underline",
-            color: "#173D8A",
-          }}
-        >
-          Cadastre-se
-        </Typography>
-      </Stack>
-    </>
-  );
+        </Stack>
+    </>);
 }
