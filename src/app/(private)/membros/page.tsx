@@ -64,7 +64,7 @@ export default function Membros() {
     }
 
     return (
-        <PageContainer title="Membros" description="Página Membros">
+        <PageContainer title="Membros" description="Página Membros" allowedRoles={['LIDER_CELULA']}>
             <DashboardCard>
                 <Box>
                     <Box sx={{ display: "flex", justifyContent: "end" }}>

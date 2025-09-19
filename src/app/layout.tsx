@@ -7,20 +7,16 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import 'dayjs/locale/pt';
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="pt-BR">
             <body>
                 <GoogleOAuthProvider clientId="416804860902-7tko1re47th6qt6nv7d672ohrvlu1m31.apps.googleusercontent.com">
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
-                    <ProviderStore>
-                        <ProviderTheme>{children}</ProviderTheme>
-                    </ProviderStore>
-                </LocalizationProvider>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                        <ProviderStore>
+                            <ProviderTheme>{children}</ProviderTheme>
+                        </ProviderStore>
+                    </LocalizationProvider>
                 </GoogleOAuthProvider>
             </body>
         </html>

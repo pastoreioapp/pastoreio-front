@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, MouseEvent, useEffect } from "react";
+import { useState, MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
     Avatar,
@@ -28,8 +28,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearLoggedUser, LoggedUserState } from "@/store/features/loggedUserSlice";
-import { Usuario } from "@/features/usuarios/types";
 import UserProfileDialog from "@/components/header/UserProfileDialog";
+import { clearUserSession } from "@/store/features/userSessionSlice";
 
 const onlineBadgeStyle = {
     "& .MuiBadge-badge": {
@@ -86,6 +86,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
 
     function handleLogoutButtonClick(): void {
         dispatch(clearLoggedUser());
+        dispatch(clearUserSession());
+        // TODO: call backend application to remove refreshToken Cookie
         router.push("/login");
     }
 

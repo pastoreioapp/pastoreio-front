@@ -9,7 +9,7 @@ import { Grid, Box } from "@mui/material";
 
 export default function Dashboard() {
     return (
-        <PageContainer title="Dashboard" description="this is Dashboard">
+        <PageContainer title="Dashboard" description="this is Dashboard" allowedRoles={['LIDER_CELULA']}>
             <Box>
                 <Grid container spacing={3}>
                     <Grid item xs={12} lg={8}>
