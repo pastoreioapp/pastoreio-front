@@ -8,13 +8,18 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
             <Sidebar />
             <Box
-                sx={{ display: "flex", flexDirection: "column", width: "100%" }}
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    width: "100%",
+                }}
             >
                 <Header />
-                <Box>{children}</Box>
+                <Box sx={{ flex: 1 }}>{children}</Box>
             </Box>
         </Box>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 
 type Props = {
     description?: string;
@@ -10,14 +10,12 @@ type Props = {
 
 export default function PageContainer({ title, description, children }: Props) {
     return (
-        <HelmetProvider>
-            <div>
-                <Helmet>
-                    <title>{title}</title>
-                    <meta name="description" content={description} />
-                </Helmet>
-                {children}
-            </div>
-        </HelmetProvider>
+        <div>
+            <Helmet>
+                <title>{title}</title>
+                <meta name="description" content={description} />
+            </Helmet>
+            {children}
+        </div>
     );
 }

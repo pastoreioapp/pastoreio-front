@@ -2,7 +2,7 @@
 
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MembroListItem } from "./membroListItem";
 import { Membro } from "@/features/membros/types";
 
@@ -17,8 +17,12 @@ export function Filtro({
 }) {
     const [search, setSearch] = useState("");
 
-    const filtered = data.filter((membro) =>
-        membro.nome.toLowerCase().includes(search.toLowerCase())
+    const filtered = useMemo(
+        () =>
+            data.filter((membro) =>
+                membro.nome.toLowerCase().includes(search.toLowerCase())
+            ),
+        [data, search]
     );
 
     return (
@@ -30,6 +34,7 @@ export function Filtro({
             }}
         >
             <TextField
+                aria-label="Pesquisar membros"
                 variant="outlined"
                 placeholder="Pesquisar membros"
                 value={search}

@@ -10,7 +10,7 @@ export function InformacaoHeader({
     return (
         <Box
             sx={{
-                marginTop: "32px",
+                mt: "32px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -30,7 +30,7 @@ export function InformacaoHeader({
                 {nome.charAt(0).toUpperCase()}
             </Avatar>
             <Typography
-                sx={{ marginTop: "12px", fontSize: "18px", fontWeight: "500" }}
+                sx={{ mt: "12px", fontSize: "18px", fontWeight: "500" }}
             >
                 {nome}
             </Typography>
