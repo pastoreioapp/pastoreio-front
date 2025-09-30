@@ -15,18 +15,24 @@ import {
     Select,
     FormControl,
     InputLabel,
+    Snackbar,
+    Alert as MuiAlert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
-import { useState } from "react";
+import { useState, ChangeEvent, useRef } from "react";
 import { Usuario } from "@/features/usuarios/types";
 import InputMask from "react-input-mask";
-import { ChangeEvent, useRef } from "react";
+import { AlertColor } from "@mui/material/Alert";
+import { Dispatch, SetStateAction } from "react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 interface UserProfileDialogProps {
     open: boolean;
     onClose: () => void;
     user: Usuario;
+    onAvatarChange?: Dispatch<SetStateAction<string | null>>;
 }
 
 export function getInitials(nome?: string): string {
@@ -38,6 +44,19 @@ export function getInitials(nome?: string): string {
               partes[partes.length - 1][0].toUpperCase();
 }
 
+const getDefaultFormData = (user: Partial<Usuario> = {}) => ({
+    nome: user.nome || "",
+    funcao: user.funcao || "",
+    telefone: user.telefone || "",
+    email: user.email || "",
+    nascimento: user.nascimento || "",
+    endereco: user.endereco || "",
+    estadoCivil: user.estadoCivil || "",
+    conjuge: user.conjuge || "",
+    filhos: user.filhos || "Não",
+    ministerio: user.ministerio || "",
+});
+
 export default function UserProfileDialog({
     open,
     onClose,
@@ -45,47 +64,82 @@ export default function UserProfileDialog({
 }: UserProfileDialogProps) {
     const theme = useTheme();
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [formData, setFormData] = useState({
-        telefone: user.telefone || "",
-        endereco: user.endereco || "",
-        nascimento: user.nascimento || "",
-        estadoCivil: user.estadoCivil || "",
-        filhos: user.filhos || "",
-        ministerio: user.ministerio || "",
-    });
+    const [formData, setFormData] = useState(() => getDefaultFormData(user));
+
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] =
+        useState<AlertColor>("success");
+
+    const showSnackbar = (
+        message: string,
+        severity: AlertColor = "success"
+    ) => {
+        setSnackbarMessage(message);
+        setSnackbarSeverity(severity);
+        setSnackbarOpen(true);
+    };
+
+    const handleSnackbarClose = () => setSnackbarOpen(false);
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatarUrl(reader.result as string);
-            };
+            reader.onloadend = () => setAvatarUrl(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
 
-    const handleChange = (field: string, value: string) => {
-        setFormData({ ...formData, [field]: value });
+    const handleChange = (field: keyof Usuario, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleEditToggle = () => {
+    const handleEditToggle = async () => {
         if (isEditing) {
-            console.log("Salvar dados:", formData);
+            setIsSaving(true);
+            try {
+                await new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Erro ao salvar")), 1500)
+                );
+            } catch {
+                showSnackbar("Algo deu errado ao salvar os dados.", "error");
+            } finally {
+                setIsSaving(false);
+            }
+        } else {
+            setIsEditing(true);
         }
-        setIsEditing(!isEditing);
     };
 
-    const triggerFileInput = () => {
-        fileInputRef.current?.click();
+    const handleClose = () => {
+        setIsEditing(false);
+        setFormData(getDefaultFormData(user));
+        setAvatarUrl(null);
+        onClose();
+    };
+
+    const triggerFileInput = () => fileInputRef.current?.click();
+
+    const commonInputProps = {
+        InputProps: {
+            readOnly: !isEditing,
+            disableUnderline: true,
+            sx: {
+                backgroundColor: "#eee",
+                borderRadius: 2,
+                color: "#000",
+            },
+        },
     };
 
     return (
         <Dialog
             open={open}
-            onClose={onClose}
+            onClose={handleClose}
             fullWidth
             maxWidth="sm"
             sx={{
@@ -98,7 +152,7 @@ export default function UserProfileDialog({
         >
             <IconButton
                 aria-label="close"
-                onClick={onClose}
+                onClick={handleClose}
                 sx={{
                     position: "absolute",
                     right: 12,
@@ -108,7 +162,6 @@ export default function UserProfileDialog({
             >
                 <CloseIcon />
             </IconButton>
-
             <DialogContent sx={{ pt: 5 }}>
                 <Box
                     position="relative"
@@ -148,7 +201,6 @@ export default function UserProfileDialog({
                             >
                                 <EditIcon fontSize="small" />
                             </IconButton>
-
                             <input
                                 type="file"
                                 accept="image/*"
@@ -158,31 +210,50 @@ export default function UserProfileDialog({
                             />
                         </>
                     )}
-
                     <Typography variant="h5" fontWeight={600}>
-                        {user.nome}
+                        {formData.nome}
                     </Typography>
                     <Typography
                         variant="body2"
                         sx={{
                             color: "#fff",
                             backgroundColor: "#173D8A",
-                            px: "8px",
-                            py: "2px",
+                            px: 1,
+                            py: 0.5,
                             borderRadius: 1,
-                            mt: "2px",
+                            mt: 0.5,
                         }}
                     >
                         {user.funcao}
                     </Typography>
                 </Box>
-
                 <Grid container spacing={2}>
+                    {isEditing ? (
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Nome"
+                                variant="filled"
+                                value={formData.nome}
+                                onChange={(e) =>
+                                    handleChange("nome", e.target.value)
+                                }
+                                {...commonInputProps}
+                                sx={{
+                                    "& .MuiInputLabel-root": {
+                                        color: theme.palette.primary.main,
+                                    },
+                                }}
+                            />
+                        </Grid>
+                    ) : null}
+
                     <Grid item xs={12}>
                         <InputMask
                             mask="(99) 99999-9999"
                             value={formData.telefone}
                             onChange={(e) =>
+                                isEditing &&
                                 handleChange("telefone", e.target.value)
                             }
                             disabled={!isEditing}
@@ -194,15 +265,15 @@ export default function UserProfileDialog({
                                     label="Telefone"
                                     variant="filled"
                                     InputProps={{
+                                        ...commonInputProps.InputProps,
                                         readOnly: !isEditing,
-                                        disableUnderline: true,
-                                        sx: {
-                                            backgroundColor: "#eee",
-                                            borderRadius: 2,
-                                            color: "#000",
+                                        disabled: !isEditing,
+                                    }}
+                                    sx={{
+                                        "& .MuiInputLabel-root": {
+                                            color: theme.palette.primary.main,
                                         },
                                     }}
-                                    InputLabelProps={{ sx: { color: "#666" } }}
                                 />
                             )}
                         </InputMask>
@@ -215,43 +286,77 @@ export default function UserProfileDialog({
                             variant="filled"
                             value={formData.endereco}
                             onChange={(e) =>
+                                isEditing &&
                                 handleChange("endereco", e.target.value)
                             }
                             InputProps={{
+                                ...commonInputProps.InputProps,
                                 readOnly: !isEditing,
-                                disableUnderline: true,
-                                sx: {
-                                    backgroundColor: "#eee",
-                                    borderRadius: 2,
-                                    color: "#000",
+                                disabled: !isEditing,
+                            }}
+                            sx={{
+                                "& .MuiInputLabel-root": {
+                                    color: theme.palette.primary.main,
                                 },
                             }}
-                            InputLabelProps={{ sx: { color: "#666" } }}
                         />
                     </Grid>
 
                     <Grid item xs={12}>
-                        <TextField
-                            fullWidth
+                        <DatePicker
                             label="Data de Nascimento"
-                            type="date"
-                            variant="filled"
-                            value={formData.nascimento}
-                            onChange={(e) =>
-                                handleChange("nascimento", e.target.value)
+                            format="DD/MM/YYYY"
+                            value={
+                                formData.nascimento
+                                    ? dayjs(formData.nascimento)
+                                    : null
                             }
-                            InputProps={{
-                                readOnly: !isEditing,
-                                disableUnderline: true,
-                                sx: {
-                                    backgroundColor: "#eee",
-                                    borderRadius: 2,
-                                    color: "#000",
+                            onChange={(date: Dayjs | null) =>
+                                handleChange(
+                                    "nascimento",
+                                    date && date.isValid()
+                                        ? date.toDate().toISOString()
+                                        : ""
+                                )
+                            }
+                            readOnly={!isEditing}
+                            slots={
+                                !isEditing
+                                    ? { openPickerIcon: () => null }
+                                    : undefined
+                            }
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    variant: "filled",
+                                    disabled: !isEditing,
+                                    InputProps: {
+                                        readOnly: !isEditing,
+                                        disableUnderline: true,
+                                        sx: {
+                                            backgroundColor: "#eee",
+                                            borderRadius: 2,
+                                            color: "#000",
+                                        },
+                                    },
+                                    InputLabelProps: {
+                                        shrink: true,
+                                    },
+                                    sx: {
+                                        "& label": {
+                                            color:
+                                                theme.palette.primary.main +
+                                                " !important",
+                                        },
+                                        "& .MuiInputBase-input.Mui-disabled": {
+                                            WebkitTextFillColor:
+                                                theme.palette.text.disabled,
+                                        },
+                                        "& .Mui-disabled": {
+                                            color: theme.palette.text.disabled,
+                                        },
+                                    },
                                 },
-                            }}
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: "#666" },
                             }}
                         />
                     </Grid>
@@ -261,12 +366,11 @@ export default function UserProfileDialog({
                             <FormControl
                                 fullWidth
                                 variant="filled"
-                                sx={{
-                                    backgroundColor: "#eee",
-                                    borderRadius: 2,
-                                }}
+                                sx={{ borderRadius: 2 }}
                             >
-                                <InputLabel sx={{ color: "#666" }}>
+                                <InputLabel
+                                    sx={{ color: theme.palette.primary.main }}
+                                >
                                     Estado Civil
                                 </InputLabel>
                                 <Select
@@ -279,14 +383,16 @@ export default function UserProfileDialog({
                                     }
                                     disableUnderline
                                 >
-                                    <MenuItem value="Solteiro">
-                                        Solteiro
-                                    </MenuItem>
-                                    <MenuItem value="Casado">Casado</MenuItem>
-                                    <MenuItem value="Divorciado">
-                                        Divorciado
-                                    </MenuItem>
-                                    <MenuItem value="Viúvo">Viúvo</MenuItem>
+                                    {[
+                                        {key: "Solteiro", name: "Solteiro(a)"},
+                                        {key: "Casado", name: "Casado(a)"},
+                                        {key: "Divorciado", name: "Divorciado(a)"},
+                                        {key: "Viúvo", name: "Viúvo(a)"}
+                                    ].map((item) => (
+                                        <MenuItem key={item.key} value={item.name}>
+                                            {item.name}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         ) : (
@@ -294,17 +400,23 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Estado Civil"
                                 variant="filled"
+                                disabled
                                 value={formData.estadoCivil}
-                                InputProps={{
-                                    readOnly: true,
-                                    disableUnderline: true,
-                                    sx: {
-                                        backgroundColor: "#eee",
-                                        borderRadius: 2,
-                                        color: "#000",
+                                {...commonInputProps}
+                                sx={{
+                                    "& label": {
+                                        color:
+                                            theme.palette.primary.main +
+                                            " !important",
+                                    },
+                                    "& .MuiInputBase-input.Mui-disabled": {
+                                        WebkitTextFillColor:
+                                            theme.palette.text.disabled,
+                                    },
+                                    "& .Mui-disabled": {
+                                        color: theme.palette.text.disabled,
                                     },
                                 }}
-                                InputLabelProps={{ sx: { color: "#666" } }}
                             />
                         )}
                     </Grid>
@@ -314,12 +426,11 @@ export default function UserProfileDialog({
                             <FormControl
                                 fullWidth
                                 variant="filled"
-                                sx={{
-                                    backgroundColor: "#eee",
-                                    borderRadius: 2,
-                                }}
+                                sx={{ borderRadius: 2 }}
                             >
-                                <InputLabel sx={{ color: "#666" }}>
+                                <InputLabel
+                                    sx={{ color: theme.palette.primary.main }}
+                                >
                                     Filhos
                                 </InputLabel>
                                 <Select
@@ -329,8 +440,11 @@ export default function UserProfileDialog({
                                     }
                                     disableUnderline
                                 >
-                                    <MenuItem value="Sim">Sim</MenuItem>
-                                    <MenuItem value="Não">Não</MenuItem>
+                                    {["Sim", "Não"].map((item) => (
+                                        <MenuItem key={item} value={item}>
+                                            {item}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         ) : (
@@ -338,17 +452,23 @@ export default function UserProfileDialog({
                                 fullWidth
                                 label="Filhos"
                                 variant="filled"
+                                disabled
                                 value={formData.filhos}
-                                InputProps={{
-                                    readOnly: true,
-                                    disableUnderline: true,
-                                    sx: {
-                                        backgroundColor: "#eee",
-                                        borderRadius: 2,
-                                        color: "#000",
+                                {...commonInputProps}
+                                sx={{
+                                    "& label": {
+                                        color:
+                                            theme.palette.primary.main +
+                                            " !important",
+                                    },
+                                    "& .MuiInputBase-input.Mui-disabled": {
+                                        WebkitTextFillColor:
+                                            theme.palette.text.disabled,
+                                    },
+                                    "& .Mui-disabled": {
+                                        color: theme.palette.text.disabled,
                                     },
                                 }}
-                                InputLabelProps={{ sx: { color: "#666" } }}
                             />
                         )}
                     </Grid>
@@ -358,26 +478,58 @@ export default function UserProfileDialog({
                             fullWidth
                             label="Ministério(s)"
                             variant="filled"
+                            disabled={true}
                             value={formData.ministerio}
                             InputProps={{
-                                readOnly: true,
+                                readOnly: !isEditing,
                                 disableUnderline: true,
                                 sx: {
-                                    backgroundColor: "#eee",
                                     borderRadius: 2,
-                                    color: "#000",
                                 },
                             }}
-                            InputLabelProps={{ sx: { color: "#666" } }}
+                            sx={{
+                                "& label": {
+                                    color:
+                                        theme.palette.primary.main +
+                                        " !important",
+                                },
+                                "& .MuiInputBase-input.Mui-disabled": {
+                                    WebkitTextFillColor:
+                                        theme.palette.text.disabled,
+                                },
+                                "& .Mui-disabled": {
+                                    color: theme.palette.text.disabled,
+                                },
+                            }}
                         />
                     </Grid>
                 </Grid>
-
                 <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>
+                    {isEditing ? (
+                        <Button
+                            onClick={() => {
+                                setIsEditing(false);
+                                setFormData(getDefaultFormData(user));
+                                setAvatarUrl(null);
+                            }}
+                            variant={"outlined"}
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: 500,
+                                borderRadius: 2,
+                                px: 4,
+                                mb: 1,
+                                minWidth: 100,
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                    ) : null}
                     <Button
                         variant={isEditing ? "contained" : "outlined"}
                         color="primary"
                         onClick={handleEditToggle}
+                        disabled={isSaving}
                         sx={{
                             textTransform: "none",
                             fontWeight: 500,
@@ -387,10 +539,28 @@ export default function UserProfileDialog({
                             minWidth: 100,
                         }}
                     >
-                        {isEditing ? "Salvar" : "Editar"}
+                        {isSaving
+                            ? "Salvando..."
+                            : isEditing
+                            ? "Salvar"
+                            : "Editar"}
                     </Button>
                 </Box>
             </DialogContent>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <MuiAlert
+                    onClose={handleSnackbarClose}
+                    severity={snackbarSeverity}
+                    sx={{ width: "100%" }}
+                >
+                    {snackbarMessage}
+                </MuiAlert>
+            </Snackbar>
         </Dialog>
     );
 }

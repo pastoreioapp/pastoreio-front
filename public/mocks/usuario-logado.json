@@ -1,57 +1,11 @@
-[
-    {
-        "nome": "Ana Silva",
-        "funcao": "Líder",
-        "telefone": "(11) 91234-5678",
-        "email": "ana.silva@email.com",
-        "nascimento": "1985-07-12",
-        "endereco": "Rua das Flores, 123, São Paulo, SP",
-        "estadoCivil": "Casada",
-        "filhos": "Sim",
-        "ministerio": "Louvor"
-    },
-    {
-        "nome": "Bruno Costa",
-        "funcao": "Membro",
-        "telefone": "(21) 99876-5432",
-        "email": "bruno.costa@email.com",
-        "nascimento": "1990-01-20",
-        "endereco": "Av. Brasil, 987, Rio de Janeiro, RJ",
-        "estadoCivil": "Solteiro",
-        "filhos": "Não",
-        "ministerio": "Som"
-    },
-    {
-        "nome": "Carla Rodrigues",
-        "funcao": "Auxiliar de célula",
-        "telefone": "(31) 98765-4321",
-        "email": "carla.rodrigues@email.com",
-        "nascimento": "1978-11-30",
-        "endereco": "Rua das Palmeiras, 456, Belo Horizonte, MG",
-        "estadoCivil": "Divorciada",
-        "filhos": "Sim",
-        "ministerio": "Atmosfera"
-    },
-    {
-        "nome": "Diego Martins",
-        "funcao": "Diácono",
-        "telefone": "(41) 93456-7890",
-        "email": "diego.martins@email.com",
-        "nascimento": "1982-03-15",
-        "endereco": "Rua das Acácias, 210, Curitiba, PR",
-        "estadoCivil": "Casado",
-        "filhos": "Sim",
-        "ministerio": "Mídia"
-    },
-    {
-        "nome": "Eliana Souza",
-        "funcao": "Anfitriã",
-        "telefone": "(51) 91222-3344",
-        "email": "eliana.souza@email.com",
-        "nascimento": "1995-09-25",
-        "endereco": "Av. Central, 300, Porto Alegre, RS",
-        "estadoCivil": "Solteira",
-        "filhos": "Não",
-        "ministerio": "Atmosfera"
-    }
-]
+{
+    "nome": "Ana Silva",
+    "funcao": "Líder",
+    "telefone": "(11) 91234-5678",
+    "email": "ana.silva@email.com",
+    "nascimento": "1985-07-12",
+    "endereco": "Rua das Flores, 123, São Paulo, SP",
+    "estadoCivil": "Casado(a)",
+    "filhos": "Sim",
+    "ministerio": "Louvor"
+}
