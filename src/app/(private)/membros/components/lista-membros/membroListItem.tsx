@@ -3,8 +3,8 @@ import {
     Avatar,
     Box,
     Divider,
-    ListItem,
     ListItemAvatar,
+    ListItemButton,
     Typography,
 } from "@mui/material";
 
@@ -18,29 +18,34 @@ export function MembroListItem({
     onClick: () => void;
 }) {
     return (
-        <ListItem
+        <ListItemButton
             onClick={onClick}
+            selected={selected}
             sx={{
                 border: "1px solid #ECECEC",
                 bgcolor: selected ? "#DCE8E7" : "#fff",
                 borderRadius: "7px",
-                marginBottom: "15px",
-                paddingY: "15px",
-                paddingX: "15.32px",
-                display: "flex",
+                mb: "15px",
+                py: "15px",
+                px: "15.32px",
                 gap: "17px",
                 width: "330px",
                 height: "90px",
                 transition: "background-color 0.2s ease-in-out",
-                cursor: "pointer",
                 "&:hover": {
                     backgroundColor: "#DCE8E7",
+                },
+                "&.Mui-selected": {
+                    bgcolor: "#DCE8E7",
+                    "&:hover": {
+                        bgcolor: "#DCE8E7",
+                    },
                 },
             }}
         >
             <ListItemAvatar>
                 <Avatar sx={{ width: 60, height: 60 }}>
-                    {membro.nome?.charAt(0).toUpperCase()}
+                    {membro.nome ? membro.nome.charAt(0).toUpperCase() : "?"}
                 </Avatar>
             </ListItemAvatar>
             <Box flex={1}>
@@ -52,6 +57,6 @@ export function MembroListItem({
                     {membro.funcao}
                 </Typography>
             </Box>
-        </ListItem>
+        </ListItemButton>
     );
 }

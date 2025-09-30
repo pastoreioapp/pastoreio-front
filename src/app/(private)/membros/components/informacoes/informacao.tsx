@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { IconPencil } from "@tabler/icons-react";
+import { Membro } from "@/features/membros/types";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
-import { Membro } from "@/features/membros/types";
 import { EtapasTabs } from "./etapasTabs";
 
 const MensagemNenhumMembroSelecionado = () => (
