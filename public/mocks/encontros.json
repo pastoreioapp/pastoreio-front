@@ -1,0 +1,87 @@
+[
+    {
+        "id": "01",
+        "tema": "A Importância da Comunhão",
+        "data": "2025-09-01",
+        "anfitriao": "Carlos Souza",
+        "numeroParticipantes": 15,
+        "preletor": "Ana Oliveira",
+        "supervisao": "não",
+        "conversoes": "sim",
+        "frequencia": [
+            { "nome": "João Gabriel", "situacao": "presente" },
+            { "nome": "Maria Silva", "situacao": "presente" },
+            { "nome": "Pedro Lima", "situacao": "faltou" },
+            { "nome": "Juliana Costa", "situacao": "justificado" },
+            { "nome": "Roberto Martins (convidado)", "situacao": "presente" }
+        ]
+    },
+    {
+        "id": "02",
+        "tema": "Servindo uns aos Outros",
+        "data": "2025-09-08",
+        "anfitriao": "Juliana Costa",
+        "numeroParticipantes": 12,
+        "preletor": "Carlos Souza",
+        "supervisao": "sim",
+        "conversoes": "não",
+        "frequencia": [
+            { "nome": "Ana Oliveira", "situacao": "presente" },
+            { "nome": "Maria Silva", "situacao": "faltou" },
+            { "nome": "Pedro Lima", "situacao": "presente" },
+            { "nome": "Fernanda Alves (convidada)", "situacao": "presente" },
+            { "nome": "Roberto Martins (convidado)", "situacao": "justificado" }
+        ]
+    },
+    {
+        "id": "03",
+        "tema": "O Poder da Oração",
+        "data": "2025-09-15",
+        "anfitriao": "Maria Silva",
+        "numeroParticipantes": 18,
+        "preletor": "João Gabriel",
+        "supervisao": "sim",
+        "conversoes": "sim",
+        "frequencia": [
+            { "nome": "Carlos Souza", "situacao": "presente" },
+            { "nome": "Pedro Lima", "situacao": "presente" },
+            { "nome": "Ana Oliveira", "situacao": "justificado" },
+            { "nome": "Juliana Costa", "situacao": "faltou" },
+            { "nome": "Ricardo Pereira (convidado)", "situacao": "presente" }
+        ]
+    },
+    {
+        "id": "04",
+        "tema": "Vivendo em Amor",
+        "data": "2025-09-22",
+        "anfitriao": "Pedro Lima",
+        "numeroParticipantes": 14,
+        "preletor": "Juliana Costa",
+        "supervisao": "não",
+        "conversoes": "não",
+        "frequencia": [
+            { "nome": "Maria Silva", "situacao": "presente" },
+            { "nome": "João Gabriel", "situacao": "presente" },
+            { "nome": "Ana Oliveira", "situacao": "presente" },
+            { "nome": "Carlos Souza", "situacao": "faltou" },
+            { "nome": "Fernanda Alves (convidada)", "situacao": "justificado" }
+        ]
+    },
+    {
+        "id": "05",
+        "tema": "Firmados na Palavra",
+        "data": "2025-09-29",
+        "anfitriao": "Ana Oliveira",
+        "numeroParticipantes": 20,
+        "preletor": "Carlos Souza",
+        "supervisao": "sim",
+        "conversoes": "sim",
+        "frequencia": [
+            { "nome": "Pedro Lima", "situacao": "presente" },
+            { "nome": "Juliana Costa", "situacao": "presente" },
+            { "nome": "Maria Silva", "situacao": "presente" },
+            { "nome": "João Gabriel", "situacao": "justificado" },
+            { "nome": "Ricardo Pereira (convidado)", "situacao": "faltou" }
+        ]
+    }
+]
