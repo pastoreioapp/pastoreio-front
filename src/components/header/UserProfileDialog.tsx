@@ -139,7 +139,7 @@ export default function UserProfileDialog({
 
     function getMainUserRole(perfis: string[]): string {
         // FIXME: implement logic to choose the right role
-        return perfis[0];
+        return perfis && perfis[0];
     }
 
     return (

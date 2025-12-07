@@ -19,7 +19,11 @@ import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
 
 export default function AuthLogin() {
     const navigate = useRouter();
-    const appAuthentication = useAppAuthentication();
+    const appAuthentication = useAppAuthentication({
+        onLoginSuccess: () => {
+            navigate.push("/dashboard");
+        }
+    });
 
     const [showPassword, setShowPassword] = useState(false);
     const [userLogin, setUserLogin] = useState<string>();
@@ -28,11 +32,11 @@ export default function AuthLogin() {
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
+    
     const handleGoogleLoginButtonClick = () => {
-        appAuthentication.useRunGoogleUserLogin(() => {
-            navigate.push("/dashboard");
-        });
+        appAuthentication.runGoogleLogin();
     };
+
     const handleLoginButtonClick = () => {
         if(userLogin && userPassword) {
             const user = {

@@ -6,42 +6,39 @@ import { LoggedUserState, setLoggedUser } from "@/store/features/loggedUserSlice
 import { setUserSession, UserSessionState } from "@/store/features/userSessionSlice";
 import { RootState } from "@/store";
 
-export function useAppAuthentication() {
+export function useAppAuthentication({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
     const dispatch = useDispatch();
     const userSession = useSelector<RootState>(data => data.userSession) as UserSessionState;
     const loggedUser = useSelector<RootState>(data => data.loggedUser) as LoggedUserState;
 
-    // TODO: use useCallback?
-    const useRunGoogleUserLogin = (callback: Function): void => {
-        // TODO: see how fix this hook lint rule
-        useGoogleLogin({
-            flow: "auth-code",
-            scope : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile email profile openid",
-            onSuccess: async tokenResponse => {
-                const headers = { 'Content-Type': 'text/plain' };
-                const authResponse = await axios.post<AuthResponse>(
-                    'http://localhost:8080/api/auth/code/google',
-                    tokenResponse.code,
-                    { headers }
-                );
-                // TODO: decode token and get expiration
-                const tokenExpirationDate = new Date();
-                dispatch(setUserSession({
-                    accessToken: authResponse.data.access_token,
-                    expiresIn: tokenExpirationDate
-                }))
+    const runGoogleLogin = useGoogleLogin({
+        flow: "auth-code",
+        scope : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile email profile openid",
+        onSuccess: async tokenResponse => {
+            const headers = { 'Content-Type': 'text/plain' };
+            // TODO: standardize the endpoints
+            const authResponse = await axios.post<AuthResponse>(
+                'http://localhost:8080/api/auth/code/google',
+                tokenResponse.code,
+                { headers }
+            );
+            // TODO: decode token and get expiration
+            const tokenExpirationDate = new Date();
+            dispatch(setUserSession({
+                accessToken: authResponse.data.access_token,
+                expiresIn: tokenExpirationDate.getTime()
+            }))
 
-                const userResponse = await axios.get<LoggedUserResponse>(
-                    'http://localhost:8080/api/usuarios/me',
-                    { headers: {
-                        Authorization: authResponse.data.access_token
-                    }}
-                );
-                dispatch(setLoggedUser(userResponse.data));
-                callback();
-            },
-        })
-    };
+            const userResponse = await axios.get<LoggedUserResponse>(
+                'http://localhost:8080/api/usuarios/me',
+                { headers: {
+                    Authorization: `Bearer ${authResponse.data.access_token}`
+                }}
+            );
+            dispatch(setLoggedUser(userResponse.data));
+            onLoginSuccess?.();
+        },
+    });
 
     const runPasswordUserLogin = async (user: UserLogin): Promise<void> => {
         const authRequestBody = {
@@ -62,7 +59,7 @@ export function useAppAuthentication() {
         const tokenExpirationDate = new Date();
         dispatch(setUserSession({
             accessToken: authResponse.data.access_token,
-            expiresIn: tokenExpirationDate
+            expiresIn: tokenExpirationDate.getTime()
         }))
 
         const userResponse = await axios.get<LoggedUserResponse>(
@@ -86,16 +83,16 @@ export function useAppAuthentication() {
         const tokenExpirationDate = new Date();
         dispatch(setUserSession({
             accessToken: authResponse.data.access_token,
-            expiresIn: tokenExpirationDate
+            expiresIn: tokenExpirationDate.getTime()
         }))
     };
 
     const userIsAuthenticated = (): boolean => {
-        return !loggedUser || !loggedUser.id || !userSession || !userSession.accessToken;
+        return !!loggedUser && !!loggedUser.id && !!userSession && !!userSession.accessToken;
     }
 
     return {
-        useRunGoogleUserLogin,
+        runGoogleLogin,
         runPasswordUserLogin,
         refreshAccessToken,
         userIsAuthenticated

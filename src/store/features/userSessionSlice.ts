@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export type UserSessionState = {
     accessToken: string,
-    expiresIn: Date
+    expiresIn: number
 }
 
 const userSessionSlice = createSlice({
