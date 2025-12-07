@@ -1,11 +1,4 @@
-import {
-    Box,
-    Divider,
-    Grid,
-    Input,
-    InputLabel,
-    Typography,
-} from "@mui/material";
+import { Box, Divider, Input, InputLabel, Typography } from "@mui/material";
 
 export function InformacoesGroup({
     titulo,
@@ -17,7 +10,7 @@ export function InformacoesGroup({
     return (
         <Box
             sx={{
-                marginTop: "32px",
+                mt: "32px",
                 width: "100%",
             }}
         >

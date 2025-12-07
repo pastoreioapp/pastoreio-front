@@ -1,81 +1,55 @@
 import { Card, CardContent, Typography, Stack, Box } from "@mui/material";
+import { ReactNode } from "react";
 
 type Props = {
-    title?: string;
-    subtitle?: string;
-    action?: JSX.Element | any;
-    footer?: JSX.Element;
-    cardheading?: string | JSX.Element;
-    headtitle?: string | JSX.Element;
-    headsubtitle?: string | JSX.Element;
-    children?: JSX.Element;
-    middlecontent?: string | JSX.Element;
+    headerTitle?: ReactNode;
+    headerSubtitle?: ReactNode;
+    action?: ReactNode;
+    children?: ReactNode;
+    footer?: ReactNode;
 };
 
 export default function DashboardCard({
-    title,
-    subtitle,
-    children,
+    headerTitle,
+    headerSubtitle,
     action,
+    children,
     footer,
-    cardheading,
-    headtitle,
-    headsubtitle,
-    middlecontent,
 }: Props) {
     return (
-        <Card
-            sx={{ paddingX: "50px", paddingY: 0, margim: 0 }}
-            elevation={0}
-            variant={undefined}
-        >
-            {cardheading ? (
-                <CardContent>
-                    <Typography variant="h5">{headtitle}</Typography>
-                    <Typography variant="subtitle2" color="textSecondary">
-                        {headsubtitle}
-                    </Typography>
-                </CardContent>
-            ) : (
-                <CardContent sx={{ padding: 0, margim: 0 }}>
-                    {title ? (
-                        <Stack
-                            direction="row"
-                            spacing={2}
-                            justifyContent="space-between"
-                            alignItems={"center"}
-                            mb={3}
-                        >
-                            <Box>
-                                {title ? (
-                                    <Typography variant="h5">
-                                        {title}
-                                    </Typography>
-                                ) : (
-                                    ""
-                                )}
-
-                                {subtitle ? (
-                                    <Typography
-                                        variant="subtitle2"
-                                        color="textSecondary"
-                                    >
-                                        {subtitle}
-                                    </Typography>
-                                ) : (
-                                    ""
-                                )}
-                            </Box>
-                            {action}
-                        </Stack>
-                    ) : null}
-
-                    {children}
+        <Card sx={{ px: 5, py: 0, m: 0 }} elevation={0}>
+            {(headerTitle || headerSubtitle || action) && (
+                <CardContent sx={{ px: 0, py: 2 }}>
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mb={3}
+                    >
+                        <Box>
+                            {headerTitle && (
+                                <Typography variant="h5">
+                                    {headerTitle}
+                                </Typography>
+                            )}
+                            {headerSubtitle && (
+                                <Typography
+                                    variant="subtitle2"
+                                    color="text.secondary"
+                                >
+                                    {headerSubtitle}
+                                </Typography>
+                            )}
+                        </Box>
+                        {action}
+                    </Stack>
                 </CardContent>
             )}
 
-            {middlecontent}
-            {footer}
+            <CardContent sx={{ px: 0, py: 0 }}>{children}</CardContent>
+
+            {footer && <Box sx={{ mt: 2 }}>{footer}</Box>}
         </Card>
     );
 }
