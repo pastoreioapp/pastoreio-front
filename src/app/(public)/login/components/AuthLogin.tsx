@@ -15,7 +15,7 @@ import {
 import CustomTextField from "@/components/ui/CustomTextField";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { useAppAuthentication } from "@/features/auth/auth.service";
+import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
 
 export default function AuthLogin() {
     const navigate = useRouter();
@@ -47,42 +47,9 @@ export default function AuthLogin() {
     };
 
     return (<>
-        <Typography variant="h3" textAlign="center" mb={1}>
+        <Typography variant="h3" textAlign="center" mb={3}>
             Login
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, my: 3 }}>
-            <IconButton onClick={handleGoogleLoginButtonClick}>
-                <Image
-                    src="/images/icons/icon-google.svg"
-                    alt="Google Login"
-                    width={24}
-                    height={24}
-                    unoptimized
-                />
-            </IconButton>
-            <IconButton>
-            <Link href={"#"}>
-                <Image
-                    src="/images/icons/icon-facebook.svg"
-                    alt="Facebook Login"
-                    width={24}
-                    height={24}
-                    unoptimized
-                />
-            </Link>
-            </IconButton>
-            <IconButton>
-            <Link href={"#"}>
-                <Image
-                    src="/images/icons/icon-apple.svg"
-                    alt="Apple Login"
-                    width={22}
-                    height={22}
-                    unoptimized
-                />
-            </Link>
-            </IconButton>
-        </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", my: 3 }}>
             <Divider sx={{ flexGrow: 1, bgcolor: "#173D8A", height: 2 }}/>
@@ -150,35 +117,60 @@ export default function AuthLogin() {
             <Box sx={{ width: "100%", textAlign: "left", mt: 2, mb: 5 }}>
             <Stack direction="row" justifyContent="right" spacing={1} mt={3}>
                 <Typography variant="body1" fontWeight="400">
-                Esqueceu a Senha ?
+                    Esqueceu a Senha ?
                 </Typography>
                 <Typography
-                variant="body1"
-                component={Link}
-                href="/recover"
-                fontWeight="700"
-                sx={{
-                    textDecoration: "underline",
-                    color: "#173D8A",
-                }}
+                    variant="body1"
+                    component={Link}
+                    href="/recover"
+                    fontWeight="700"
+                    sx={{ textDecoration: "underline", color: "#173D8A" }}
                 >
                 Recuperar
                 </Typography>
             </Stack>
             </Box>
             <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            fullWidth
-            onClick={handleLoginButtonClick}
-            sx={{
-                borderRadius: "50px",
-                height: "50px",
-            }}
+                color="primary"
+                variant="contained"
+                size="large"
+                fullWidth
+                onClick={handleLoginButtonClick}
+                sx={{ borderRadius: "50px", height: "50px" }}
             >
-            Login
+                Login
             </Button>
+            
+            <Button fullWidth
+                color="primary"
+                variant="outlined"
+                size="large"
+                onClick={handleGoogleLoginButtonClick}
+                sx={{ borderRadius: "50px", height: "50px", mt: 2 }}
+                InputProps={{ endAdornment: (
+                    <InputAdornment position="start">
+                        <IconButton edge="start" sx={{ color: "#173D8A" }} >
+                            <Image
+                                src="/images/icons/icon-google.svg"
+                                alt="Google Login"
+                                width={24}
+                                height={24}
+                                unoptimized/>
+                        </IconButton>
+                    </InputAdornment>
+                )}}
+            >
+                Entrar com o Google
+            </Button>
+            
+            <IconButton edge="start" sx={{ color: "#173D8A" }}>
+                <Image
+                    src="/images/icons/icon-google.svg"
+                    alt="Google Login"
+                    width={24}
+                    height={24}
+                    unoptimized/>
+            </IconButton>
         </Box>
         <Stack
             direction="row"

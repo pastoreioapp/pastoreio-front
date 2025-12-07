@@ -27,7 +27,7 @@ export default function AuthRegister() {
   return (
     <>
       <Typography variant="h3" textAlign="center" mb={1}>
-        Login
+        Criar conta
       </Typography>
 
       <Box

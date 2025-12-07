@@ -2,7 +2,7 @@
 
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
-import AuthRegister from "../components/AuthRegister";
+import AuthRegister from "./components/AuthRegister";
 import LeftContent from "../components/LeftContent";
 
 export default function RegisterPage() {

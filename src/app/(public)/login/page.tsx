@@ -1,6 +1,6 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
-import AuthLogin from "../components/AuthLogin";
+import AuthLogin from "./components/AuthLogin";
 import LeftContent from "../components/LeftContent";
 
 export default function LoginPage() {
