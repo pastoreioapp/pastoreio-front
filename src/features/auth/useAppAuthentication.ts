@@ -69,6 +69,7 @@ export function useAppAuthentication({ onLoginSuccess }: { onLoginSuccess?: () =
             }}
         );
         dispatch(setLoggedUser(userResponse.data));
+        onLoginSuccess?.();
     };
 
     const refreshAccessToken = async (): Promise<void> => {

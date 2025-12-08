@@ -3,7 +3,7 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
 import AuthRegister from "./components/AuthRegister";
-import LeftContent from "../components/LeftContent";
+import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function RegisterPage() {
   return (
@@ -31,7 +31,7 @@ export default function RegisterPage() {
             transition: "all 0.3s ease",
           }}
         >
-          <LeftContent />
+          <PainelApresentacao />
         </Box>
 
         <Box

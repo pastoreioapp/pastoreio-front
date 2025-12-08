@@ -1,7 +1,7 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
-import AuthLogin from "./components/AuthLogin";
-import LeftContent from "../components/LeftContent";
+import PainelLogin from "./components/PainelLogin";
+import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function LoginPage() {
   return (
@@ -29,7 +29,7 @@ export default function LoginPage() {
             transition: "all 0.3s ease",
           }}
         >
-          <LeftContent />
+          <PainelApresentacao />
         </Box>
 
         <Box
@@ -48,8 +48,7 @@ export default function LoginPage() {
           <Card
             elevation={9}
             sx={{
-              p: { xs: 3, sm: 6 },
-              py: { xs: 5, sm: 6 },
+              p: { xs: 5, sm: 7 },
               width: "100%",
               maxWidth: "550px",
               backgroundColor: "#EFF4FF",
@@ -57,7 +56,7 @@ export default function LoginPage() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <AuthLogin />
+            <PainelLogin />
           </Card>
         </Box>
       </Box>

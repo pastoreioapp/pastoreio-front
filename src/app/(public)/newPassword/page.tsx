@@ -1,7 +1,7 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
 import NewPassword from "../components/NewPassword";
-import LeftContent from "../components/LeftContent";
+import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function PageNewPassword() {
   return (
@@ -32,7 +32,7 @@ export default function PageNewPassword() {
             transition: "all 0.3s ease",
           }}
         >
-          <LeftContent />
+          <PainelApresentacao />
         </Box>
 
         <Box
