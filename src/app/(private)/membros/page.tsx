@@ -9,6 +9,7 @@ import { useMembrosSelecionados } from "./hooks/useMembroSelecionado";
 import { LoadingBox } from "./components/loading/LoadingBox";
 import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
+import { CELULA_ROLES } from "@/features/auth/types";
 
 export default function Membros() {
     const {
@@ -23,7 +24,7 @@ export default function Membros() {
     if (erro) return <ErrorBox message={erro} />;
 
     return (
-        <PageContainer title="Membros" description="Página Membros" allowedRoles={['LIDER_CELULA']}>
+        <PageContainer title="Membros" description="Página Membros" allowedRoles={CELULA_ROLES}>
             <DashboardCard>
                 <Box>
                     <Box sx={{ display: "flex", justifyContent: "end" }}>

@@ -6,10 +6,11 @@ import RecentTransactions from "@/app/(private)/dashboard/components/RecentTrans
 import SalesOverview from "@/app/(private)/dashboard/components/SalesOverview";
 import YearlyBreakup from "@/app/(private)/dashboard/components/YearlyBreakup";
 import { Grid, Box } from "@mui/material";
+import { CELULA_ROLES } from "@/features/auth/types";
 
 export default function Dashboard() {
     return (
-        <PageContainer title="Dashboard" description="this is Dashboard" allowedRoles={['LIDER_CELULA']}>
+        <PageContainer title="Dashboard" description="this is Dashboard" allowedRoles={CELULA_ROLES}>
             <Box>
                 <Grid container spacing={3}>
                     <Grid item xs={12} lg={8}>
