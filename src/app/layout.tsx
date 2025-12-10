@@ -7,6 +7,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/pt";
 import { HelmetProvider } from "react-helmet-async";
+import { SnackbarProvider } from "notistack";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         </HelmetProvider>
                     </LocalizationProvider>
                 </GoogleOAuthProvider>
+                <SnackbarProvider />
             </body>
         </html>
     );

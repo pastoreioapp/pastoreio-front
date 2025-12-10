@@ -11,18 +11,15 @@ import {
   InputAdornment,
   Button,
   Stack,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import CustomTextField from "@/components/ui/CustomTextField";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
 import { AxiosError } from "axios";
+import { enqueueSnackbar } from "notistack";
 
 export default function PainelLogin() {
-    const [toastOpen, setToastOpen] = useState(false);
-    const [toastMsg, setToastMsg] = useState('');
     const navigate = useRouter();
     const appAuthentication = useAppAuthentication({
         onLoginSuccess: () => {
@@ -50,11 +47,10 @@ export default function PainelLogin() {
                 password: userPassword
             }).catch((err: AxiosError) => {
                 if(err.status == 401) {
-                    setToastMsg('Usuário e/ou senha incorreto(s)');
+                    enqueueSnackbar('Usuário e/ou senha incorreto(s)', { variant: "error" });
                 } else {
-                    setToastMsg('Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores');
+                    enqueueSnackbar('Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores', { variant: "error" });
                 }
-                setToastOpen(true);
             });
         }
     };
@@ -202,16 +198,5 @@ export default function PainelLogin() {
                 Cadastre-se
             </Typography>
         </Stack>
-
-        <Snackbar
-            open={toastOpen}
-            autoHideDuration={3000}
-            onClose={() => setToastOpen(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-            <Alert severity="error" variant="filled">
-                {toastMsg}
-            </Alert>
-        </Snackbar>
     </>);
 }
