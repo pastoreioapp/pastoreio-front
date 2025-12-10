@@ -2,7 +2,7 @@
 
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
-import AuthRegister from "./components/AuthRegister";
+import PainelRegistro from "./components/PainelRegistro";
 import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function RegisterPage() {
@@ -59,7 +59,7 @@ export default function RegisterPage() {
               my: { xs: 4, lg: 0 },
             }}
           >
-            <AuthRegister />
+            <PainelRegistro />
           </Card>
         </Box>
       </Box>
