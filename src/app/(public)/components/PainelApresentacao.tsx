@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Box } from "@mui/material";
 import ImageCarousel from "./ImageCarousel";
 
-export default function LeftContent() {
+export default function PainelApresentacao() {
   return (
     <section>
       {/* Logo */}

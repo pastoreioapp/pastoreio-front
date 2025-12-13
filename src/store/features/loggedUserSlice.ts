@@ -1,11 +1,7 @@
+import { LoggedUserResponse } from "@/features/auth/types";
 import { createSlice } from "@reduxjs/toolkit";
 
-export type LoggedUserState = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-}
+export interface LoggedUserState extends LoggedUserResponse { }
 
 const loggedUserSlice = createSlice({
     name: "loggedUser",

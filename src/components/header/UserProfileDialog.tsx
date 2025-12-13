@@ -27,11 +27,12 @@ import { AlertColor } from "@mui/material/Alert";
 import { Dispatch, SetStateAction } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
+import { LoggedUserState } from "@/store/features/loggedUserSlice";
 
 interface UserProfileDialogProps {
     open: boolean;
     onClose: () => void;
-    user: Usuario;
+    user: LoggedUserState;
     onAvatarChange?: Dispatch<SetStateAction<string | null>>;
 }
 
@@ -136,6 +137,11 @@ export default function UserProfileDialog({
         },
     };
 
+    function getMainUserRole(perfis: string[]): string {
+        // FIXME: implement logic to choose the right role
+        return perfis && perfis[0];
+    }
+
     return (
         <Dialog
             open={open}
@@ -224,7 +230,7 @@ export default function UserProfileDialog({
                             mt: 0.5,
                         }}
                     >
-                        {user.funcao}
+                        {getMainUserRole(user.perfis)}
                     </Typography>
                 </Box>
                 <Grid container spacing={2}>

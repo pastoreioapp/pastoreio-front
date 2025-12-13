@@ -1,7 +1,7 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "@/components/pages/PageContainer";
 import RecoverPassword from "../components/RecoverPassword";
-import LeftContent from "../components/LeftContent";
+import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function RecoverPage() {
   return (
@@ -32,7 +32,7 @@ export default function RecoverPage() {
             transition: "all 0.3s ease",
           }}
         >
-          <LeftContent />
+          <PainelApresentacao />
         </Box>
 
         <Box

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, MouseEvent, useEffect } from "react";
+import { useState, MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
     Avatar,
@@ -27,10 +27,9 @@ import {
 } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { clearLoggedUser } from "@/store/features/loggedUserSlice";
-import { getUsuarioLogado } from "@/features/usuarios/usuarios.service";
-import { Usuario } from "@/features/usuarios/types";
+import { clearLoggedUser, LoggedUserState } from "@/store/features/loggedUserSlice";
 import UserProfileDialog from "@/components/header/UserProfileDialog";
+import { clearUserSession } from "@/store/features/userSessionSlice";
 
 const onlineBadgeStyle = {
     "& .MuiBadge-badge": {
@@ -78,16 +77,17 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
-    const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [toastOpen, setToastOpen] = useState(false);
 
     const router = useRouter();
     const dispatch = useDispatch();
-    const loggedUser = useSelector<RootState>((state) => state.loggedUser);
+    const usuario = useSelector<RootState>((state) => state.loggedUser) as LoggedUserState;
 
     function handleLogoutButtonClick(): void {
         dispatch(clearLoggedUser());
+        dispatch(clearUserSession());
+        // TODO: call backend application to remove refreshToken Cookie
         router.push("/login");
     }
 
@@ -111,18 +111,6 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
             handleClose();
         }
     };
-
-    useEffect(() => {
-        const fetchUsuario = async () => {
-            try {
-                const usuario = await getUsuarioLogado();
-                setUsuario(usuario);
-            } catch {
-                setToastOpen(true);
-            }
-        };
-        fetchUsuario();
-    }, []);
 
     const isOpen = Boolean(anchorEl);
 
