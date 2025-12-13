@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="pt-BR">
             <body>
-                <GoogleOAuthProvider clientId="416804860902-7tko1re47th6qt6nv7d672ohrvlu1m31.apps.googleusercontent.com">
+                <GoogleOAuthProvider clientId="">
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
                         <HelmetProvider>
                             <ProviderStore>
