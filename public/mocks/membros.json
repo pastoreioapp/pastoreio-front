@@ -13,6 +13,8 @@
         "discipulador": "João Pedro",
         "discipulando": "Lucas Souza",
         "ministerio": "Louvor",
+        "tags": ["Líder"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -54,6 +56,8 @@
         "discipulador": "",
         "discipulando": "Maria Lima",
         "ministerio": "Som",
+        "tags": ["Membro"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": false,
@@ -95,6 +99,8 @@
         "discipulador": "Ana Silva",
         "discipulando": "",
         "ministerio": "Atmosfera",
+        "tags": ["Louvor"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -136,6 +142,8 @@
         "discipulador": "Carla Rodrigues",
         "discipulando": "Paula Fernandes",
         "ministerio": "Mídia",
+        "tags": ["Mídia"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -177,6 +185,8 @@
         "discipulador": "",
         "discipulando": "",
         "ministerio": "Atmosfera",
+        "tags": ["Anfitrião"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": false,
@@ -218,6 +228,8 @@
         "discipulador": "Ana Silva",
         "discipulando": "Juliana Costa",
         "ministerio": "Intercessão",
+        "tags": ["Membro"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -259,6 +271,8 @@
         "discipulador": "Diego Martins",
         "discipulando": "",
         "ministerio": "Louvor",
+        "tags": ["Membro", "Discipulo"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -300,6 +314,8 @@
         "discipulador": "Fernanda Oliveira",
         "discipulando": "",
         "ministerio": "Infantil",
+        "tags": ["Membro", "Discipulador"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -341,6 +357,8 @@
         "discipulador": "",
         "discipulando": "",
         "ministerio": "Segurança",
+        "tags": ["Membro"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,
@@ -382,6 +400,8 @@
         "discipulador": "Ana Silva",
         "discipulando": "Lucas Pereira",
         "ministerio": "Louvor",
+        "tags": ["Líder", "Intercessão"],
+        "foto": "https://i.pravatar.cc/150?img=12",
         "trajetoria": {
             "pastoreio1": {
                 "assiduoCulto": true,

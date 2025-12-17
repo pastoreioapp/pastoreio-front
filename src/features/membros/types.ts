@@ -47,5 +47,7 @@ export interface Membro {
     discipulador: string;
     discipulando: string;
     ministerio: string;
+    tags: string[];
+    foto: string;
     trajetoria: Trajetoria;
 }
