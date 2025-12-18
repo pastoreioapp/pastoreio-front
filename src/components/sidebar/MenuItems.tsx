@@ -34,9 +34,9 @@ export const Menuitems: MenuItemType[] = [
   },
   {
     id: uniqueId(),
-    title: "Orgonograma",
+    title: "Organograma",
     icon: IconLayoutDashboard,
-    href: "/orgonograma",
+    href: "/organograma",
   },
   {
     id: uniqueId(),
