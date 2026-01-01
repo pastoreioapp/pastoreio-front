@@ -9,6 +9,8 @@ import { useEncontrosSelecionados } from "./hooks/useEncontroSelecionado";
 import { LoadingBox } from "./components/loading/LoadingBox";
 import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
+import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
+import { useState } from "react";
 
 export default function Encontros() {
     const {
@@ -18,6 +20,15 @@ export default function Encontros() {
         loading,
         erro,
     } = useEncontrosSelecionados();
+
+    const [modalAberto, setModalAberto] = useState(false);
+
+    const handleSalvarEncontro = (dados: DadosEncontro) => {
+        console.log("Dados do encontro:", dados);
+        // TODO: Integrar com a API quando estiver pronta
+        // Exemplo: await salvarEncontro(dados);
+        alert("Encontro cadastrado com sucesso! (Por enquanto apenas no console)");
+    };
 
     if (loading) return <LoadingBox />;
     if (erro) return <ErrorBox message={erro} />;
@@ -29,6 +40,7 @@ export default function Encontros() {
                     <Box sx={{ display: "flex", justifyContent: "end" }}>
                         <Button
                             variant="contained"
+                            onClick={() => setModalAberto(true)}
                             sx={{
                                 bgcolor: "#5E79B3",
                                 fontSize: 13,
@@ -57,6 +69,12 @@ export default function Encontros() {
                     </Box>
                 </Box>
             </DashboardCard>
+
+            <ModalCadastroEncontro
+                open={modalAberto}
+                onClose={() => setModalAberto(false)}
+                onSave={handleSalvarEncontro}
+            />
         </PageContainer>
     );
 }
