@@ -14,18 +14,11 @@ import {
 } from "@mui/material";
 import CustomTextField from "@/components/ui/CustomTextField";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
 import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
-import { AxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
 
 export default function PainelLogin() {
-    const navigate = useRouter();
-    const appAuthentication = useAppAuthentication({
-        onLoginSuccess: () => {
-            navigate.push("/dashboard");
-        }
-    });
+    const appAuthentication = useAppAuthentication();
 
     const [showPassword, setShowPassword] = useState(false);
     const [userLogin, setUserLogin] = useState<string>();
@@ -35,23 +28,29 @@ export default function PainelLogin() {
         setShowPassword(!showPassword);
     };
     
-    const handleGoogleLoginButtonClick = () => {
-        appAuthentication.runGoogleLogin();
+    const handleGoogleLoginButtonClick = async () => {
+        try {
+            await appAuthentication.runGoogleLogin();
+        } catch (error: any) {
+            enqueueSnackbar('Falha ao realizar login com Google. Tente novamente.', { variant: "error" });
+        }
     };
 
-    const handleLoginButtonClick = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLoginButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (userLogin && userPassword) {
-            appAuthentication.runPasswordUserLogin({
-                login: userLogin,
-                password: userPassword
-            }).catch((err: AxiosError) => {
-                if(err.status == 401) {
+            try {
+                await appAuthentication.runPasswordUserLogin({
+                    login: userLogin,
+                    password: userPassword
+                });
+            } catch (error: any) {
+                if (error.message?.includes('Invalid login credentials') || error.status === 401) {
                     enqueueSnackbar('Usuário e/ou senha incorreto(s)', { variant: "error" });
                 } else {
                     enqueueSnackbar('Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores', { variant: "error" });
                 }
-            });
+            }
         }
     };
 

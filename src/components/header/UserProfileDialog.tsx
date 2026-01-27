@@ -27,12 +27,12 @@ import { AlertColor } from "@mui/material/Alert";
 import { Dispatch, SetStateAction } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
-import { LoggedUserState } from "@/store/features/loggedUserSlice";
+import { LoggedUserResponse } from "@/features/auth/types";
 
 interface UserProfileDialogProps {
     open: boolean;
     onClose: () => void;
-    user: LoggedUserState;
+    user: LoggedUserResponse;
     onAvatarChange?: Dispatch<SetStateAction<string | null>>;
 }
 

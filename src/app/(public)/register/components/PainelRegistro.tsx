@@ -17,16 +17,10 @@ import { Stack } from "@mui/system";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CustomTextField from "@/components/ui/CustomTextField";
 import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
-import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 
 export default function PainelRegistro() {
-    const navigate = useRouter();
-    const appAuthentication = useAppAuthentication({
-        onLoginSuccess: () => {
-            navigate.push("/dashboard");
-        }
-    });
+    const appAuthentication = useAppAuthentication();
 
     const [userLogin, setUserLogin] = useState<string>();
     const [userName, setUserName] = useState<string>();
@@ -37,19 +31,23 @@ export default function PainelRegistro() {
 		setShowPassword(!showPassword);
 	};
 
-	const handleGoogleLoginButtonClick = () => {
-		appAuthentication.runGoogleLogin();
+    const handleGoogleLoginButtonClick = async () => {
+		try {
+			await appAuthentication.runGoogleLogin();
+		} catch (error: any) {
+			enqueueSnackbar('Falha ao realizar login com Google. Tente novamente.', { variant: "error" });
+		}
 	};
 
-    const handleRegistrarButtonClick = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleRegistrarButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (userLogin && userName && userPassword) {
-            appAuthentication.runPasswordUserLogin({
-                login: userLogin,
-                password: userPassword
-            }).catch(() => {
-				enqueueSnackbar('Falha ao registrar conta. Tente novamente mais tarde ou contate os administradores', { variant: "error" });
-            });
+            try {
+                await appAuthentication.runUserRegister(userLogin, userPassword, userName);
+            } catch (error: any) {
+                const errorMessage = error.message || 'Falha ao registrar conta. Tente novamente mais tarde ou contate os administradores';
+                enqueueSnackbar(errorMessage, { variant: "error" });
+            }
         }
     };
 

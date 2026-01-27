@@ -1,122 +1,108 @@
-import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-import { AuthResponse, LoggedUserResponse, Perfil, UserLogin } from "./types";
-import { useDispatch, useSelector } from "react-redux";
-import { LoggedUserState, setLoggedUser } from "@/store/features/loggedUserSlice";
-import { setUserSession, UserSessionState } from "@/store/features/userSessionSlice";
-import { RootState } from "@/store";
+"use client";
 
-export function useAppAuthentication({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
+import { createClient } from "@/features/supabase/client";
+import { mapSupabaseUserToLoggedUser } from "@/features/auth/auth";
+import { UserLogin } from "./types";
+import { useDispatch, useSelector } from "react-redux";
+import { LoggedUserState, setLoggedUser, clearLoggedUser } from "@/store/features/loggedUserSlice";
+import { RootState } from "@/store";
+import { useRouter } from "next/navigation";
+
+const supabase = createClient();
+
+export function useAppAuthentication() {
     const dispatch = useDispatch();
-    const userSession = useSelector<RootState>(data => data.userSession) as UserSessionState;
+    const router = useRouter();
     const loggedUser = useSelector<RootState>(data => data.loggedUser) as LoggedUserState;
 
-    const setMockedUser = () => {
-        dispatch(setLoggedUser({
-            id: 1,
-            nome: "Developer User",
-            email: "developer-user@gmail.com",
-            perfis: [Perfil.ADMINISTRADOR_SISTEMA]
-
-        }));
-        dispatch(setUserSession({
-            accessToken: 'access-token',
-            expiresIn: 0
-        }));
-    }
-
-    const runGoogleLogin = useGoogleLogin({
-        flow: "auth-code",
-        scope : "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile email profile openid",
-        onSuccess: async tokenResponse => {
-            const headers = { 'Content-Type': 'text/plain' };
-            // TODO: standardize the endpoints
-            const authResponse = await axios.post<AuthResponse>(
-                'http://localhost:8080/api/auth/code/google',
-                tokenResponse.code,
-                { headers }
-            );
-            // TODO: decode token and get expiration
-            const tokenExpirationDate = new Date();
-            dispatch(setUserSession({
-                accessToken: authResponse.data.access_token,
-                expiresIn: tokenExpirationDate.getTime()
-            }))
-
-            const userResponse = await axios.get<LoggedUserResponse>(
-                'http://localhost:8080/api/usuarios/me',
-                { headers: {
-                    Authorization: `Bearer ${authResponse.data.access_token}`
-                }}
-            );
-            dispatch(setLoggedUser(userResponse.data));
-            onLoginSuccess?.();
-        },
-    });
-
     const runPasswordUserLogin = async (user: UserLogin): Promise<void> => {
-        if(process.env.NODE_ENV === "development") {
-            console.log("Skipping authentication as per environment configuration.");
-            setMockedUser();
-            onLoginSuccess?.();
-            return;
+        try {
+            const payload = {email: user.login, password: user.password};
+            const { data, error } = await supabase.auth.signInWithPassword(payload);
+
+            if (error) throw error;
+
+            if (data.user) {
+                const loggedUserData = await mapSupabaseUserToLoggedUser(data.user);
+                if (loggedUserData) {
+                    dispatch(setLoggedUser(loggedUserData));
+                    router.push('/dashboard');
+                }
+            }
+        } catch (error: any) {
+            console.error('Login error:', error);
+            throw error;
         }
-
-        const authRequestBody = {
-            'grant_type': 'password',
-            'username': user.login,
-            'password': user.password,
-            'client_id': 'my-client-basic',
-            'client_secret': 'my-secret-basic',
-        };
-        const authResponse = await axios.post<AuthResponse>(
-            'http://localhost:8080/api/oauth2/token',
-            authRequestBody,
-            { headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }}
-        );
-        // TODO: decode token and get expiration
-        const tokenExpirationDate = new Date();
-        dispatch(setUserSession({
-            accessToken: authResponse.data.access_token,
-            expiresIn: tokenExpirationDate.getTime()
-        }))
-
-        const userResponse = await axios.get<LoggedUserResponse>(
-            'http://localhost:8080/api/usuarios/me',
-            { headers: {
-                Authorization: `Bearer ${authResponse.data.access_token}`
-            }}
-        );
-        dispatch(setLoggedUser(userResponse.data));
-        onLoginSuccess?.();
     };
 
-    const refreshAccessToken = async (): Promise<void> => {
-        const authResponse = await axios.post<AuthResponse>(
-            'http://localhost:8080/api/oauth2/refresh??',
-            {},
-            { headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }}
-        );
-        // TODO: decode token and get expiration
-        const tokenExpirationDate = new Date();
-        dispatch(setUserSession({
-            accessToken: authResponse.data.access_token,
-            expiresIn: tokenExpirationDate.getTime()
-        }))
+    const runGoogleLogin = async (): Promise<void> => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/api/auth/callback`,
+                },
+            });
+
+            if (error) throw error;
+        } catch (error: any) {
+            console.error('Google login error:', error);
+            throw error;
+        }
     };
 
-    const userIsAuthenticated = (): boolean => {
-        return !!loggedUser && !!loggedUser.id && !!userSession && !!userSession.accessToken;
-    }
+    const runUserRegister = async (email: string, password: string, fullName: string): Promise<void> => {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        name: fullName,
+                    },
+                },
+            });
+
+            if (error) throw error;
+
+            // Se o email confirmation estiver desabilitado, o usuário já está logado
+            if (data.user && !data.session) {
+                throw new Error('Por favor, verifique seu email para confirmar a conta.');
+            }
+
+            if (data.user && data.session) {
+                const loggedUserData = await mapSupabaseUserToLoggedUser(data.user);
+                if (loggedUserData) {
+                    dispatch(setLoggedUser(loggedUserData));
+                    router.push('/dashboard');
+                }
+            }
+        } catch (error: any) {
+            console.error('Register error:', error);
+            throw error;
+        }
+    };
+
+    const runLogout = async (): Promise<void> => {
+        try {
+            await supabase.auth.signOut();
+            dispatch(clearLoggedUser());
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            throw error;
+        }
+    };
+
+    const userIsAuthenticated = (): boolean => !!loggedUser && !!loggedUser.id;
 
     return {
         runGoogleLogin,
         runPasswordUserLogin,
-        refreshAccessToken,
-        userIsAuthenticated
-    }
+        runUserRegister,
+        runLogout,
+        userIsAuthenticated,
+        loggedUser
+    };
 }

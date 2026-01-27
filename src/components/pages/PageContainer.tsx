@@ -1,7 +1,7 @@
 "use client";
 
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { ProtectedRoute } from "../auth/ProtectedRoute";
 
 type Props = {
     description?: string;
