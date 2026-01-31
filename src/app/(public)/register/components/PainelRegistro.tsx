@@ -12,23 +12,46 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Email, Phone } from "@mui/icons-material";
 import CustomTextField from "@/components/ui/CustomTextField";
 import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
 import { enqueueSnackbar } from "notistack";
+import {
+  getLoginValidationError,
+  getPasswordValidationError,
+  formatPhoneToE164,
+  isValidEmail,
+  isValidPhone,
+} from "@/utils/validation";
+
+export type RegisterLoginType = "email" | "phone";
 
 export default function PainelRegistro() {
     const appAuthentication = useAppAuthentication();
 
-    const [userLogin, setUserLogin] = useState<string>();
-    const [userName, setUserName] = useState<string>();
-    const [userPassword, setUserPassword] = useState<string>();
+    const [loginType, setLoginType] = useState<RegisterLoginType>("email");
+    const [userLogin, setUserLogin] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
+    const [userPassword, setUserPassword] = useState<string>("");
 	const [showPassword, setShowPassword] = useState(false);
+	const [loginTouched, setLoginTouched] = useState(false);
+	const [nameTouched, setNameTouched] = useState(false);
+	const [passwordTouched, setPasswordTouched] = useState(false);
 
 	const handleClickShowPassword = () => {
 		setShowPassword(!showPassword);
+	};
+
+	const handleLoginTypeChange = (_: React.MouseEvent<HTMLElement>, newType: RegisterLoginType | null) => {
+		if (newType) {
+			setLoginType(newType);
+			setUserLogin("");
+			setLoginTouched(false);
+		}
 	};
 
     const handleGoogleLoginButtonClick = async () => {
@@ -39,16 +62,51 @@ export default function PainelRegistro() {
 		}
 	};
 
+	const getLoginValueForApi = (): string => {
+		if (loginType === "phone" && userLogin.trim()) {
+			return formatPhoneToE164(userLogin.trim());
+		}
+		return userLogin.trim();
+	};
+
+	const isLoginValid = (): boolean => {
+		if (!userLogin.trim()) return false;
+		return loginType === "email" ? isValidEmail(userLogin.trim()) : isValidPhone(userLogin.trim());
+	};
+
+	const loginError = loginTouched ? getLoginValidationError(userLogin, loginType) : null;
+	const nameError = nameTouched && !userName.trim() ? "Campo obrigatório" : null;
+	const passwordError = passwordTouched ? getPasswordValidationError(userPassword) : null;
+
     const handleRegistrarButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (userLogin && userName && userPassword) {
+		setLoginTouched(true);
+		setNameTouched(true);
+		setPasswordTouched(true);
+
+		if (!isLoginValid()) {
+			enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", { variant: "error" });
+			return;
+		}
+		if (passwordError) {
+			enqueueSnackbar(passwordError, { variant: "error" });
+			return;
+		}
+		if (nameError) {
+			enqueueSnackbar(nameError, { variant: "error" });
+			return;
+		}
+        if (userName.trim() && userPassword) {
             try {
-                await appAuthentication.runUserRegister(userLogin, userPassword, userName);
+                const loginValue = getLoginValueForApi();
+                await appAuthentication.runUserRegister(loginValue, userPassword, userName.trim(), loginType);
             } catch (error: any) {
                 const errorMessage = error.message || 'Falha ao registrar conta. Tente novamente mais tarde ou contate os administradores';
                 enqueueSnackbar(errorMessage, { variant: "error" });
             }
-        }
+        } else {
+			enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error" });
+		}
     };
 
 	return (<>
@@ -62,25 +120,45 @@ export default function PainelRegistro() {
 
 		<form onSubmit={handleRegistrarButtonClick}>
 			<Stack mb={3}>
-			<Typography
-				variant="subtitle1"
-				fontWeight={600}
-				component="label"
-				htmlFor="login"
-				mb="5px"
-				color={"#173D8A"}
-			>
-				Login <span style={{ color: "red" }}>*</span>
-			</Typography>
+			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+				<Typography
+					variant="subtitle1"
+					fontWeight={600}
+					component="label"
+					htmlFor="login"
+					color={"#173D8A"}
+				>
+					{loginType === "email" ? "Email" : "Telefone"} <span style={{ color: "red" }}>*</span>
+				</Typography>
+				<ToggleButtonGroup
+					value={loginType}
+					exclusive
+					onChange={handleLoginTypeChange}
+					size="small"
+					sx={{ "& .MuiToggleButton-root": { py: 0.5, px: 1.5 } }}
+				>
+					<ToggleButton value="email" aria-label="Registrar com email">
+						<Email sx={{ fontSize: 18, mr: 0.5 }} />
+						Email
+					</ToggleButton>
+					<ToggleButton value="phone" aria-label="Registrar com telefone">
+						<Phone sx={{ fontSize: 18, mr: 0.5 }} />
+						Telefone
+					</ToggleButton>
+				</ToggleButtonGroup>
+			</Box>
 			<CustomTextField
 				required
 				fullWidth
-				error={userLogin === ""}
+				error={!!loginError}
+				helperText={loginError}
 				id="login"
 				variant="outlined"
-				placeholder="Digite seu login"
+				type={loginType === "email" ? "email" : "tel"}
+				placeholder={loginType === "email" ? "Digite seu email" : "Ex: 11 99999-9999"}
 				value={userLogin}
 				onChange={(event) => setUserLogin(event.target.value)}
+				onBlur={() => setLoginTouched(true)}
 			/>
 
 			<Typography
@@ -97,12 +175,14 @@ export default function PainelRegistro() {
 			<CustomTextField
 				required
 				fullWidth
-				error={userName === ""}
+				error={!!nameError}
+				helperText={nameError}
 				id="name"
 				variant="outlined"
 				placeholder="Insira o seu nome completo"
 				value={userName}
 				onChange={(event) => setUserName(event.target.value)}
+				onBlur={() => setNameTouched(true)}
 			/>
 
 			<Typography
@@ -119,13 +199,15 @@ export default function PainelRegistro() {
 			<CustomTextField
 				required
 				fullWidth
-				error={userPassword === ""}
+				error={!!passwordError}
+				helperText={passwordError}
 				id="password"
 				variant="outlined"
 				placeholder="Crie sua senha"
 				type={showPassword ? "text" : "password"}
 				value={userPassword}
 				onChange={(event) => setUserPassword(event.target.value)}
+				onBlur={() => setPasswordTouched(true)}
 				InputProps={{
 				endAdornment: (
 					<InputAdornment position="end">

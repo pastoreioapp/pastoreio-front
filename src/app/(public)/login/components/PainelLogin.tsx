@@ -11,21 +11,40 @@ import {
   InputAdornment,
   Button,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import CustomTextField from "@/components/ui/CustomTextField";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Email, Phone } from "@mui/icons-material";
 import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
 import { enqueueSnackbar } from "notistack";
+import {
+  getLoginValidationError,
+  isValidEmail,
+  isValidPhone,
+} from "@/utils/validation";
+
+export type LoginType = "email" | "phone";
 
 export default function PainelLogin() {
     const appAuthentication = useAppAuthentication();
 
+    const [loginType, setLoginType] = useState<LoginType>("email");
     const [showPassword, setShowPassword] = useState(false);
-    const [userLogin, setUserLogin] = useState<string>();
-    const [userPassword, setUserPassword] = useState<string>();
+    const [userLogin, setUserLogin] = useState<string>("");
+    const [userPassword, setUserPassword] = useState<string>("");
+    const [loginTouched, setLoginTouched] = useState(false);
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleLoginTypeChange = (_: React.MouseEvent<HTMLElement>, newType: LoginType | null) => {
+        if (newType) {
+            setLoginType(newType);
+            setUserLogin("");
+            setLoginTouched(false);
+        }
     };
     
     const handleGoogleLoginButtonClick = async () => {
@@ -36,21 +55,45 @@ export default function PainelLogin() {
         }
     };
 
+    const isLoginValid = (): boolean => {
+        if (!userLogin.trim()) return false;
+        return loginType === "email" ? isValidEmail(userLogin.trim()) : isValidPhone(userLogin.trim());
+    };
+
+    const loginError = loginTouched ? getLoginValidationError(userLogin, loginType) : null;
+
     const handleLoginButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (userLogin && userPassword) {
+        setLoginTouched(true);
+
+        if (!isLoginValid()) {
+            enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", {
+                variant: "error",
+            });
+            return;
+        }
+        if (userPassword) {
             try {
                 await appAuthentication.runPasswordUserLogin({
-                    login: userLogin,
-                    password: userPassword
+                    login: userLogin.trim(),
+                    password: userPassword,
+                    loginType,
                 });
             } catch (error: any) {
-                if (error.message?.includes('Invalid login credentials') || error.status === 401) {
-                    enqueueSnackbar('Usuário e/ou senha incorreto(s)', { variant: "error" });
+                if (
+                    error.message?.includes("Invalid login credentials") ||
+                    error.status === 401
+                ) {
+                    enqueueSnackbar("Usuário e/ou senha incorreto(s)", { variant: "error" });
                 } else {
-                    enqueueSnackbar('Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores', { variant: "error" });
+                    enqueueSnackbar(
+                        "Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores",
+                        { variant: "error" }
+                    );
                 }
             }
+        } else {
+            enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error" });
         }
     };
 
@@ -66,26 +109,50 @@ export default function PainelLogin() {
         <Box>
             <form onSubmit={handleLoginButtonClick}>
                 <Stack mb={3}>
-                    <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        component="label"
-                        htmlFor="login"
-                        mb="5px"
-                        color={"#173D8A"}
-                        placeholder="Digite seu login"
-                    >
-                        Login <span style={{ color: "red" }}>*</span>
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+                        <Typography
+                            variant="subtitle1"
+                            fontWeight={600}
+                            component="label"
+                            htmlFor="login"
+                            color={"#173D8A"}
+                        >
+                            {loginType === "email" ? "Email" : "Telefone"}{" "}
+                            <span style={{ color: "red" }}>*</span>
+                        </Typography>
+                        <ToggleButtonGroup
+                            value={loginType}
+                            exclusive
+                            onChange={handleLoginTypeChange}
+                            size="small"
+                            sx={{ "& .MuiToggleButton-root": { py: 0.5, px: 1.5 } }}
+                        >
+                            <ToggleButton value="email" aria-label="Entrar com email">
+                                <Email sx={{ fontSize: 18, mr: 0.5 }} />
+                                Email
+                            </ToggleButton>
+                            <ToggleButton value="phone" aria-label="Entrar com telefone">
+                                <Phone sx={{ fontSize: 18, mr: 0.5 }} />
+                                Telefone
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Box>
                     <CustomTextField
                         required
-                        error={userLogin === ""}
                         fullWidth
+                        error={!!loginError}
+                        helperText={loginError}
                         id="login"
                         variant="outlined"
-                        placeholder="Digite seu login"
+                        type={loginType === "email" ? "email" : "tel"}
+                        placeholder={
+                            loginType === "email"
+                                ? "Digite seu email"
+                                : "Ex: 11 99999-9999"
+                        }
                         value={userLogin}
                         onChange={(event) => setUserLogin(event.target.value)}
+                        onBlur={() => setLoginTouched(true)}
                     />
 
                     <Typography

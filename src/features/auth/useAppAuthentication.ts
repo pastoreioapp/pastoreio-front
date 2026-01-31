@@ -3,6 +3,7 @@
 import { createClient } from "@/features/supabase/client";
 import { mapSupabaseUserToLoggedUser } from "@/features/auth/auth";
 import { UserLogin } from "./types";
+import { formatPhoneToE164 } from "@/utils/validation";
 import { useDispatch, useSelector } from "react-redux";
 import { LoggedUserState, setLoggedUser, clearLoggedUser } from "@/store/features/loggedUserSlice";
 import { RootState } from "@/store";
@@ -17,7 +18,17 @@ export function useAppAuthentication() {
 
     const runPasswordUserLogin = async (user: UserLogin): Promise<void> => {
         try {
-            const payload = {email: user.login, password: user.password};
+            const loginType = user.loginType ?? "email";
+            const loginValue =
+                loginType === "phone"
+                    ? formatPhoneToE164(user.login.trim())
+                    : user.login.trim();
+
+            const payload =
+                loginType === "phone"
+                    ? { phone: loginValue, password: user.password }
+                    : { email: loginValue, password: user.password };
+
             const { data, error } = await supabase.auth.signInWithPassword(payload);
 
             if (error) throw error;
@@ -26,11 +37,11 @@ export function useAppAuthentication() {
                 const loggedUserData = await mapSupabaseUserToLoggedUser(data.user);
                 if (loggedUserData) {
                     dispatch(setLoggedUser(loggedUserData));
-                    router.push('/dashboard');
+                    router.push("/dashboard");
                 }
             }
         } catch (error: any) {
-            console.error('Login error:', error);
+            console.error("Login error:", error);
             throw error;
         }
     };
@@ -51,35 +62,58 @@ export function useAppAuthentication() {
         }
     };
 
-    const runUserRegister = async (email: string, password: string, fullName: string): Promise<void> => {
+    const runUserRegister = async (
+        login: string,
+        password: string,
+        fullName: string,
+        loginType: "email" | "phone"
+    ): Promise<void> => {
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: fullName,
-                        name: fullName,
-                    },
-                },
-            });
+            const signUpPayload =
+                loginType === "phone"
+                    ? {
+                          phone: login,
+                          password,
+                          options: {
+                              data: {
+                                  full_name: fullName,
+                                  name: fullName,
+                              },
+                          },
+                      }
+                    : {
+                          email: login,
+                          password,
+                          options: {
+                              data: {
+                                  full_name: fullName,
+                                  name: fullName,
+                              },
+                          },
+                      };
+
+            const { data, error } = await supabase.auth.signUp(signUpPayload);
 
             if (error) throw error;
 
-            // Se o email confirmation estiver desabilitado, o usuário já está logado
+            // Se o email/phone confirmation estiver desabilitado, o usuário já está logado
             if (data.user && !data.session) {
-                throw new Error('Por favor, verifique seu email para confirmar a conta.');
+                const message =
+                    loginType === "phone"
+                        ? "Por favor, verifique seu telefone para confirmar a conta."
+                        : "Por favor, verifique seu email para confirmar a conta.";
+                throw new Error(message);
             }
 
             if (data.user && data.session) {
                 const loggedUserData = await mapSupabaseUserToLoggedUser(data.user);
                 if (loggedUserData) {
                     dispatch(setLoggedUser(loggedUserData));
-                    router.push('/dashboard');
+                    router.push("/dashboard");
                 }
             }
         } catch (error: any) {
-            console.error('Register error:', error);
+            console.error("Register error:", error);
             throw error;
         }
     };
