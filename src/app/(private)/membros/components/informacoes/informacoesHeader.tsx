@@ -4,9 +4,11 @@ export function InformacaoHeader({
     nome,
     funcao,
 }: {
-    nome: string;
-    funcao: string;
+    nome: string | null;
+    funcao: string | null;
 }) {
+    const displayNome = nome ?? "";
+    const displayFuncao = funcao ?? "";
     return (
         <Box
             sx={{
@@ -27,12 +29,12 @@ export function InformacaoHeader({
                     boxShadow: "inset 0 0 0 6px #91A3D8",
                 }}
             >
-                {nome.charAt(0).toUpperCase()}
+                {displayNome.charAt(0).toUpperCase() || "?"}
             </Avatar>
             <Typography
                 sx={{ mt: "12px", fontSize: "18px", fontWeight: "500" }}
             >
-                {nome}
+                {displayNome}
             </Typography>
             <Box
                 sx={{
@@ -44,7 +46,7 @@ export function InformacaoHeader({
                 }}
             >
                 <Typography sx={{ fontSize: "15px", fontWeight: "600" }}>
-                    {funcao}
+                    {displayFuncao}
                 </Typography>
             </Box>
         </Box>

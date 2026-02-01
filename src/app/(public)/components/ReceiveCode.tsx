@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Box, Typography, Button, Stack } from "@mui/material";
-import CustomTextField from "@/components/ui/CustomTextField";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
 
 export default function ReceiveCode() {
   return (

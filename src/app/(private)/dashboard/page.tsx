@@ -1,4 +1,4 @@
-import PageContainer from "@/components/pages/PageContainer";
+import PageContainer from "@/ui/components/pages/PageContainer";
 import Blog from "@/app/(private)/dashboard/components/Blog";
 import MonthlyEarnings from "@/app/(private)/dashboard/components/MonthlyEarnings";
 import ProductPerformance from "@/app/(private)/dashboard/components/ProductPerformance";
@@ -6,7 +6,7 @@ import RecentTransactions from "@/app/(private)/dashboard/components/RecentTrans
 import SalesOverview from "@/app/(private)/dashboard/components/SalesOverview";
 import YearlyBreakup from "@/app/(private)/dashboard/components/YearlyBreakup";
 import { Grid, Box } from "@mui/material";
-import { CELULA_ROLES } from "@/features/auth/types";
+import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
 
 export default function Dashboard() {
     return (

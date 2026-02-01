@@ -14,15 +14,15 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import CustomTextField from "@/components/ui/CustomTextField";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
 import { Visibility, VisibilityOff, Email, Phone } from "@mui/icons-material";
-import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
+import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { enqueueSnackbar } from "notistack";
 import {
   getLoginValidationError,
   isValidEmail,
   isValidPhone,
-} from "@/utils/validation";
+} from "@/ui/utils/validation";
 
 export type LoginType = "email" | "phone";
 

@@ -1,8 +1,8 @@
 "use client";
 
-import ProviderStore from "../store/ProviderStore";
-import ProviderTheme from "../utils/ProviderTheme";
-import AuthProvider from "../components/auth/AuthProvider";
+import ProviderStore from "@/ui/stores/ProviderStore";
+import ProviderTheme from "@/ui/utils/ProviderTheme";
+import AuthProvider from "@/ui/components/auth/AuthProvider";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/pt";

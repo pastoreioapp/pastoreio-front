@@ -1,4 +1,4 @@
-import { Encontro } from "@/features/encontros/types";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { Box, Divider, ListItemButton, Typography } from "@mui/material";
 
 export function EncontroListItem({

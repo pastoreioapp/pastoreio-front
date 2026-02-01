@@ -5,7 +5,7 @@ export function InformacoesGroup({
     campos,
 }: {
     titulo: string;
-    campos: { label: string; valor: string }[];
+    campos: { label: string; valor: string | null }[];
 }) {
     return (
         <Box
@@ -33,7 +33,7 @@ export function InformacoesGroup({
                         {campo.label}
                     </InputLabel>
                     <Input
-                        value={campo.valor}
+                        value={campo.valor ?? ""}
                         sx={{ fontSize: "11px", width: "100%" }}
                         disableUnderline
                         disabled

@@ -17,8 +17,8 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { Visibility, VisibilityOff, Email, Phone } from "@mui/icons-material";
-import CustomTextField from "@/components/ui/CustomTextField";
-import { useAppAuthentication } from "@/features/auth/useAppAuthentication";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
+import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { enqueueSnackbar } from "notistack";
 import {
   getLoginValidationError,
@@ -26,7 +26,7 @@ import {
   formatPhoneToE164,
   isValidEmail,
   isValidPhone,
-} from "@/utils/validation";
+} from "@/ui/utils/validation";
 
 export type RegisterLoginType = "email" | "phone";
 

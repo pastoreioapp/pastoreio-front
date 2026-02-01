@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { IconPencil } from "@tabler/icons-react";
-import { Membro } from "@/features/membros/types";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
 import { EtapasTabs } from "./etapasTabs";
@@ -25,7 +25,7 @@ const MensagemNenhumMembroSelecionado = () => (
     </Box>
 );
 
-export function Informacao({ data }: { data: Membro | null }) {
+export function Informacao({ data }: { data: MembroListItemDto | null }) {
     if (!data) return <MensagemNenhumMembroSelecionado />;
 
     const grupos = [
@@ -34,7 +34,7 @@ export function Informacao({ data }: { data: Membro | null }) {
             campos: [
                 { label: "Telefone", valor: data.telefone },
                 { label: "Email", valor: data.email },
-                { label: "Nascimento", valor: data.nascimento },
+                { label: "Nascimento", valor: data.dataNascimento },
                 { label: "Endereço", valor: data.endereco },
             ],
         },

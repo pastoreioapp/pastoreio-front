@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Box, Typography, Button, Stack, Divider } from "@mui/material";
-import CustomTextField from "@/components/ui/CustomTextField";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 export default function RecoverPassword() {

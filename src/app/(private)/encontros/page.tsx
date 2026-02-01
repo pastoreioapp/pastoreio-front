@@ -1,7 +1,7 @@
 "use client";
 
-import DashboardCard from "@/components/ui/DashboardCard";
-import PageContainer from "@/components/pages/PageContainer";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
+import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, Button } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-encontro/filtro";

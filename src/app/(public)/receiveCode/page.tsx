@@ -1,5 +1,5 @@
 import { Box, Card } from "@mui/material";
-import PageContainer from "@/components/pages/PageContainer";
+import PageContainer from "@/ui/components/pages/PageContainer";
 import ReceiveCode from "../components/ReceiveCode";
 import PainelApresentacao from "../components/PainelApresentacao";
 

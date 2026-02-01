@@ -1,19 +1,21 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { getMembros } from "@/features/membros/membros.service";
-import { Membro } from "@/features/membros/types";
+import { listMembros } from "@/app/actions/membros";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 
 export function useMembros() {
-    const [membros, setMembros] = useState<Membro[]>([]);
+    const [membros, setMembros] = useState<MembroListItemDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const data = await getMembros();
+                const data = await listMembros();
                 setMembros(data);
-            } catch (error: any) {
-                setErro(error.message || "Erro ao carregar membros");
+            } catch (error: unknown) {
+                setErro(error instanceof Error ? error.message : "Erro ao carregar membros");
             } finally {
                 setLoading(false);
             }

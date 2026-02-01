@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Card } from "@mui/material";
-import PageContainer from "@/components/pages/PageContainer";
 import PainelRegistro from "./components/PainelRegistro";
 import PainelApresentacao from "../components/PainelApresentacao";
 

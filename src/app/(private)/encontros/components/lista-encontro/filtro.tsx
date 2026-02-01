@@ -3,7 +3,7 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
-import { Encontro } from "@/features/encontros/types";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { EncontroListItem } from "./encontroListItem";
 
 export function Filtro({

@@ -11,7 +11,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import CustomTextField from "@/components/ui/CustomTextField";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
 
 export default function NewPassword() {
   const [showPasswordNew, setShowPasswordNew] = useState(false);

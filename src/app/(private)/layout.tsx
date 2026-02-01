@@ -1,7 +1,7 @@
 "use client";
 import { Box } from "@mui/material";
-import Sidebar from "@/components/sidebar/Sidebar";
-import Header from "@/components/header/Header";
+import Sidebar from "@/ui/components/sidebar/Sidebar";
+import Header from "@/ui/components/header/Header";
 
 export default function RootLayout({children}: { children: React.ReactNode; }) {
     return (

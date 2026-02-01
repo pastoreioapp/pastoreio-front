@@ -1,4 +1,4 @@
-import { Membro } from "@/features/membros/types";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 import {
     Avatar,
     Box,
@@ -13,7 +13,7 @@ export function MembroListItem({
     selected,
     onClick,
 }: {
-    membro: Membro;
+    membro: MembroListItemDto;
     selected: boolean;
     onClick: () => void;
 }) {

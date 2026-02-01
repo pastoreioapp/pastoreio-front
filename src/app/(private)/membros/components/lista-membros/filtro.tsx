@@ -3,24 +3,24 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 import { MembroListItem } from "./membroListItem";
-import { Membro } from "@/features/membros/types";
 
 export function Filtro({
     data,
     onSelect,
     membroSelecionado,
 }: {
-    data: Membro[];
-    onSelect: (membro: Membro) => void;
-    membroSelecionado: Membro | null;
+    data: MembroListItemDto[];
+    onSelect: (membro: MembroListItemDto) => void;
+    membroSelecionado: MembroListItemDto | null;
 }) {
     const [search, setSearch] = useState("");
 
     const filtered = useMemo(
         () =>
             data.filter((membro) =>
-                membro.nome.toLowerCase().includes(search.toLowerCase())
+                (membro.nome ?? "").toLowerCase().includes(search.toLowerCase())
             ),
         [data, search]
     );

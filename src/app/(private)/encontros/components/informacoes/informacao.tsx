@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import { IconPencil } from "@tabler/icons-react";
 import { InformacoesGroup } from "./informacoesGroup";
-import { Encontro } from "@/features/encontros/types";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { EtapasTabs } from "./etapasTabs";
 
 const MensagemNenhumEncontroSelecionado = () => (

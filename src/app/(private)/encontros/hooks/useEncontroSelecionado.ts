@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEncontros } from "./useEncontros";
-import { Encontro } from "@/features/encontros/types";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
 
 export function useEncontrosSelecionados() {
     const { encontros, loading, erro } = useEncontros();

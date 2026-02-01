@@ -1,4 +1,4 @@
-import { Encontro } from "@/features/encontros/types";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
 import {
     Table,
     TableBody,

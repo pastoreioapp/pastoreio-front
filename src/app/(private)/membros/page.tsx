@@ -1,7 +1,7 @@
 "use client";
 
-import DashboardCard from "@/components/ui/DashboardCard";
-import PageContainer from "@/components/pages/PageContainer";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
+import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, Button } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-membros/filtro";
@@ -9,7 +9,7 @@ import { useMembrosSelecionados } from "./hooks/useMembroSelecionado";
 import { LoadingBox } from "./components/loading/LoadingBox";
 import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
-import { CELULA_ROLES } from "@/features/auth/types";
+import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
 
 export default function Membros() {
     const {

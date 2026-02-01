@@ -1,25 +1,30 @@
-import { getEncontros } from "@/features/encontros/encontros.service";
-import { Encontro } from "@/features/encontros/types";
 import { useEffect, useState } from "react";
+import type { Encontro } from "@/modules/celulas/domain/encontro";
+import { EncontroService } from "@/modules/celulas/application/encontro.service";
+import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
 
 export function useEncontros() {
-    const [encontros, setEncontros] = useState<Encontro[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [erro, setErro] = useState<string | null>(null);
+  const [encontros, setEncontros] = useState<Encontro[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const data = await getEncontros();
-                setEncontros(data);
-            } catch (error: any) {
-                setErro(error.message || "Erro ao carregar encontros");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, []);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const repo = new EncontroRepository();
+        const service = new EncontroService(repo);
+        const data = await service.list();
+        setEncontros(data);
+      } catch (error: unknown) {
+        setErro(
+          error instanceof Error ? error.message : "Erro ao carregar encontros"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
-    return { encontros, loading, erro };
+  return { encontros, loading, erro };
 }

@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { IconBasket } from "@tabler/icons-react";
-import SimpleCard from "@/components/ui/SimpleCard";
+import SimpleCard from "@/ui/components/ui/SimpleCard";
 
 const ecoCard = [
     {

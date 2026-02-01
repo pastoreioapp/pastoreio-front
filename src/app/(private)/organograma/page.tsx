@@ -1,7 +1,7 @@
-import DashboardCard from "@/components/ui/DashboardCard";
-import PageContainer from "@/components/pages/PageContainer";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
+import PageContainer from "@/ui/components/pages/PageContainer";
 import { Typography } from "@mui/material";
-import { CELULA_ROLES } from "@/features/auth/types";
+import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
 
 export default function Organograma() {
   return (
