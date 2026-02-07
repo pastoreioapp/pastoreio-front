@@ -27,6 +27,10 @@ export default function RootLayout({children}: { children: React.ReactNode; }) {
                     flexDirection: "column",
                     flex: 1,
                     width: "100%",
+                    minHeight: {
+                        xs: "calc(100vh - 30px)",
+                        md: "calc(100vh - 54px)",
+                    },
                     gap: "27px",
                 }}
             >
