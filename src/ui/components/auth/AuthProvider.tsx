@@ -20,8 +20,6 @@ const supabase = createClient();
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
     const dispatch = useDispatch();
 
-    console.log('AuthProvider mounted');
-
     useEffect(() => {
         const checkInitialSession = async () => {
             try {

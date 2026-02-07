@@ -26,7 +26,7 @@ export default function NotFound() {
                 }}
             >
                 <Image
-                    src="/images/logos/logo-horizontal.svg"
+                    src="/images/logos/logo-escura.svg"
                     alt="Pastoreio"
                     width={180}
                     height={45}

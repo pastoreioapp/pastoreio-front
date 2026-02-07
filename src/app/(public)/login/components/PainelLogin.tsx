@@ -6,16 +6,23 @@ import { useState } from "react";
 import {
   Box,
   Typography,
-  Divider,
   IconButton,
   InputAdornment,
   Button,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
+  useTheme,
 } from "@mui/material";
 import CustomTextField from "@/ui/components/ui/CustomTextField";
-import { Visibility, VisibilityOff, Email, Phone } from "@mui/icons-material";
+import {
+  Visibility,
+  VisibilityOff,
+  Email,
+  Phone,
+  Google,
+  PersonAdd,
+  ArrowBack,
+} from "@mui/icons-material";
+import InputMask from "react-input-mask";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { enqueueSnackbar } from "notistack";
 import {
@@ -26,32 +33,39 @@ import {
 
 export type LoginType = "email" | "phone";
 
+type LoginStep = "menu" | "email" | "phone";
+
 export default function PainelLogin() {
+    const theme = useTheme();
     const appAuthentication = useAppAuthentication();
 
-    const [loginType, setLoginType] = useState<LoginType>("email");
+    const [step, setStep] = useState<LoginStep>("menu");
     const [showPassword, setShowPassword] = useState(false);
     const [userLogin, setUserLogin] = useState<string>("");
     const [userPassword, setUserPassword] = useState<string>("");
     const [loginTouched, setLoginTouched] = useState(false);
+    const [passwordTouched, setPasswordTouched] = useState(false);
+
+    const loginType: LoginType = step === "phone" ? "phone" : "email";
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
 
-    const handleLoginTypeChange = (_: React.MouseEvent<HTMLElement>, newType: LoginType | null) => {
-        if (newType) {
-            setLoginType(newType);
-            setUserLogin("");
-            setLoginTouched(false);
-        }
+    const handleBack = () => {
+        setStep("menu");
+        setUserLogin("");
+        setUserPassword("");
+        setLoginTouched(false);
+        setPasswordTouched(false);
+        setShowPassword(false);
     };
-    
+
     const handleGoogleLoginButtonClick = async () => {
         try {
             await appAuthentication.runGoogleLogin();
         } catch (error: any) {
-            enqueueSnackbar('Falha ao realizar login com Google. Tente novamente.', { variant: "error" });
+            enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error" });
         }
     };
 
@@ -61,10 +75,12 @@ export default function PainelLogin() {
     };
 
     const loginError = loginTouched ? getLoginValidationError(userLogin, loginType) : null;
+    const passwordError = passwordTouched && !userPassword.trim() ? "Senha é obrigatória" : null;
 
     const handleLoginButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoginTouched(true);
+        setPasswordTouched(true);
 
         if (!isLoginValid()) {
             enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", {
@@ -97,172 +113,314 @@ export default function PainelLogin() {
         }
     };
 
-    return (<>
-        <Typography variant="h3" textAlign="center" mb={3}>
-            Login
-        </Typography>
+    const menuButtonSx = {
+        borderRadius: "5px",
+        height: "46px",
+        fontWeight: 100,
+        fontSize: "0.9375rem",
+        textTransform: "none",
+        mt: 2,
+        boxShadow: "none",
+        "&:hover": {
+            boxShadow: "none",
+        },
+    };
 
-        <Box sx={{ display: "flex", alignItems: "center", my: 5 }}>
-            <Divider sx={{ flexGrow: 1, borderColor: "#0000003b", height: 2 }}/>
-        </Box>
+    if (step === "menu") {
+        return (
+            <>
+                <Typography
+                    variant="h3"
+                    textAlign="center"
+                    mb={4}
+                    sx={{ color: theme.palette.grey[600], fontSize: { xs: "1.2rem", sm: "1.5rem" }, fontWeight: 100 }}
+                >
+                    Acesse sua conta
+                </Typography>
 
-        <Box>
-            <form onSubmit={handleLoginButtonClick}>
-                <Stack mb={3}>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+                <Stack>
+                    <Button
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        onClick={() => setStep("email")}
+                        startIcon={<Email />}
+                        sx={menuButtonSx}
+                    >
+                        Entrar com email
+                    </Button>
+
+                    <Button
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        onClick={() => setStep("phone")}
+                        startIcon={<Phone />}
+                        sx={menuButtonSx}
+                    >
+                        Entrar com telefone
+                    </Button>
+
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        onClick={handleGoogleLoginButtonClick}
+                        startIcon={
+                            <Image
+                                src="/images/icons/icon-google.svg"
+                                alt="Google"
+                                width={20}
+                                height={20}
+                                unoptimized
+                            />
+                        }
+                        sx={{
+                            borderRadius: "5px",
+                            height: "46px",
+                            mt: 1.5,
+                            textTransform: "none",
+                            borderColor: theme.palette.grey[50],
+                            color: theme.palette.grey[600],
+                            fontSize: "0.875rem",
+                            "&:hover": {
+                                borderColor: theme.palette.primary.main,
+                                backgroundColor: theme.palette.primary.light + "20",
+                            },
+                        }}
+                    >
+                        Continuar com Google
+                    </Button>
+
+                    
+                    <Stack
+                        direction="row"
+                        justifyContent="center"
+                        spacing={1}
+                        mt={5}
+                        sx={{ width: "100%", flexWrap: "wrap" }}
+                    >
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 400, color: theme.palette.grey[600], fontSize: "0.875rem" }}
+                        >
+                            Ainda não possui uma conta?
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            component={Link}
+                            href="/register"
+                            sx={{
+                                textDecoration: "none",
+                                color: theme.palette.primary.main,
+                                fontWeight: 700,
+                                fontSize: "0.875rem",
+                            }}
+                        >
+                            Cadastre-se
+                        </Typography>
+                    </Stack>
+                </Stack>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <Typography
+                variant="h3"
+                textAlign="center"
+                mb={4}
+                sx={{ color: theme.palette.grey[600], fontSize: { xs: "1.2rem", sm: "1.5rem" }, fontWeight: 100 }}
+            >
+                {loginType === "email" ? "Entrar com email" : "Entrar com telefone"}
+            </Typography>
+
+            <Box>
+                <form onSubmit={handleLoginButtonClick}>
+                    <Stack mb={3} gap={0}>
                         <Typography
                             variant="subtitle1"
                             fontWeight={600}
                             component="label"
                             htmlFor="login"
-                            color={"#173D8A"}
+                            sx={{ color: theme.palette.grey[600], fontSize: "0.875rem", mb: 0.5 }}
                         >
                             {loginType === "email" ? "Email" : "Telefone"}{" "}
-                            <span style={{ color: "red" }}>*</span>
+                            <span style={{ color: theme.palette.error.main }}>*</span>
                         </Typography>
-                        <ToggleButtonGroup
-                            value={loginType}
-                            exclusive
-                            onChange={handleLoginTypeChange}
-                            size="small"
-                            sx={{ "& .MuiToggleButton-root": { py: 0.5, px: 1.5 } }}
-                        >
-                            <ToggleButton value="email" aria-label="Entrar com email">
-                                <Email sx={{ fontSize: 18, mr: 0.5 }} />
-                                Email
-                            </ToggleButton>
-                            <ToggleButton value="phone" aria-label="Entrar com telefone">
-                                <Phone sx={{ fontSize: 18, mr: 0.5 }} />
-                                Telefone
-                            </ToggleButton>
-                        </ToggleButtonGroup>
-                    </Box>
-                    <CustomTextField
-                        required
-                        fullWidth
-                        error={!!loginError}
-                        helperText={loginError}
-                        id="login"
-                        variant="outlined"
-                        type={loginType === "email" ? "email" : "tel"}
-                        placeholder={
-                            loginType === "email"
-                                ? "Digite seu email"
-                                : "Ex: 11 99999-9999"
-                        }
-                        value={userLogin}
-                        onChange={(event) => setUserLogin(event.target.value)}
-                        onBlur={() => setLoginTouched(true)}
-                    />
-
-                    <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        component="label"
-                        htmlFor="password"
-                        mb="5px"
-                        mt="25px"
-                        color={"#173D8A"}
-                    >
-                        Senha <span style={{ color: "red" }}>*</span>
-                    </Typography>
-
-                    <CustomTextField
-                        required
-                        fullWidth
-                        error={userPassword === ""}
-                        id="password"
-                        variant="outlined"
-                        placeholder="Digite sua senha"
-                        type={showPassword ? "text" : "password"}
-                        value={userPassword}
-                        onChange={(event) => setUserPassword(event.target.value)}
-                        InputProps={{ 
-                        endAdornment: (
-                            <InputAdornment position="end">
-                            <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={handleClickShowPassword}
-                                edge="end"
-                                sx={{ color: "#173D8A" }}
+                        {loginType === "phone" ? (
+                            <InputMask
+                                mask="99 99999-9999"
+                                value={userLogin}
+                                onChange={(event) => setUserLogin(event.target.value)}
+                                onBlur={() => setLoginTouched(true)}
                             >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                            </InputAdornment>
-                        ),
-                        }}
-                    />
-                </Stack>
-                <Box sx={{ width: "100%", mt: 2, mb: 8 }}>
-                    <Stack direction="row" justifyContent="center" spacing={1} mt={3}>
-                        <Typography variant="body1" fontWeight="400">
+                                {(inputProps: any) => (
+                                    <CustomTextField
+                                        {...inputProps}
+                                        required
+                                        fullWidth
+                                        error={!!loginError}
+                                        helperText={loginError}
+                                        id="login"
+                                        variant="outlined"
+                                        type="tel"
+                                        placeholder="11 99999-9999"
+                                        sx={{
+                                            "& .MuiOutlinedInput-input": {
+                                                py: 1.25,
+                                                fontSize: "0.9375rem",
+                                            },
+                                        }}
+                                    />
+                                )}
+                            </InputMask>
+                        ) : (
+                            <CustomTextField
+                                required
+                                fullWidth
+                                error={!!loginError}
+                                helperText={loginError}
+                                id="login"
+                                variant="outlined"
+                                type="email"
+                                placeholder="Digite seu email"
+                                value={userLogin}
+                                onChange={(event) => setUserLogin(event.target.value)}
+                                onBlur={() => setLoginTouched(true)}
+                                sx={{
+                                    "& .MuiOutlinedInput-input": {
+                                        py: 1.25,
+                                        fontSize: "0.9375rem",
+                                    },
+                                }}
+                            />
+                        )}
+
+                        <Typography
+                            variant="subtitle1"
+                            fontWeight={600}
+                            component="label"
+                            htmlFor="password"
+                            sx={{
+                                color: theme.palette.grey[600],
+                                fontSize: "0.875rem",
+                                mt: 2.5,
+                                mb: 0.5,
+                                display: "block",
+                            }}
+                        >
+                            Senha <span style={{ color: theme.palette.error.main }}>*</span>
+                        </Typography>
+
+                        <CustomTextField
+                            required
+                            fullWidth
+                            error={!!passwordError}
+                            helperText={passwordError}
+                            id="password"
+                            variant="outlined"
+                            placeholder="Digite sua senha"
+                            type={showPassword ? "text" : "password"}
+                            value={userPassword}
+                            onChange={(event) => setUserPassword(event.target.value)}
+                            onBlur={() => setPasswordTouched(true)}
+                            sx={{
+                                "& .MuiOutlinedInput-input": {
+                                    py: 1.25,
+                                    fontSize: "0.9375rem",
+                                },
+                            }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            edge="end"
+                                            sx={{ color: theme.palette.primary.main }}
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Stack>
+
+                    <Stack
+                        direction="row"
+                        justifyContent="center"
+                        spacing={1}
+                        sx={{ mt: 1, mb: 3 }}
+                    >
+                        <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 400, color: theme.palette.grey[600], fontSize: "0.875rem" }}
+                        >
                             Esqueceu a Senha?
                         </Typography>
                         <Typography
                             variant="body1"
                             component={Link}
                             href="/recover"
-                            fontWeight="700"
-                            sx={{ textDecoration: "none", color: "#173D8A" }}
+                            sx={{
+                                textDecoration: "none",
+                                color: theme.palette.primary.main,
+                                fontWeight: 700,
+                                fontSize: "0.875rem",
+                            }}
                         >
-                        Recuperar
+                            Recuperar
                         </Typography>
                     </Stack>
-                </Box>
-                <Button
-                    fullWidth
-                    type="submit"
-                    color="primary"
-                    variant="contained"
-                    size="large"
-                    sx={{ borderRadius: "50px", height: "50px" }}
-                >
-                    Login
-                </Button>
-            </form>
-            
-            <Button fullWidth
-                color="inherit"
-                variant="text"
-                size="medium"
-                onClick={handleGoogleLoginButtonClick}
-                sx={{ borderRadius: "50px", height: "50px", mt: 1, textTransform: 'none' }}
-                startIcon={<Image
-                    src="/images/icons/icon-google.svg"
-                    alt="Google Login"
-                    width={20}
-                    height={20}
-                    unoptimized
-                />}
-            >
-                Continuar com o Google
-            </Button>
-        </Box>
 
-        <Stack
-            direction="row"
-            justifyContent="center"
-            spacing={1}
-            mt={3}
-            sx={{
-                width: "100%",
-                maxWidth: "100%",
-                display: "flex",
-                flexWrap: "wrap",
-            }}
-        >
-            <Typography variant="body1" fontWeight="400">
-                Ainda não possui uma conta?
-            </Typography>
-            <Typography
-                variant="body1"
-                component={Link}
-                href="/register"
-                fontWeight="700"
-                sx={{ textDecoration: "none", color: "#173D8A" }}
-            >
-                Cadastre-se
-            </Typography>
-        </Stack>
-    </>);
+                    <Button
+                        fullWidth
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                        size="large"
+                        sx={{
+                            borderRadius: "5px",
+                            height: "46px",
+                            fontWeight: 100,
+                            fontSize: "0.9375rem",
+                            textTransform: "none",
+                            boxShadow: "none",
+                            "&:hover": {
+                                boxShadow: "none",
+                            },
+                        }}
+                    >
+                        Entrar
+                    </Button>
+                </form>
+            </Box>
+
+            <Box width="100%" textAlign="center" mt={4}>
+                <Button
+                    startIcon={<ArrowBack />}
+                    onClick={handleBack}
+                    sx={{
+                        textTransform: "none",
+                        color: theme.palette.grey[500],
+                        fontWeight: 500,
+                        fontSize: "0.9375rem",
+                        px: 0,
+                        "&:hover": {
+                            backgroundColor: "transparent",
+                            color: theme.palette.primary.main,
+                        },
+                    }}
+                >
+                    Voltar para menu inicial
+                </Button>
+            </Box>
+        </>
+    );
 }

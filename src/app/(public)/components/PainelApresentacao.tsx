@@ -10,7 +10,7 @@ export default function PainelApresentacao() {
       <Box sx={{ position: "absolute", top: 0, left: 0, padding: 4 }}>
         <Link href={"/dashboard"}>
           <Image
-            src="/images/logos/logo-horizontal.svg"
+            src="/images/logos/logo-escura.svg"
             alt="Google Login"
             width={230}
             height={60}

@@ -14,9 +14,9 @@ export const theme = createTheme(
         direction: "ltr",
         palette: {
             primary: {
-                main: "#173D8A",
-                light: "#ECF2FF",
-                dark: "#647aa8",
+                main: "#5E79B3",
+                light: "#7F99D2",
+                dark: "#4D6A9E",
             },
             secondary: {
                 main: "#49BEFF",
@@ -48,6 +48,7 @@ export const theme = createTheme(
                 contrastText: "#ffffff",
             },
             grey: {
+                50: "#E9E9E9",
                 100: "#F2F6FA",
                 200: "#EAEFF4",
                 300: "#DFE5EF",
@@ -138,6 +139,22 @@ export const theme = createTheme(
                 styleOverrides: {
                     root: {
                         borderRadius: "7px",
+                    },
+                },
+            },
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: {
+                        borderRadius: "5px",
+                        "& fieldset": {
+                            borderColor: "#E9E9E9",
+                        },
+                        "&:hover fieldset": {
+                            borderColor: "#E9E9E9",
+                        },
+                        "&.Mui-focused fieldset": {
+                            borderWidth: "1px",
+                        },
                     },
                 },
             },
