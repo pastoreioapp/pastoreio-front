@@ -9,22 +9,30 @@ import {
     ListItemText,
     ListItemButton,
     styled,
+    IconButton,
 } from "@mui/material";
+import { IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import { Menuitems, MenuItemType } from "./MenuItems";
 import { usePathname } from "next/navigation";
 
+interface SidebarProps {
+    mobileOpen: boolean;
+    onDrawerToggle: () => void;
+}
+
 const StyledListItem = styled(ListItem)(() => ({
     display: "flex",
     justifyContent: "center",
-    marginBottom: "2px",
+    marginBottom: "8px",
     ".MuiButtonBase-root": {
         width: "240px",
         height: "52px",
         borderRadius: "8px",
-        color: "#929ead",
-        justifyContent: "center",
+        color: "#929EAE",
+        justifyContent: "flex-start",
         alignItems: "center",
+        paddingLeft: "20px",
         transition: "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
         ".MuiListItemIcon-root": {
             minWidth: "auto",
@@ -39,20 +47,24 @@ const StyledListItem = styled(ListItem)(() => ({
         },
         ".MuiListItemText-primary": {
             fontSize: "17px",
-            fontWeight: "600",
+            fontWeight: "500",
+            fontFamily: "'Poppins', sans-serif",
             color: "inherit",
         },
         "&:hover": {
-            backgroundColor: "#dce8e6",
+            backgroundColor: "rgba(94, 121, 179, 0.08)",
         },
         "&.Mui-selected": {
-            color: "#1c222e",
-            backgroundColor: "#dce8e6",
+            color: "#1B212D",
+            backgroundColor: "rgba(94, 121, 179, 0.15)",
             "&:hover": {
-                backgroundColor: "#dce8e6",
+                backgroundColor: "rgba(94, 121, 179, 0.15)",
             },
             ".MuiListItemIcon-root": {
-                color: "#1c222e",
+                color: "#1B212D",
+            },
+            ".MuiListItemText-primary": {
+                fontWeight: "600",
             },
         },
     },
@@ -61,9 +73,11 @@ const StyledListItem = styled(ListItem)(() => ({
 const NavItem = ({
     item,
     pathDirect,
+    onNavigate,
 }: {
     item: MenuItemType;
     pathDirect: string;
+    onNavigate?: () => void;
 }) => {
     const Icon = item.icon;
     const itemIcon = <Icon size={"24px"} stroke={2} />;
@@ -74,6 +88,7 @@ const NavItem = ({
                 component={Link}
                 href={item.href}
                 selected={pathDirect === item.href}
+                onClick={onNavigate}
             >
                 <ListItemIcon>{itemIcon}</ListItemIcon>
                 <ListItemText primary={item.title} />
@@ -82,12 +97,17 @@ const NavItem = ({
     );
 };
 
-const SidebarItemsList = () => {
+const SidebarItemsList = ({ onNavigate }: { onNavigate?: () => void }) => {
     const pathDirect = usePathname();
     return (
         <List component="nav" sx={{ pt: "50px" }}>
             {Menuitems.map((item) => (
-                <NavItem key={item.id} item={item} pathDirect={pathDirect} />
+                <NavItem 
+                    key={item.id} 
+                    item={item} 
+                    pathDirect={pathDirect}
+                    onNavigate={onNavigate}
+                />
             ))}
         </List>
     );
@@ -145,53 +165,135 @@ const CardBottom = () => (
     </Box>
 );
 
-export default function SidebarComponent() {
-    return (
+export default function SidebarComponent({ mobileOpen, onDrawerToggle }: SidebarProps) {
+
+    const drawerContent = (
         <Box
             sx={{
-                width: "300px",
-                flexShrink: 0,
-                transition: "width 0.3s ease",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                bgcolor: "#FFFFFF",
+                py: "36px",
+                px: "19px",
             }}
         >
-            <Drawer
-                anchor="left"
-                open
-                variant="permanent"
-                PaperProps={{
-                    sx: {
-                        width: "300px",
-                        borderRight: "none",
-                        overflowX: "hidden",
-                        backgroundColor: "#fafafa",
+            <LogoArea />
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                }}
+            >
+                <SidebarItemsList />
+            </Box>
+            <Box sx={{ mt: "auto", display: "flex", justifyContent: "center" }}>
+                <CardBottom />
+            </Box>
+        </Box>
+    );
+
+    const mobileDrawerContent = (
+        <Box
+            sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                bgcolor: "#FFFFFF",
+                py: "24px",
+                px: "19px",
+                position: "relative",
+            }}
+        >
+            <IconButton
+                onClick={onDrawerToggle}
+                sx={{
+                    position: "absolute",
+                    top: "5px",
+                    right: "5px",
+                    color: "#4c5059",
+                    zIndex: 10,
+                    "&:hover": {
+                        backgroundColor: "rgba(94, 121, 179, 0.08)",
                     },
                 }}
             >
-                <Box
+                <IconX size={24} />
+            </IconButton>
+            <LogoArea />
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                }}
+            >
+                <SidebarItemsList onNavigate={onDrawerToggle} />
+            </Box>
+            <Box sx={{ mt: "auto", display: "flex", justifyContent: "center" }}>
+                <CardBottom />
+            </Box>
+        </Box>
+    );
+
+    return (
+        <>
+            <Box
+                sx={{
+                    width: { xs: 0, md: "278px" },
+                    flexShrink: 0,
+                    display: { xs: "none", md: "block" },
+                }}
+            >
+                <Drawer
+                    anchor="left"
+                    open
+                    variant="permanent"
                     sx={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        bgcolor: "#fafafa",
-                        py: "36px",
-                        px: "30px",
+                        "& .MuiDrawer-paper": {
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            margin: { md: "27px 0 27px 50px" },
+                            height: "calc(100% - 54px)",
+                        },
+                    }}
+                    PaperProps={{
+                        sx: {
+                            width: "278px",
+                            borderRight: "none",
+                            overflowX: "hidden",
+                            backgroundColor: "#FFFFFF",
+                            borderRadius: "30px",
+                            boxShadow: "0px 0px 20px rgba(183, 202, 255, 0.25)",
+                        },
                     }}
                 >
-                    <LogoArea />
-                    <Box
-                        sx={{
-                            flexGrow: 1,
-                            overflowY: "auto",
-                            overflowX: "hidden",
-                        }}
-                    >
-                        <SidebarItemsList />
-                    </Box>
-                    <Box sx={{ mt: "auto" }}>
-                        <CardBottom />
-                    </Box>
-                </Box>
+                    {drawerContent}
+                </Drawer>
+            </Box>
+            <Drawer
+                anchor="left"
+                open={mobileOpen}
+                onClose={onDrawerToggle}
+                variant="temporary"
+                ModalProps={{
+                    keepMounted: true,
+                }}
+                sx={{
+                    display: { xs: "block", md: "none" },
+                    "& .MuiDrawer-paper": {
+                        width: "278px",
+                        borderRight: "none",
+                        overflowX: "hidden",
+                        backgroundColor: "#FFFFFF",
+                        boxShadow: "0px 0px 20px rgba(183, 202, 255, 0.25)",
+                    },
+                }}
+            >
+                {mobileDrawerContent}
             </Drawer>
-        </Box>
+        </>
     );
 }

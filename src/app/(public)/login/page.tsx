@@ -4,43 +4,13 @@ import PainelApresentacao from "../components/PainelApresentacao";
 
 export default function LoginPage() {
   return (
-    <Box
-      sx={{
-        position: "relative",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: { xs: "column", lg: "row" },
-        backgroundColor: "#EFF4FF",
-      }}
-    >
       <Box
         sx={{
-          width: { xs: 0, lg: "45%" },
-          height: { xs: 0, lg: "100vh" },
-          overflow: "hidden",
-          display: { xs: "none", lg: "flex" },
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-          color: "#173D8A",
-          padding: 4,
-          transition: "all 0.3s ease",
-        }}
-      >
-        <PainelApresentacao />
-      </Box>
-
-      <Box
-        sx={{
-          width: { xs: "100%", lg: "55%" },
-          height: { xs: "auto", lg: "100vh" },
-          minHeight: { xs: "100vh", lg: "auto" },
+          height: "100vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#ffffff",
-          p: { xs: 2, sm: 4 },
-          borderRadius: "30px 0px 0px 30px",
+          background: "linear-gradient(180deg, #5E79B3 0%, #7F99D2 100%)",
         }}
       >
         <Card
@@ -57,6 +27,5 @@ export default function LoginPage() {
           <PainelLogin />
         </Card>
       </Box>
-    </Box>
   );
 }

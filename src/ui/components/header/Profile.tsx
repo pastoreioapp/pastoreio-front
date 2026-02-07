@@ -15,6 +15,8 @@ import {
     Button,
     Snackbar,
     Alert as MuiAlert,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import {
     IconBrightnessUp,
@@ -77,6 +79,9 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [toastOpen, setToastOpen] = useState(false);
 
     const { runLogout, loggedUser: usuario } = useAppAuthentication();
+    
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
     const handleClick = (event: MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -132,39 +137,68 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                     alignItems: "center",
                     justifyContent: "space-between",
                     textTransform: "none",
-                    padding: "6px 12px 6px 6px",
-                    borderRadius: "50px",
-                    marginLeft: "20px",
-                    backgroundColor: "#f1f1f1",
-                    color: "#374151",
+                    padding: isMobile ? "4px" : "6px 15px 6px 6px",
+                    borderRadius: "100px",
+                    border: "1px solid #5E79B3",
+                    backgroundColor: "transparent",
+                    color: "#1B212D",
+                    minWidth: "auto",
                     "&:hover": {
-                        backgroundColor: "#e5e7eb",
+                        backgroundColor: "rgba(94, 121, 179, 0.05)",
                     },
                 }}
             >
-                <Avatar
-                    src={avatarUrl || undefined}
+                <Box
                     sx={{
-                        width: 35,
-                        height: 35,
-                        bgcolor: "#0d3b8a",
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        color: "#fff",
+                        width: { xs: "32px", sm: "36px", md: "40px" },
+                        height: { xs: "32px", sm: "36px", md: "40px" },
+                        borderRadius: "50%",
+                        border: "3px solid #FFFFFF",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        backgroundColor: "#5E79B3",
                     }}
                 >
-                    {!avatarUrl && (usuario ? getInitials(usuario.nome) : "")}
-                </Avatar>
-                <Typography variant="body1" fontWeight="600" sx={{ mx: 1.5 }}>
-                    {usuario ? usuario.nome : ""}
-                </Typography>
-                <IconCaretDownFilled
-                    size="18"
-                    style={{
-                        transition: "transform 0.2s ease-in-out",
-                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    }}
-                />
+                    <Avatar
+                        src={avatarUrl || undefined}
+                        sx={{
+                            width: "100%",
+                            height: "100%",
+                            bgcolor: "#5E79B3",
+                            fontSize: { xs: "12px", sm: "13px", md: "14px" },
+                            fontWeight: "600",
+                            color: "#fff",
+                        }}
+                    >
+                        {!avatarUrl && (usuario ? getInitials(usuario.nome) : "")}
+                    </Avatar>
+                </Box>
+                {!isMobile && (
+                    <>
+                        <Typography 
+                            variant="body1" 
+                            fontWeight="600" 
+                            sx={{ 
+                                mx: 1.5,
+                                fontFamily: "'Poppins', sans-serif",
+                                fontSize: "15px",
+                                color: "#1B212D",
+                            }}
+                        >
+                            {usuario ? usuario.nome : ""}
+                        </Typography>
+                        <IconCaretDownFilled
+                            size="18"
+                            color="#929EAE"
+                            style={{
+                                transition: "transform 0.2s ease-in-out",
+                                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                            }}
+                        />
+                    </>
+                )}
             </Button>
 
             <Menu
