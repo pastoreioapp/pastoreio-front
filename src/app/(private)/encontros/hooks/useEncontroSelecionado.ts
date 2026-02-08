@@ -3,7 +3,7 @@ import { useEncontros } from "./useEncontros";
 import { Encontro } from "@/features/encontros/types";
 
 export function useEncontrosSelecionados() {
-    const { encontros, loading, erro } = useEncontros();
+    const { encontros, loading, erro, refetch } = useEncontros();
     const [encontrosSelecionado, setEncontrosSelecionado] =
         useState<Encontro | null>(null);
 
@@ -25,5 +25,6 @@ export function useEncontrosSelecionados() {
         toggleEncontrosSelecionado,
         loading,
         erro,
+        refetch,
     };
 }

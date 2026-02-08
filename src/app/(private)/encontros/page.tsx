@@ -10,6 +10,8 @@ import { LoadingBox } from "./components/loading/LoadingBox";
 import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
+import { criarEncontro } from "@/features/encontros/encontros.service";
+import { EncontroInsert } from "@/features/encontros/types";
 import { useState } from "react";
 
 export default function Encontros() {
@@ -19,15 +21,34 @@ export default function Encontros() {
         toggleEncontrosSelecionado,
         loading,
         erro,
+        refetch,
     } = useEncontrosSelecionados();
 
     const [modalAberto, setModalAberto] = useState(false);
 
-    const handleSalvarEncontro = (dados: DadosEncontro) => {
-        console.log("Dados do encontro:", dados);
-        // TODO: Integrar com a API quando estiver pronta
-        // Exemplo: await salvarEncontro(dados);
-        alert("Encontro cadastrado com sucesso! (Por enquanto apenas no console)");
+    const handleSalvarEncontro = async (dados: DadosEncontro) => {
+        // Converter "sim"/"não" para boolean e adicionar campos obrigatórios
+        const dadosFormatados: any = {
+            tema: dados.tema,
+            data: dados.data,
+            horario: "19:00:00", // Valor padrão - TODO: adicionar campo no modal
+            local: "A definir", // Valor padrão - TODO: adicionar campo no modal
+            anfitriao: dados.anfitriao,
+            preletor: dados.preletor,
+            supervisao: dados.supervisao === "sim",
+            conversoes: dados.conversoes === "sim",
+            criado_em: new Date().toISOString(),
+            criado_por: "sistema", // TODO: pegar usuário logado
+            deletado: false,
+        };
+        
+        await criarEncontro(dadosFormatados);
+        
+        alert("Encontro cadastrado com sucesso!");
+        setModalAberto(false);
+        
+        // Recarregar a lista de encontros
+        await refetch();
     };
 
     if (loading) return <LoadingBox />;

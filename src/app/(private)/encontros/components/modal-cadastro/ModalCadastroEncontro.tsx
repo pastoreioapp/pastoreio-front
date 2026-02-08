@@ -19,7 +19,7 @@ import { useState } from "react";
 interface ModalCadastroEncontroProps {
     open: boolean;
     onClose: () => void;
-    onSave: (dados: DadosEncontro) => void;
+    onSave: (dados: DadosEncontro) => Promise<void>;
 }
 
 export interface DadosEncontro {
@@ -44,22 +44,33 @@ export function ModalCadastroEncontro({
         supervisao: "não",
         conversoes: "não",
     });
+    const [salvando, setSalvando] = useState(false);
 
     const handleChange = (field: keyof DadosEncontro, value: string) => {
         setDados((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validação simples
         if (!dados.tema || !dados.data || !dados.anfitriao || !dados.preletor) {
             alert("Por favor, preencha todos os campos obrigatórios");
             return;
         }
-        onSave(dados);
-        handleClose();
+        
+        try {
+            setSalvando(true);
+            await onSave(dados);
+            handleClose(); // Só fecha se salvar com sucesso
+        } catch (error: any) {
+            console.error("Erro no modal:", error);
+            alert("Erro ao salvar: " + (error?.message || "Erro desconhecido"));
+            setSalvando(false); // Reseta estado mas não fecha o modal
+        }
     };
 
     const handleClose = () => {
+        if (salvando) return; // Não permite fechar enquanto está salvando
+        
         // Limpa o formulário ao fechar
         setDados({
             tema: "",
@@ -69,6 +80,7 @@ export function ModalCadastroEncontro({
             supervisao: "não",
             conversoes: "não",
         });
+        setSalvando(false);
         onClose();
     };
 
@@ -148,15 +160,19 @@ export function ModalCadastroEncontro({
                 </Box>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
-                <Button onClick={handleClose} color="inherit">
+                <Button onClick={handleClose} disabled={salvando}>
                     Cancelar
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    sx={{ bgcolor: "#5E79B3" }}
+                    disabled={salvando}
+                    sx={{
+                        bgcolor: "#5E79B3",
+                        "&:hover": { bgcolor: "#4A6190" },
+                    }}
                 >
-                    Salvar
+                    {salvando ? "Salvando..." : "Salvar"}
                 </Button>
             </DialogActions>
         </Dialog>

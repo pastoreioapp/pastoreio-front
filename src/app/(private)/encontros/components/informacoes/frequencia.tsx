@@ -28,6 +28,17 @@ export function Frequencia({ data }: { data: Encontro["frequencia"] }) {
         }
     };
 
+    // Proteção: se não houver dados de frequência, mostrar mensagem
+    if (!data || data.length === 0) {
+        return (
+            <Box sx={{ p: 3, textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                    Nenhuma frequência registrada para este encontro.
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
         <TableContainer
             component={Paper}
