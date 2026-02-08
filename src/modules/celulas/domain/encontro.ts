@@ -13,7 +13,7 @@ export interface Encontro {
 }
 
 export interface EncontroInsert {
-    celula_id: string;
+    celula_id?: string | null;
     tema: string;
     data: string;
     anfitriao: string;

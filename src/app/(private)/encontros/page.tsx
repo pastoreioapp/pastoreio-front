@@ -30,7 +30,7 @@ export default function Encontros() {
     const handleSalvarEncontro = async (dados: DadosEncontro) => {
         try {
             const dadosParaSalvar: EncontroInsert = {
-                celula_id: dados.celula_id,
+                celula_id: dados.celula_id || null,
                 data: dados.data,
                 tema: dados.tema,
                 anfitriao: dados.anfitriao,

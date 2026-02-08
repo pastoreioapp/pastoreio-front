@@ -23,7 +23,7 @@ interface ModalCadastroEncontroProps {
 }
 
 export interface DadosEncontro {
-    celula_id: string;
+    celula_id?: string | null;
     tema: string;
     data: string;
     anfitriao: string;
@@ -39,7 +39,7 @@ export function ModalCadastroEncontro({
     onSave,
 }: ModalCadastroEncontroProps) {
     const [dados, setDados] = useState<DadosEncontro>({
-        celula_id: "1",
+        celula_id: null,
         tema: "",
         data: "",
         anfitriao: "",
@@ -76,7 +76,7 @@ export function ModalCadastroEncontro({
     const handleClose = () => {
         // Limpa o formulário ao fechar
         setDados({
-            celula_id: "1",
+            celula_id: null,
             tema: "",
             data: "",
             anfitriao: "",

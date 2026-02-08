@@ -41,6 +41,10 @@ export class EncontroRepository {
       throw new Error(error.message);
     }
     
+    if (!data) {
+      throw new Error("Nenhum dado retornado do Supabase após inserção");
+    }
+    
     return data;
   }
 }
