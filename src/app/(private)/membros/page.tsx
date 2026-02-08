@@ -14,6 +14,8 @@ import { enqueueSnackbar } from "notistack";
 export default function Membros() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    // TODO: obter celulaId do usuário logado (ex.: contexto, rota /celulas/[id]/membros ou sessão)
+    const celulaId = 3;
     const {
         membros,
         membroSelecionado,
@@ -21,7 +23,7 @@ export default function Membros() {
         deselectMembro,
         loading,
         erro,
-    } = useMembrosSelecionados();
+    } = useMembrosSelecionados(celulaId);
 
     if (loading) return <LoadingBox />;
     if (erro) return <ErrorBox message={erro} />;
