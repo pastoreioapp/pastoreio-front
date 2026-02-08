@@ -29,7 +29,8 @@ export function MembroListItem({
                 py: "15px",
                 px: "15.32px",
                 gap: "17px",
-                width: "330px",
+                width: "100%",
+                maxWidth: "330px",
                 height: "90px",
                 transition: "background-color 0.2s ease-in-out",
                 "&:hover": {
@@ -51,9 +52,9 @@ export function MembroListItem({
             <Box flex={1}>
                 <Typography fontSize={16}>{membro.nome}</Typography>
                 <Divider
-                    sx={{ borderColor: "#1B212D", mt: "2px", mb: "4px" }}
+                    sx={{ borderColor: "#C5C5C5", mt: "2px", mb: "4px" }}
                 />
-                <Typography fontSize={12} fontWeight={600}>
+                <Typography color="#686868" fontSize={".8rem"} fontWeight={800}>
                     {membro.funcao}
                 </Typography>
             </Box>

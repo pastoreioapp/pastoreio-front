@@ -32,15 +32,16 @@ export function InformacaoHeader({
                 {displayNome.charAt(0).toUpperCase() || "?"}
             </Avatar>
             <Typography
-                sx={{ mt: "12px", fontSize: "18px", fontWeight: "500" }}
+                sx={{ mt: 2, fontSize: "18px", fontWeight: "500" }}
             >
                 {displayNome}
             </Typography>
             <Box
                 sx={{
                     bgcolor: "#5E79B3",
-                    py: "2px",
-                    px: "9px",
+                    mt: 1,
+                    py: .5,
+                    px: 2,
                     color: "#fff",
                     borderRadius: 1,
                 }}
