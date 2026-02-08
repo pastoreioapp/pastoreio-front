@@ -19,16 +19,18 @@ import { useState } from "react";
 interface ModalCadastroEncontroProps {
     open: boolean;
     onClose: () => void;
-    onSave: (dados: DadosEncontro) => void;
+    onSave: (dados: DadosEncontro) => Promise<void>;
 }
 
 export interface DadosEncontro {
+    celula_id: string;
     tema: string;
     data: string;
     anfitriao: string;
     preletor: string;
     supervisao: "sim" | "não";
     conversoes: "sim" | "não";
+    observacoes?: string;
 }
 
 export function ModalCadastroEncontro({
@@ -37,37 +39,51 @@ export function ModalCadastroEncontro({
     onSave,
 }: ModalCadastroEncontroProps) {
     const [dados, setDados] = useState<DadosEncontro>({
+        celula_id: "1",
         tema: "",
         data: "",
         anfitriao: "",
         preletor: "",
         supervisao: "não",
         conversoes: "não",
+        observacoes: "",
     });
+
+    const [salvando, setSalvando] = useState(false);
 
     const handleChange = (field: keyof DadosEncontro, value: string) => {
         setDados((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validação simples
         if (!dados.tema || !dados.data || !dados.anfitriao || !dados.preletor) {
             alert("Por favor, preencha todos os campos obrigatórios");
             return;
         }
-        onSave(dados);
-        handleClose();
+        
+        try {
+            setSalvando(true);
+            await onSave(dados);
+            handleClose();
+        } catch (error) {
+            console.error("Erro ao salvar:", error);
+        } finally {
+            setSalvando(false);
+        }
     };
 
     const handleClose = () => {
         // Limpa o formulário ao fechar
         setDados({
+            celula_id: "1",
             tema: "",
             data: "",
             anfitriao: "",
             preletor: "",
             supervisao: "não",
             conversoes: "não",
+            observacoes: "",
         });
         onClose();
     };
@@ -145,18 +161,29 @@ export function ModalCadastroEncontro({
                             <MenuItem value="sim">Sim</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <TextField
+                        label="Observações"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={dados.observacoes || ""}
+                        onChange={(e) => handleChange("observacoes", e.target.value)}
+                        placeholder="Observações sobre o encontro (opcional)"
+                    />
                 </Box>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
-                <Button onClick={handleClose} color="inherit">
+                <Button onClick={handleClose} color="inherit" disabled={salvando}>
                     Cancelar
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
                     sx={{ bgcolor: "#5E79B3" }}
+                    disabled={salvando}
                 >
-                    Salvar
+                    {salvando ? "Salvando..." : "Salvar"}
                 </Button>
             </DialogActions>
         </Dialog>

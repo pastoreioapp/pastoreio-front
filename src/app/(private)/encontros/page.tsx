@@ -11,6 +11,9 @@ import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useState } from "react";
+import { EncontroService } from "@/modules/celulas/application/encontro.service";
+import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
+import type { EncontroInsert } from "@/modules/celulas/domain/encontro";
 
 export default function Encontros() {
     const {
@@ -19,15 +22,39 @@ export default function Encontros() {
         toggleEncontrosSelecionado,
         loading,
         erro,
+        refetch,
     } = useEncontrosSelecionados();
 
     const [modalAberto, setModalAberto] = useState(false);
 
-    const handleSalvarEncontro = (dados: DadosEncontro) => {
-        console.log("Dados do encontro:", dados);
-        // TODO: Integrar com a API quando estiver pronta
-        // Exemplo: await salvarEncontro(dados);
-        alert("Encontro cadastrado com sucesso! (Por enquanto apenas no console)");
+    const handleSalvarEncontro = async (dados: DadosEncontro) => {
+        try {
+            const dadosParaSalvar: EncontroInsert = {
+                celula_id: dados.celula_id,
+                data: dados.data,
+                tema: dados.tema,
+                anfitriao: dados.anfitriao,
+                preletor: dados.preletor,
+                supervisao: dados.supervisao === "sim",
+                conversoes: dados.conversoes === "sim",
+                observacoes: dados.observacoes,
+                horario: "19:00:00",
+                local: "A definir",
+                criado_em: new Date().toISOString(),
+                criado_por: "sistema",
+                deletado: false,
+            };
+
+            const repo = new EncontroRepository();
+            const service = new EncontroService(repo);
+            await service.create(dadosParaSalvar);
+
+            setModalAberto(false);
+            await refetch();
+        } catch (error) {
+            console.error("Erro ao salvar encontro:", error);
+            alert("Erro ao salvar encontro. Verifique o console para mais detalhes.");
+        }
     };
 
     if (loading) return <LoadingBox />;
