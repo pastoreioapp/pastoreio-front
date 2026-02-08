@@ -67,8 +67,7 @@ export function Informacao({
         <Box
             sx={{
                 border: "1px solid #F5F5F5",
-                py: { xs: 3, md: 5 },
-                px: { xs: 3, md: 10 },
+                p: { xs: 3, md: 5 },
                 borderRadius: "10px",
                 width: "100%",
                 height: "100%",
@@ -135,10 +134,12 @@ export function Informacao({
                     display: "flex",
                     flexDirection: { xs: "column", md: "row" },
                     gap: { xs: 0, md: 5 },
-                    width: { xs: "100%", md: "auto" },
+                    flex: { md: 1 },
+                    minWidth: 0,
+                    width: "100%",
                 }}>
                     {grupos.map((grupo, i) => (
-                        <Box key={i} sx={{ width: { xs: "100%", md: 300 } }}>
+                        <Box key={i} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
                             <InformacoesGroup
                                 titulo={grupo.titulo}
                                 campos={grupo.campos}

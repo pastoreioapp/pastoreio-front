@@ -58,7 +58,7 @@ export default function Membros() {
                     flexDirection: { xs: "column", md: "row" },
                 }}>
                     {mostrarLista && (
-                        <Box sx={{ width: { xs: "100%", md: 348 } }}>
+                        <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
                             <Filtro
                                 data={membros}
                                 onSelect={toggleMembroSelecionado}
@@ -68,7 +68,7 @@ export default function Membros() {
                     )}
 
                     {mostrarInfo && (
-                        <Box flex={1}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Informacao
                                 data={membroSelecionado || null}
                                 onBack={isMobile ? deselectMembro : undefined}

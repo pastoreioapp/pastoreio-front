@@ -13,8 +13,10 @@ import {
 } from "@mui/material";
 import { IconX } from "@tabler/icons-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menuitems, MenuItemType } from "./MenuItems";
 import { usePathname } from "next/navigation";
+import { poppins } from "@/ui/utils/theme";
 
 interface SidebarProps {
     mobileOpen: boolean;
@@ -46,9 +48,9 @@ const StyledListItem = styled(ListItem)(() => ({
             whiteSpace: "nowrap",
         },
         ".MuiListItemText-primary": {
-            fontSize: "17px",
+            fontSize: "1rem",
             fontWeight: "500",
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: poppins.style.fontFamily,
             color: "inherit",
         },
         "&:hover": {
@@ -80,7 +82,7 @@ const NavItem = ({
     onNavigate?: () => void;
 }) => {
     const Icon = item.icon;
-    const itemIcon = <Icon size={"24px"} stroke={2} />;
+    const itemIcon = <Icon size={24} stroke={2} />;
 
     return (
         <StyledListItem disablePadding>
@@ -132,7 +134,12 @@ const LogoArea = () => (
                 justifyContent: "center",
             }}
         >
-            <img src="/images/logos/Logo.svg" alt="Logo" />
+            <Image
+                src="/images/logos/Logo.svg"
+                alt="Logo"
+                width={240}
+                height={154}
+            />
         </Box>
     </Box>
 );
@@ -156,10 +163,11 @@ const CardBottom = () => (
                 justifyContent: "center",
             }}
         >
-            <img
+            <Image
                 src="/images/cards/versiculo.svg"
                 alt="Card"
-                style={{ width: "240px", height: "132.05px" }}
+                width={240}
+                height={132}
             />
         </Box>
     </Box>

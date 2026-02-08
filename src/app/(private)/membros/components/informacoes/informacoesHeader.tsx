@@ -13,15 +13,17 @@ export function InformacaoHeader({
         <Box
             sx={{
                 mt: "32px",
+                mr: { xs: 0, md: 5 },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                flexShrink: 0,
             }}
         >
             <Avatar
                 sx={{
-                    width: "180px",
-                    height: "180px",
+                    width: "130px",
+                    height: "130px",
                     fontSize: 48,
                     fontWeight: "bold",
                     backgroundColor: "#5E79B3",
@@ -38,11 +40,11 @@ export function InformacaoHeader({
             </Typography>
             <Box
                 sx={{
-                    bgcolor: "#5E79B3",
+                    bgcolor: displayFuncao === "MEMBRO" ? "#DCE8E6" : "#5E79B3",
                     mt: 1,
                     py: .5,
                     px: 2,
-                    color: "#fff",
+                    color: displayFuncao === "MEMBRO" ? "#1B212D" : "#fff",
                     borderRadius: 1,
                 }}
             >
