@@ -14,6 +14,7 @@ import { useState } from "react";
 import { EncontroService } from "@/modules/celulas/application/encontro.service";
 import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
 import type { EncontroInsert } from "@/modules/celulas/domain/encontro";
+import { enqueueSnackbar } from "notistack";
 
 export default function Encontros() {
     const {
@@ -29,15 +30,21 @@ export default function Encontros() {
 
     const handleSalvarEncontro = async (dados: DadosEncontro) => {
         try {
+            const observacoesNormalizadas = [
+                `Anfitrião: ${dados.anfitriao}`,
+                `Preletor: ${dados.preletor}`,
+                `Houve supervisão do setor: ${dados.supervisao}`,
+                `Houve conversões: ${dados.conversoes}`,
+                dados.observacoes?.trim() ? `Observações: ${dados.observacoes.trim()}` : "",
+            ]
+                .filter(Boolean)
+                .join("\n");
+
             const dadosParaSalvar: EncontroInsert = {
                 celula_id: dados.celula_id || null,
                 data: dados.data,
                 tema: dados.tema,
-                anfitriao: dados.anfitriao,
-                preletor: dados.preletor,
-                supervisao: dados.supervisao === "sim",
-                conversoes: dados.conversoes === "sim",
-                observacoes: dados.observacoes,
+                observacoes: observacoesNormalizadas,
                 horario: "19:00:00",
                 local: "A definir",
                 criado_em: new Date().toISOString(),
@@ -50,10 +57,11 @@ export default function Encontros() {
             await service.create(dadosParaSalvar);
 
             setModalAberto(false);
+            enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success" });
             await refetch();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao salvar encontro:", error);
-            alert("Erro ao salvar encontro. Verifique o console para mais detalhes.");
+            throw new Error(error?.message || "Erro ao salvar encontro.");
         }
     };
 

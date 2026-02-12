@@ -15,6 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { enqueueSnackbar } from "notistack";
 
 interface ModalCadastroEncontroProps {
     open: boolean;
@@ -38,6 +39,8 @@ export function ModalCadastroEncontro({
     onClose,
     onSave,
 }: ModalCadastroEncontroProps) {
+    type CampoObrigatorio = "tema" | "data" | "anfitriao" | "preletor";
+
     const [dados, setDados] = useState<DadosEncontro>({
         celula_id: null,
         tema: "",
@@ -50,15 +53,47 @@ export function ModalCadastroEncontro({
     });
 
     const [salvando, setSalvando] = useState(false);
+    const [camposTocados, setCamposTocados] = useState<Record<CampoObrigatorio, boolean>>({
+        tema: false,
+        data: false,
+        anfitriao: false,
+        preletor: false,
+    });
+
+    const getCampoObrigatorioErro = (campo: CampoObrigatorio) => {
+        if (!camposTocados[campo]) {
+            return "";
+        }
+
+        return dados[campo].trim() ? "" : "Campo obrigatório";
+    };
+
+    const marcarCampoComoTocado = (campo: CampoObrigatorio) => {
+        setCamposTocados((prev) => ({ ...prev, [campo]: true }));
+    };
+
+    const marcarTodosCamposObrigatoriosComoTocados = () => {
+        setCamposTocados({
+            tema: true,
+            data: true,
+            anfitriao: true,
+            preletor: true,
+        });
+    };
+
+    const possuiCamposObrigatoriosInvalidos = () =>
+        !dados.tema.trim() || !dados.data.trim() || !dados.anfitriao.trim() || !dados.preletor.trim();
 
     const handleChange = (field: keyof DadosEncontro, value: string) => {
         setDados((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = async () => {
-        // Validação simples
-        if (!dados.tema || !dados.data || !dados.anfitriao || !dados.preletor) {
-            alert("Por favor, preencha todos os campos obrigatórios");
+        marcarTodosCamposObrigatoriosComoTocados();
+
+        if (possuiCamposObrigatoriosInvalidos()) {
+            const errorMessage = "Por favor, preencha todos os campos obrigatórios";
+            enqueueSnackbar(errorMessage, { variant: "error" });
             return;
         }
         
@@ -66,8 +101,11 @@ export function ModalCadastroEncontro({
             setSalvando(true);
             await onSave(dados);
             handleClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erro ao salvar:", error);
+            const errorMessage =
+                error?.message || "Não foi possível salvar o encontro. Tente novamente.";
+            enqueueSnackbar(errorMessage, { variant: "error" });
         } finally {
             setSalvando(false);
         }
@@ -84,6 +122,12 @@ export function ModalCadastroEncontro({
             supervisao: "não",
             conversoes: "não",
             observacoes: "",
+        });
+        setCamposTocados({
+            tema: false,
+            data: false,
+            anfitriao: false,
+            preletor: false,
         });
         onClose();
     };
@@ -103,6 +147,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.tema}
                         onChange={(e) => handleChange("tema", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("tema")}
+                        error={Boolean(getCampoObrigatorioErro("tema"))}
+                        helperText={getCampoObrigatorioErro("tema")}
                         placeholder="Ex: A Importância da Comunhão"
                     />
 
@@ -113,6 +160,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.data}
                         onChange={(e) => handleChange("data", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("data")}
+                        error={Boolean(getCampoObrigatorioErro("data"))}
+                        helperText={getCampoObrigatorioErro("data")}
                         InputLabelProps={{ shrink: true }}
                     />
 
@@ -122,6 +172,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.anfitriao}
                         onChange={(e) => handleChange("anfitriao", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("anfitriao")}
+                        error={Boolean(getCampoObrigatorioErro("anfitriao"))}
+                        helperText={getCampoObrigatorioErro("anfitriao")}
                         placeholder="Nome do anfitrião"
                     />
 
@@ -131,6 +184,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.preletor}
                         onChange={(e) => handleChange("preletor", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("preletor")}
+                        error={Boolean(getCampoObrigatorioErro("preletor"))}
+                        helperText={getCampoObrigatorioErro("preletor")}
                         placeholder="Nome do preletor"
                     />
 

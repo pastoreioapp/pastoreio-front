@@ -16,10 +16,6 @@ export interface EncontroInsert {
     celula_id?: string | null;
     tema: string;
     data: string;
-    anfitriao: string;
-    preletor: string;
-    supervisao: boolean;
-    conversoes: boolean;
     observacoes?: string;
     horario: string;
     local: string;
