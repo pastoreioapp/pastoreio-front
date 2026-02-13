@@ -33,22 +33,30 @@ export default function Encontros() {
             const observacoesNormalizadas = [
                 `Anfitrião: ${dados.anfitriao}`,
                 `Preletor: ${dados.preletor}`,
-                `Houve supervisão do setor: ${dados.supervisao}`,
-                `Houve conversões: ${dados.conversoes}`,
+                `Houve supervisão do setor: ${dados.supervisao === "sim" ? "Sim" : "Não"}`,
+                `Houve conversões: ${dados.conversoes === "sim" ? "Sim" : "Não"}`,
                 dados.observacoes?.trim() ? `Observações: ${dados.observacoes.trim()}` : "",
             ]
                 .filter(Boolean)
                 .join("\n");
+
+            // Buscar email do usuário autenticado
+            const { createClient } = await import("@/shared/supabase/client");
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            const userEmail = user?.email || "sistema";
 
             const dadosParaSalvar: EncontroInsert = {
                 celula_id: dados.celula_id || null,
                 data: dados.data,
                 tema: dados.tema,
                 observacoes: observacoesNormalizadas,
-                horario: "19:00:00",
-                local: "A definir",
+                horario: `${dados.horario}:00`,
+                local: dados.local,
+                supervisao: dados.supervisao === "sim",
+                conversoes: dados.conversoes === "sim",
                 criado_em: new Date().toISOString(),
-                criado_por: "sistema",
+                criado_por: userEmail,
                 deletado: false,
             };
 
@@ -60,7 +68,6 @@ export default function Encontros() {
             enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success" });
             await refetch();
         } catch (error: any) {
-            console.error("Erro ao salvar encontro:", error);
             throw new Error(error?.message || "Erro ao salvar encontro.");
         }
     };

@@ -7,8 +7,8 @@ export interface Encontro {
     anfitriao: string;
     numeroParticipantes: number;
     preletor: string;
-    supervisao: "sim" | "não";
-    conversoes: "sim" | "não";
+    supervisao: boolean;
+    conversoes: boolean;
     frequencia?: Frequencia[];
 }
 
@@ -19,6 +19,8 @@ export interface EncontroInsert {
     observacoes?: string;
     horario: string;
     local: string;
+    supervisao: boolean;
+    conversoes: boolean;
     criado_em: string;
     criado_por: string;
     deletado: boolean;

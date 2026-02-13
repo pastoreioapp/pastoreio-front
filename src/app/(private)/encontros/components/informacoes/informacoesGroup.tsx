@@ -3,7 +3,7 @@ import { Box, Input, InputLabel, Typography } from "@mui/material";
 export function InformacoesGroup({
     campos,
 }: {
-    campos: { label: string; valor: string | number }[];
+    campos: { label: string; valor: string | number | boolean }[];
 }) {
     return (
         <Box>
@@ -20,7 +20,7 @@ export function InformacoesGroup({
                     </InputLabel>
                     <Box sx={{ display: "flex", gap: "1px" }}>
                         <Input
-                            value={campo.valor}
+                            value={typeof campo.valor === "boolean" ? (campo.valor ? "Sim" : "Não") : campo.valor}
                             sx={{
                                 fontSize: "11px",
                                 width: "100%",

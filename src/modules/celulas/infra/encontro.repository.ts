@@ -16,11 +16,9 @@ export class EncontroRepository {
       throw new Error(error.message);
     }
     
-    // Converter formato do banco para formato do frontend
+    // Retornar dados do banco diretamente
     const encontrosFormatados = (data || []).map((encontro: any) => ({
       ...encontro,
-      supervisao: encontro.supervisao ? "sim" : "não",
-      conversoes: encontro.conversoes ? "sim" : "não",
       frequencia: encontro.frequencia || [],
     }));
     

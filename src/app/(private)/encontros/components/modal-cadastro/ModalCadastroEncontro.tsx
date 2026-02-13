@@ -27,6 +27,8 @@ export interface DadosEncontro {
     celula_id?: string | null;
     tema: string;
     data: string;
+    horario: string;
+    local: string;
     anfitriao: string;
     preletor: string;
     supervisao: "sim" | "não";
@@ -39,12 +41,14 @@ export function ModalCadastroEncontro({
     onClose,
     onSave,
 }: ModalCadastroEncontroProps) {
-    type CampoObrigatorio = "tema" | "data" | "anfitriao" | "preletor";
+    type CampoObrigatorio = "tema" | "data" | "horario" | "local" | "anfitriao" | "preletor";
 
     const [dados, setDados] = useState<DadosEncontro>({
         celula_id: null,
         tema: "",
         data: "",
+        horario: "19:00",
+        local: "",
         anfitriao: "",
         preletor: "",
         supervisao: "não",
@@ -56,6 +60,8 @@ export function ModalCadastroEncontro({
     const [camposTocados, setCamposTocados] = useState<Record<CampoObrigatorio, boolean>>({
         tema: false,
         data: false,
+        horario: false,
+        local: false,
         anfitriao: false,
         preletor: false,
     });
@@ -76,13 +82,15 @@ export function ModalCadastroEncontro({
         setCamposTocados({
             tema: true,
             data: true,
+            horario: true,
+            local: true,
             anfitriao: true,
             preletor: true,
         });
     };
 
     const possuiCamposObrigatoriosInvalidos = () =>
-        !dados.tema.trim() || !dados.data.trim() || !dados.anfitriao.trim() || !dados.preletor.trim();
+        !dados.tema.trim() || !dados.data.trim() || !dados.horario.trim() || !dados.local.trim() || !dados.anfitriao.trim() || !dados.preletor.trim();
 
     const handleChange = (field: keyof DadosEncontro, value: string) => {
         setDados((prev) => ({ ...prev, [field]: value }));
@@ -102,7 +110,6 @@ export function ModalCadastroEncontro({
             await onSave(dados);
             handleClose();
         } catch (error: any) {
-            console.error("Erro ao salvar:", error);
             const errorMessage =
                 error?.message || "Não foi possível salvar o encontro. Tente novamente.";
             enqueueSnackbar(errorMessage, { variant: "error" });
@@ -117,6 +124,8 @@ export function ModalCadastroEncontro({
             celula_id: null,
             tema: "",
             data: "",
+            horario: "19:00",
+            local: "",
             anfitriao: "",
             preletor: "",
             supervisao: "não",
@@ -126,6 +135,8 @@ export function ModalCadastroEncontro({
         setCamposTocados({
             tema: false,
             data: false,
+            horario: false,
+            local: false,
             anfitriao: false,
             preletor: false,
         });
@@ -164,6 +175,31 @@ export function ModalCadastroEncontro({
                         error={Boolean(getCampoObrigatorioErro("data"))}
                         helperText={getCampoObrigatorioErro("data")}
                         InputLabelProps={{ shrink: true }}
+                    />
+
+                    <TextField
+                        label="Horário"
+                        type="time"
+                        fullWidth
+                        required
+                        value={dados.horario}
+                        onChange={(e) => handleChange("horario", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("horario")}
+                        error={Boolean(getCampoObrigatorioErro("horario"))}
+                        helperText={getCampoObrigatorioErro("horario")}
+                        InputLabelProps={{ shrink: true }}
+                    />
+
+                    <TextField
+                        label="Local/Endereço"
+                        fullWidth
+                        required
+                        value={dados.local}
+                        onChange={(e) => handleChange("local", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("local")}
+                        error={Boolean(getCampoObrigatorioErro("local"))}
+                        helperText={getCampoObrigatorioErro("local")}
+                        placeholder="Ex: Rua das Flores, 123 - Centro"
                     />
 
                     <TextField
