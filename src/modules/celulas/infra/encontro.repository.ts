@@ -9,7 +9,7 @@ export class EncontroRepository {
 
     const { data, error } = await supabase
       .from(TABLE)
-      .select("*, frequencias_celula(*)")
+      .select("*, frequencias_celula(*, membros(nome))")
       .eq("deletado", false)
       .order("data", { ascending: false });
 
@@ -19,9 +19,12 @@ export class EncontroRepository {
     }
 
     const encontrosFormatados = (data || []).map((encontro: any) => {
-      const frequencias = (encontro.frequencias_celula || []).filter(
-        (f: any) => !f.deletado
-      );
+      const frequencias = (encontro.frequencias_celula || [])
+        .filter((f: any) => !f.deletado)
+        .map((f: any) => {
+          const { membros, ...rest } = f;
+          return { ...rest, membro_nome: membros?.nome };
+        });
       const { frequencias_celula: _, ...dadosEncontro } = encontro;
       return {
         ...dadosEncontro,
