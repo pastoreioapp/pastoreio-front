@@ -63,7 +63,7 @@ export default function PainelLogin() {
         try {
             await appAuthentication.runGoogleLogin();
         } catch (error: any) {
-            enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error" });
+            enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error", autoHideDuration: 2000 });
         }
     };
 
@@ -83,6 +83,7 @@ export default function PainelLogin() {
         if (!isLoginValid()) {
             enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", {
                 variant: "error",
+                autoHideDuration: 2000,
             });
             return;
         }
@@ -98,16 +99,16 @@ export default function PainelLogin() {
                     error.message?.includes("Invalid login credentials") ||
                     error.status === 401
                 ) {
-                    enqueueSnackbar("Usuário e/ou senha incorreto(s)", { variant: "error" });
+                    enqueueSnackbar("Usuário e/ou senha incorreto(s)", { variant: "error", autoHideDuration: 2000 });
                 } else {
                     enqueueSnackbar(
                         "Falha ao realizar o login. Tente novamente mais tarde ou contate os administradores",
-                        { variant: "error" }
+                        { variant: "error", autoHideDuration: 2000 }
                     );
                 }
             }
         } else {
-            enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error" });
+            enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error", autoHideDuration: 2000 });
         }
     };
 

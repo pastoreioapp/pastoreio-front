@@ -6,6 +6,7 @@ import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
 import { EtapasTabs } from "./etapasTabs";
+import { enqueueSnackbar } from "notistack";
 
 const MensagemNenhumMembroSelecionado = () => (
     <Box
@@ -99,6 +100,7 @@ export function Informacao({
                     </Box>
 
                     <Typography
+                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
                         sx={{
                             fontSize: "1rem",
                             fontWeight: 600,
@@ -157,6 +159,7 @@ export function Informacao({
                     }}
                 >
                     <Typography
+                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
                         sx={{
                             fontSize: "1rem",
                             fontWeight: 600,
@@ -165,8 +168,6 @@ export function Informacao({
                             gap: 1,
                             alignItems: "center",
                             cursor: "pointer",
-                            mr: -7,
-                            mt: -2,
                             transition: "color 0.2s, text-decoration 0.2s",
                             "&:hover": {
                                 color: "#405687",

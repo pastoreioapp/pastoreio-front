@@ -101,7 +101,7 @@ export function ModalCadastroEncontro({
 
         if (possuiCamposObrigatoriosInvalidos()) {
             const errorMessage = "Por favor, preencha todos os campos obrigatórios";
-            enqueueSnackbar(errorMessage, { variant: "error" });
+            enqueueSnackbar(errorMessage, { variant: "error", autoHideDuration: 2000 });
             return;
         }
         
@@ -112,7 +112,7 @@ export function ModalCadastroEncontro({
         } catch (error: any) {
             const errorMessage =
                 error?.message || "Não foi possível salvar o encontro. Tente novamente.";
-            enqueueSnackbar(errorMessage, { variant: "error" });
+            enqueueSnackbar(errorMessage, { variant: "error", autoHideDuration: 2000 });
         } finally {
             setSalvando(false);
         }

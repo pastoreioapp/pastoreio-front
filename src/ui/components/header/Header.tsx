@@ -26,6 +26,35 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const pageTitle = currentItem ? currentItem.title : "Central da Célula";
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    
+    const pageTitleHeader =
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+                component="span"
+                sx={{
+                    marginRight: { xs: "4px", sm: "6px", md: "8px" },
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#1B212D",
+                }}
+            >
+                {currentItem && <currentItem.icon size={isMobile ? 20 : 24} stroke={2} />}
+            </Box>
+            <Typography 
+                variant="h3" 
+                fontWeight={600} 
+                color="#1B212D"
+                sx={{
+                    fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
+                    fontFamily: poppins.style.fontFamily,
+                }}
+            >
+                {pageTitle}
+            </Typography>
+        </Box>
+    ;
 
     return (
         <AppBar
@@ -61,36 +90,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                 },
                             }}
                         >
-                            <IconMenu2 size={20} />
+                            <IconMenu2 size={30} />
                         </IconButton>
                     )}
-                    <Box
-                        component="span"
-                        sx={{
-                            width: { xs: "32px", sm: "36px", md: "40px" },
-                            height: { xs: "32px", sm: "36px", md: "40px" },
-                            borderRadius: "8px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginRight: { xs: "4px", sm: "6px", md: "8px" },
-                            color: "#1B212D",
-                        }}
-                    >
-                        {currentItem && <currentItem.icon size={isMobile ? 20 : 24} stroke={2} />}
-                    </Box>
-                    <Typography 
-                        variant="h3" 
-                        fontWeight={600} 
-                        color="#1B212D"
-                        sx={{
-                            fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
-                            fontFamily: poppins.style.fontFamily,
-                        }}
-                    >
-                        {pageTitle}
-                    </Typography>
+                    {!isMobile && pageTitleHeader}
                 </Box>
+                {isMobile && pageTitleHeader}
                 <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1, md: 2 }}>
                     {/* TODO: Desabilitado pois ainda não temos notificações */}
                     {/* <IconButton
