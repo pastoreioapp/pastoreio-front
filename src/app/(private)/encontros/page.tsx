@@ -56,7 +56,7 @@ export default function Encontros() {
             await service.create(dadosParaSalvar);
 
             setModalAberto(false);
-            enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success" });
+            enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success", autoHideDuration: 2000 });
             await refetch();
         } catch (error: any) {
             throw new Error(error?.message || "Erro ao salvar encontro.");
