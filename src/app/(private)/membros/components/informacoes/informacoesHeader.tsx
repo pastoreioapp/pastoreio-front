@@ -4,22 +4,26 @@ export function InformacaoHeader({
     nome,
     funcao,
 }: {
-    nome: string;
-    funcao: string;
+    nome: string | null;
+    funcao: string | null;
 }) {
+    const displayNome = nome ?? "";
+    const displayFuncao = funcao ?? "";
     return (
         <Box
             sx={{
                 mt: "32px",
+                mr: { xs: 0, md: 5 },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                flexShrink: 0,
             }}
         >
             <Avatar
                 sx={{
-                    width: "180px",
-                    height: "180px",
+                    width: "130px",
+                    height: "130px",
                     fontSize: 48,
                     fontWeight: "bold",
                     backgroundColor: "#5E79B3",
@@ -27,24 +31,25 @@ export function InformacaoHeader({
                     boxShadow: "inset 0 0 0 6px #91A3D8",
                 }}
             >
-                {nome.charAt(0).toUpperCase()}
+                {displayNome.charAt(0) || "?"}
             </Avatar>
             <Typography
-                sx={{ mt: "12px", fontSize: "18px", fontWeight: "500" }}
+                sx={{ mt: 2, fontSize: "18px", fontWeight: "500" }}
             >
-                {nome}
+                {displayNome}
             </Typography>
             <Box
                 sx={{
-                    bgcolor: "#5E79B3",
-                    py: "2px",
-                    px: "9px",
-                    color: "#fff",
+                    bgcolor: displayFuncao === "MEMBRO" ? "#DCE8E6" : "#5E79B3",
+                    mt: 1,
+                    py: .5,
+                    px: 2,
+                    color: displayFuncao === "MEMBRO" ? "#1B212D" : "#fff",
                     borderRadius: 1,
                 }}
             >
                 <Typography sx={{ fontSize: "15px", fontWeight: "600" }}>
-                    {funcao}
+                    {displayFuncao}
                 </Typography>
             </Box>
         </Box>

@@ -5,7 +5,7 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from "@mui/material/styles";
 import { Grid, Stack, Typography, Avatar } from "@mui/material";
 import { IconArrowUpLeft } from "@tabler/icons-react";
-import DashboardCard from "@/components/ui/DashboardCard";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
 
 export default function YearlyBreakup() {
     // chart color
@@ -63,7 +63,7 @@ export default function YearlyBreakup() {
     const seriescolumnchart: any = [38, 40, 25];
 
     return (
-        <DashboardCard title="Yearly Breakup">
+        <DashboardCard headerTitle="Yearly Breakup">
             <Grid container spacing={3}>
                 {/* column */}
                 <Grid item xs={7} sm={7}>

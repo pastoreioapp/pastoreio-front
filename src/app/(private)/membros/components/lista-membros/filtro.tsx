@@ -3,24 +3,24 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
 import { MembroListItem } from "./membroListItem";
-import { Membro } from "@/features/membros/types";
 
 export function Filtro({
     data,
     onSelect,
     membroSelecionado,
 }: {
-    data: Membro[];
-    onSelect: (membro: Membro) => void;
-    membroSelecionado: Membro | null;
+    data: MembroListItemDto[];
+    onSelect: (membro: MembroListItemDto) => void;
+    membroSelecionado: MembroListItemDto | null;
 }) {
     const [search, setSearch] = useState("");
 
     const filtered = useMemo(
         () =>
             data.filter((membro) =>
-                membro.nome.toLowerCase().includes(search.toLowerCase())
+                (membro.nome ?? "").toLowerCase().includes(search.toLowerCase())
             ),
         [data, search]
     );
@@ -40,7 +40,8 @@ export function Filtro({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{
-                    width: "330px",
+                    width: "100%",
+                    maxWidth: { xs: "100%", md: "330px" },
                     height: "50px",
                     "& .MuiOutlinedInput-root": {
                         backgroundColor: "#F8F8F8",
@@ -57,7 +58,7 @@ export function Filtro({
                         "& .MuiInputBase-input::placeholder": {
                             color: "#929EAE",
                             opacity: 1,
-                            fontSize: "14px",
+                            fontSize: ".9rem",
                         },
                     },
                 }}
@@ -66,10 +67,10 @@ export function Filtro({
                         <InputAdornment position="start">
                             <Search
                                 sx={{
-                                    width: "24px",
-                                    height: "24px",
-                                    color: "#1B212D",
-                                    marginRight: "15px",
+                                    width: 30,
+                                    height: 30,
+                                    color: "#929EAE",
+                                    marginRight: 2,
                                 }}
                             />
                         </InputAdornment>
@@ -79,9 +80,9 @@ export function Filtro({
 
             <List
                 sx={{
-                    paddingTop: "15px",
+                    paddingTop: 2,
                     maxHeight: "655px",
-                    paddingRight: "9px",
+                    paddingRight: 2,
                     overflowY: "auto",
                     overflowX: "hidden",
                     "&::-webkit-scrollbar": {

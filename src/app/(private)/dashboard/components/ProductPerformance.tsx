@@ -1,4 +1,4 @@
-import DashboardCard from "@/components/ui/DashboardCard";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
 import {
     Typography,
     Box,
@@ -51,7 +51,7 @@ const products = [
 
 export default function ProductPerformance() {
     return (
-        <DashboardCard title="Product Performance">
+        <DashboardCard headerTitle="Product Performance">
             <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
                 <Table
                     aria-label="simple table"

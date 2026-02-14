@@ -19,13 +19,13 @@ export function EtapaCard({
             elevation={1}
             variant="outlined"
             sx={{
-                width: "200px",
+                width: { xs: "100%", sm: "250px" },
                 borderRadius: 2,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 bgcolor: "#F9F9F9",
-                paddingTop: "10px",
+                p: 3,
             }}
         >
             <Avatar
@@ -45,9 +45,9 @@ export function EtapaCard({
 
             <Typography
                 sx={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    paddingBottom: "8px",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    my: 2,
                 }}
             >
                 {titulo}
@@ -63,8 +63,8 @@ export function EtapaCard({
                                 <Box
                                     sx={{
                                         border: "1px solid #ccc",
-                                        width: 13,
-                                        height: 13,
+                                        width: 15,
+                                        height: 15,
                                         borderRadius: 1,
                                     }}
                                 />
@@ -72,13 +72,13 @@ export function EtapaCard({
                             checkedIcon={
                                 <CheckCircleOutline
                                     sx={{
-                                        fontSize: 18,
+                                        fontSize: "1.125rem",
                                         color: theme.palette.success.main,
                                     }}
                                 />
                             }
                         />
-                        <Typography sx={{ fontSize: "13px" }}>
+                        <Typography sx={{ fontSize: "0.9rem" }}>
                             {item.label}
                         </Typography>
                     </Box>

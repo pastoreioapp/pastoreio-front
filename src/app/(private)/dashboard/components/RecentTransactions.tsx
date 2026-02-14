@@ -1,4 +1,4 @@
-import DashboardCard from "@/components/ui/DashboardCard";
+import DashboardCard from "@/ui/components/ui/DashboardCard";
 import {
     Timeline,
     TimelineItem,
@@ -13,7 +13,7 @@ import { Link, Typography } from "@mui/material";
 
 export default function RecentTransactions() {
     return (
-        <DashboardCard title="Recent Transactions">
+        <DashboardCard headerTitle="Recent Transactions">
             <>
                 <Timeline
                     className="theme-timeline"

@@ -5,9 +5,11 @@ import { EtapaCard } from "./etapaCard";
 import { listaTrajetoria } from "./listaTrajetoria";
 
 const STYLE_TAB = {
-    fontSize: "16px",
+    fontSize: { xs: "14px", md: "16px" },
     fontWeight: "500",
-    width: "180px",
+    width: { xs: "auto", md: "180px" },
+    minWidth: "unset",
+    padding: { xs: 1.5, md: 2.5 },
     color: "#C5C5C5",
     "&.Mui-selected": {
         color: "#000",
@@ -25,7 +27,6 @@ export function EtapasTabs() {
             paddingTop="10px"
             marginX="auto"
             sx={{
-                width: "800px",
                 overflowX: "auto",
             }}
         >
@@ -46,52 +47,17 @@ export function EtapasTabs() {
                         }}
                     >
                         <Tab label="Trajetória" value="1" sx={STYLE_TAB} />
-                        <Tab
-                            label="Cursos EMP"
-                            value="2"
-                            sx={{
-                                width: "180px",
-                                fontSize: "16px",
-                                fontWeight: "500",
-                                position: "relative",
-                                mx: 1,
-                                color: "#C5C5C5",
-                                "&.Mui-selected": {
-                                    color: "#000",
-                                },
-                                "&::before": {
-                                    content: '""',
-                                    position: "absolute",
-                                    left: 0,
-                                    top: "25%",
-                                    bottom: "25%",
-                                    width: "1px",
-                                    background:
-                                        "linear-gradient(to bottom, #eee, #C5C5C5, #eee)",
-                                },
-                                "&::after": {
-                                    content: '""',
-                                    position: "absolute",
-                                    right: 0,
-                                    top: "25%",
-                                    bottom: "25%",
-                                    width: "1px",
-                                    background:
-                                        "linear-gradient(to bottom, #eee, #C5C5C5, #eee)",
-                                },
-                            }}
-                        />
+                        <Tab label="Cursos EMP" value="2" sx={STYLE_TAB} />
                         <Tab label="Frequência" value="3" sx={STYLE_TAB} />
                     </TabList>
                 </Box>
                 <TabPanel
                     value="1"
                     sx={{
-                        padding: 0,
-                        paddingTop: "10px",
+                        paddingTop: 4,
                     }}
                 >
-                    <Box display="flex" justifyContent="center" gap={2}>
+                    <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
                         <EtapaCard
                             etapa={1}
                             titulo="Pastoreio 1"

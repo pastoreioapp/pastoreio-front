@@ -1,87 +1,102 @@
 "use client";
 
 import Link from "next/link";
-import { Box, Typography, Button, Stack, Divider } from "@mui/material";
-import CustomTextField from "@/components/ui/CustomTextField";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Typography, Button, Stack, useTheme } from "@mui/material";
+import { ArrowBack } from "@mui/icons-material";
+import CustomTextField from "@/ui/components/ui/CustomTextField";
 
 export default function RecoverPassword() {
-  return (
-    <Box>
-      <Typography variant="h3" textAlign="center" mb={5} fontWeight="900">
-        Recuperar senha
-      </Typography>
+    const theme = useTheme();
 
-      <Stack
-        display={"flex"}
-        alignContent={"center"}
-        alignItems={"center"}
-        direction="row"
-        justifyContent="center"
-        spacing={1}
-        p={1}
-      >
-        <ErrorOutlineIcon sx={{ color: "#173D8A" }} />
-        <Typography variant="body1" fontWeight="900">
-          <span>Problemas para entrar?</span>
-          <br />
-          Vamos recuperar a sua senha !
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          width: "80%",
-          display: "flex",
-          alignItems: "center",
-          mb: 6,
-          marginX: "auto",
-        }}
-      >
-        <Divider
-          sx={{
-            flexGrow: 1,
-            bgcolor: "#173D8A",
-            height: 2,
-          }}
-        />
-      </Box>
+    const inputSx = {
+        "& .MuiOutlinedInput-input": {
+            py: 1.25,
+            fontSize: "0.9375rem",
+        },
+    };
 
-      <Stack mb={3}>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          component="label"
-          htmlFor="email"
-          mb="5px"
-          color={"#173D8A"}
-          placeholder="Digite seu endereço de e-mail"
-        >
-          Endereço de E-mail <span style={{ color: "red" }}>*</span>
-        </Typography>
-        <CustomTextField
-          id="email"
-          variant="outlined"
-          fullWidth
-          placeholder="Digite seu endereço de e-mail"
-          required
-        />
-      </Stack>
-      <Button
-        color="primary"
-        variant="contained"
-        size="large"
-        fullWidth
-        component={Link}
-        href="//receiveCode"
-        sx={{
-          borderRadius: "50px",
-          marginTop: "50px",
-          marginBottom: "20px",
-          height: "50px",
-        }}
-      >
-        Recuperar senha
-      </Button>
-    </Box>
-  );
+    return (
+        <>
+            <Typography
+                variant="h3"
+                textAlign="center"
+                mb={1}
+                sx={{ color: theme.palette.grey[600], fontSize: { xs: "1.2rem", sm: "1.5rem" }, fontWeight: 100 }}
+            >
+                Recuperar senha
+            </Typography>
+
+            <Typography
+                variant="body1"
+                textAlign="center"
+                sx={{ color: theme.palette.grey[500], fontSize: "0.7rem", mb: 4 }}
+            >
+                Problemas para entrar? Recupere sua senha!
+            </Typography>
+
+            <Stack mb={3}>
+                <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    component="label"
+                    htmlFor="email"
+                    sx={{ color: theme.palette.grey[600], fontSize: "0.875rem", mb: 0.5 }}
+                >
+                    Endereço de E-mail <span style={{ color: theme.palette.error.main }}>*</span>
+                </Typography>
+                <CustomTextField
+                    id="email"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Digite seu endereço de e-mail"
+                    required
+                    sx={inputSx}
+                />
+            </Stack>
+
+            <Button
+                color="primary"
+                variant="contained"
+                size="large"
+                fullWidth
+                component={Link}
+                href="/receiveCode"
+                sx={{
+                    borderRadius: "5px",
+                    height: "46px",
+                    fontWeight: 100,
+                    fontSize: "0.9375rem",
+                    textTransform: "none",
+                    boxShadow: "none",
+                    textDecoration: "none",
+                    mt: 2,
+                    "&:hover": { boxShadow: "none" },
+                }}
+            >
+                Recuperar senha
+            </Button>
+
+            <Box width="100%" textAlign="center" mt={4}>
+                <Button
+                    startIcon={<ArrowBack />}
+                    component={Link}
+                    href="/login"
+                    sx={{
+                        textTransform: "none",
+                        color: theme.palette.grey[500],
+                        fontWeight: 500,
+                        fontSize: "0.9375rem",
+                        px: 0,
+                        textDecoration: "none",
+                        "&:hover": {
+                            backgroundColor: "transparent",
+                            color: theme.palette.primary.main,
+                        },
+                    }}
+                >
+                    Voltar para o login
+                </Button>
+            </Box>
+        </>
+    );
 }
