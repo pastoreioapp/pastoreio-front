@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, MouseEvent } from "react";
+import { poppins } from "@/ui/utils/theme";
 import {
     Avatar,
     Box,
@@ -182,7 +183,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             fontWeight="600" 
                             sx={{ 
                                 mx: 1.5,
-                                fontFamily: "'Poppins', sans-serif",
+                                fontFamily: poppins.style.fontFamily,
                                 fontSize: "15px",
                                 color: "#1B212D",
                             }}

@@ -8,11 +8,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/pt";
 import { HelmetProvider } from "react-helmet-async";
 import { SnackbarProvider } from "notistack";
+import { poppins } from "@/ui/utils/theme";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="pt-BR">
-            <body>
+            <body className={poppins.className}>
                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
                     <HelmetProvider>
                         <ProviderStore>

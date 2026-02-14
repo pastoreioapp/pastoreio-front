@@ -26,7 +26,11 @@ export default function RootLayout({children}: { children: React.ReactNode; }) {
                     display: "flex",
                     flexDirection: "column",
                     flex: 1,
-                    width: "100%",
+                    width: {
+                        xs: "calc(100vw - 30px)",
+                        sm: "calc(100vw - 40px)",
+                        md: "calc(100vw - 405px)",
+                    },
                     minHeight: {
                         xs: "calc(100vh - 30px)",
                         md: "calc(100vh - 54px)",

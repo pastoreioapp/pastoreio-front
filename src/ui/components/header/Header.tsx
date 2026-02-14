@@ -7,14 +7,14 @@ import {
     Stack,
     IconButton,
     Typography,
-    Badge,
     useMediaQuery,
     useTheme,
 } from "@mui/material";
 import Profile from "./Profile";
-import { IconBellRingingFilled, IconMenu2 } from "@tabler/icons-react";
+import { IconMenu2 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { Menuitems } from "../sidebar/MenuItems";
+import { poppins } from "@/ui/utils/theme";
 
 interface HeaderProps {
     onMenuClick: () => void;
@@ -84,8 +84,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         fontWeight={600} 
                         color="#1B212D"
                         sx={{
-                            fontSize: { xs: "16px", sm: "20px", md: "26px" },
-                            fontFamily: "'Poppins', sans-serif",
+                            fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
+                            fontFamily: poppins.style.fontFamily,
                         }}
                     >
                         {pageTitle}

@@ -1,42 +1,21 @@
 import PageContainer from "@/ui/components/pages/PageContainer";
-import Blog from "@/app/(private)/dashboard/components/Blog";
-import MonthlyEarnings from "@/app/(private)/dashboard/components/MonthlyEarnings";
-import ProductPerformance from "@/app/(private)/dashboard/components/ProductPerformance";
-import RecentTransactions from "@/app/(private)/dashboard/components/RecentTransactions";
-import SalesOverview from "@/app/(private)/dashboard/components/SalesOverview";
-import YearlyBreakup from "@/app/(private)/dashboard/components/YearlyBreakup";
-import { Grid, Box } from "@mui/material";
+import UnderConstructionCard from "@/ui/components/ui/UnderConstructionCard";
 import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
+import { IconChartBar } from "@tabler/icons-react";
 
 export default function Dashboard() {
     return (
-        <PageContainer title="Dashboard" description="this is Dashboard" allowedRoles={CELULA_ROLES}>
-            <Box>
-                <Grid container spacing={3}>
-                    <Grid item xs={12} lg={8}>
-                        <SalesOverview />
-                    </Grid>
-                    <Grid item xs={12} lg={4}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <YearlyBreakup />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <MonthlyEarnings />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} lg={4}>
-                        <RecentTransactions />
-                    </Grid>
-                    <Grid item xs={12} lg={8}>
-                        <ProductPerformance />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Blog />
-                    </Grid>
-                </Grid>
-            </Box>
+        <PageContainer title="Dashboard" description="Visão geral da célula e métricas" allowedRoles={CELULA_ROLES}>
+            <UnderConstructionCard
+                title="Dashboard em construção"
+                description="Em breve você terá uma visão consolidada da sua célula: indicadores, crescimento e atividades recentes."
+                icon={<IconChartBar size={40} stroke={1.5} />}
+                items={[
+                    "Resumo de membros e encontros",
+                    "Gráficos de frequência e crescimento",
+                    "Atividades e próximos compromissos",
+                ]}
+            />
         </PageContainer>
     );
 }
