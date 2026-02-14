@@ -3,7 +3,7 @@ import { useEncontros } from "./useEncontros";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 
 export function useEncontrosSelecionados() {
-    const { encontros, loading, erro } = useEncontros();
+    const { encontros, loading, erro, refetch } = useEncontros();
     const [encontrosSelecionado, setEncontrosSelecionado] =
         useState<Encontro | null>(null);
 
@@ -25,5 +25,6 @@ export function useEncontrosSelecionados() {
         toggleEncontrosSelecionado,
         loading,
         erro,
+        refetch,
     };
 }

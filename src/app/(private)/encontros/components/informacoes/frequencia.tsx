@@ -28,6 +28,14 @@ export function Frequencia({ data }: { data: Encontro["frequencia"] }) {
         }
     };
 
+    if (!data || data.length === 0) {
+        return (
+            <Typography fontSize={13} sx={{ color: "#959595" }}>
+                Nenhum registro de frequência para este encontro.
+            </Typography>
+        );
+    }
+
     return (
         <TableContainer
             component={Paper}

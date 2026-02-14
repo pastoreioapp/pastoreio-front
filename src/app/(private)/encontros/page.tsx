@@ -11,6 +11,10 @@ import { ErrorBox } from "./components/error/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useState } from "react";
+import { EncontroService } from "@/modules/celulas/application/encontro.service";
+import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
+import type { EncontroInsert } from "@/modules/celulas/domain/encontro";
+import { enqueueSnackbar } from "notistack";
 
 export default function Encontros() {
     const {
@@ -19,15 +23,53 @@ export default function Encontros() {
         toggleEncontrosSelecionado,
         loading,
         erro,
+        refetch,
     } = useEncontrosSelecionados();
 
     const [modalAberto, setModalAberto] = useState(false);
 
-    const handleSalvarEncontro = (dados: DadosEncontro) => {
-        console.log("Dados do encontro:", dados);
-        // TODO: Integrar com a API quando estiver pronta
-        // Exemplo: await salvarEncontro(dados);
-        alert("Encontro cadastrado com sucesso! (Por enquanto apenas no console)");
+    const handleSalvarEncontro = async (dados: DadosEncontro) => {
+        try {
+            const observacoesNormalizadas = [
+                `Anfitrião: ${dados.anfitriao}`,
+                `Preletor: ${dados.preletor}`,
+                `Houve supervisão do setor: ${dados.supervisao === "sim" ? "Sim" : "Não"}`,
+                `Houve conversões: ${dados.conversoes === "sim" ? "Sim" : "Não"}`,
+                dados.observacoes?.trim() ? `Observações: ${dados.observacoes.trim()}` : "",
+            ]
+                .filter(Boolean)
+                .join("\n");
+
+            // Buscar email do usuário autenticado
+            const { createClient } = await import("@/shared/supabase/client");
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            const userEmail = user?.email || "sistema";
+
+            const dadosParaSalvar: EncontroInsert = {
+                celula_id: dados.celula_id || null,
+                data: dados.data,
+                tema: dados.tema,
+                observacoes: observacoesNormalizadas,
+                horario: `${dados.horario}:00`,
+                local: dados.local,
+                supervisao: dados.supervisao === "sim",
+                conversoes: dados.conversoes === "sim",
+                criado_em: new Date().toISOString(),
+                criado_por: userEmail,
+                deletado: false,
+            };
+
+            const repo = new EncontroRepository();
+            const service = new EncontroService(repo);
+            await service.create(dadosParaSalvar);
+
+            setModalAberto(false);
+            enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success" });
+            await refetch();
+        } catch (error: any) {
+            throw new Error(error?.message || "Erro ao salvar encontro.");
+        }
     };
 
     if (loading) return <LoadingBox />;

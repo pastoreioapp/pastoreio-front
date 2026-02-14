@@ -15,20 +15,25 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { enqueueSnackbar } from "notistack";
 
 interface ModalCadastroEncontroProps {
     open: boolean;
     onClose: () => void;
-    onSave: (dados: DadosEncontro) => void;
+    onSave: (dados: DadosEncontro) => Promise<void>;
 }
 
 export interface DadosEncontro {
+    celula_id?: string | null;
     tema: string;
     data: string;
+    horario: string;
+    local: string;
     anfitriao: string;
     preletor: string;
     supervisao: "sim" | "não";
     conversoes: "sim" | "não";
+    observacoes?: string;
 }
 
 export function ModalCadastroEncontro({
@@ -36,38 +41,104 @@ export function ModalCadastroEncontro({
     onClose,
     onSave,
 }: ModalCadastroEncontroProps) {
+    type CampoObrigatorio = "tema" | "data" | "horario" | "local" | "anfitriao" | "preletor";
+
     const [dados, setDados] = useState<DadosEncontro>({
+        celula_id: null,
         tema: "",
         data: "",
+        horario: "19:00",
+        local: "",
         anfitriao: "",
         preletor: "",
         supervisao: "não",
         conversoes: "não",
+        observacoes: "",
     });
+
+    const [salvando, setSalvando] = useState(false);
+    const [camposTocados, setCamposTocados] = useState<Record<CampoObrigatorio, boolean>>({
+        tema: false,
+        data: false,
+        horario: false,
+        local: false,
+        anfitriao: false,
+        preletor: false,
+    });
+
+    const getCampoObrigatorioErro = (campo: CampoObrigatorio) => {
+        if (!camposTocados[campo]) {
+            return "";
+        }
+
+        return dados[campo].trim() ? "" : "Campo obrigatório";
+    };
+
+    const marcarCampoComoTocado = (campo: CampoObrigatorio) => {
+        setCamposTocados((prev) => ({ ...prev, [campo]: true }));
+    };
+
+    const marcarTodosCamposObrigatoriosComoTocados = () => {
+        setCamposTocados({
+            tema: true,
+            data: true,
+            horario: true,
+            local: true,
+            anfitriao: true,
+            preletor: true,
+        });
+    };
+
+    const possuiCamposObrigatoriosInvalidos = () =>
+        !dados.tema.trim() || !dados.data.trim() || !dados.horario.trim() || !dados.local.trim() || !dados.anfitriao.trim() || !dados.preletor.trim();
 
     const handleChange = (field: keyof DadosEncontro, value: string) => {
         setDados((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = () => {
-        // Validação simples
-        if (!dados.tema || !dados.data || !dados.anfitriao || !dados.preletor) {
-            alert("Por favor, preencha todos os campos obrigatórios");
+    const handleSubmit = async () => {
+        marcarTodosCamposObrigatoriosComoTocados();
+
+        if (possuiCamposObrigatoriosInvalidos()) {
+            const errorMessage = "Por favor, preencha todos os campos obrigatórios";
+            enqueueSnackbar(errorMessage, { variant: "error" });
             return;
         }
-        onSave(dados);
-        handleClose();
+        
+        try {
+            setSalvando(true);
+            await onSave(dados);
+            handleClose();
+        } catch (error: any) {
+            const errorMessage =
+                error?.message || "Não foi possível salvar o encontro. Tente novamente.";
+            enqueueSnackbar(errorMessage, { variant: "error" });
+        } finally {
+            setSalvando(false);
+        }
     };
 
     const handleClose = () => {
         // Limpa o formulário ao fechar
         setDados({
+            celula_id: null,
             tema: "",
             data: "",
+            horario: "19:00",
+            local: "",
             anfitriao: "",
             preletor: "",
             supervisao: "não",
             conversoes: "não",
+            observacoes: "",
+        });
+        setCamposTocados({
+            tema: false,
+            data: false,
+            horario: false,
+            local: false,
+            anfitriao: false,
+            preletor: false,
         });
         onClose();
     };
@@ -87,6 +158,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.tema}
                         onChange={(e) => handleChange("tema", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("tema")}
+                        error={Boolean(getCampoObrigatorioErro("tema"))}
+                        helperText={getCampoObrigatorioErro("tema")}
                         placeholder="Ex: A Importância da Comunhão"
                     />
 
@@ -97,7 +171,35 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.data}
                         onChange={(e) => handleChange("data", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("data")}
+                        error={Boolean(getCampoObrigatorioErro("data"))}
+                        helperText={getCampoObrigatorioErro("data")}
                         InputLabelProps={{ shrink: true }}
+                    />
+
+                    <TextField
+                        label="Horário"
+                        type="time"
+                        fullWidth
+                        required
+                        value={dados.horario}
+                        onChange={(e) => handleChange("horario", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("horario")}
+                        error={Boolean(getCampoObrigatorioErro("horario"))}
+                        helperText={getCampoObrigatorioErro("horario")}
+                        InputLabelProps={{ shrink: true }}
+                    />
+
+                    <TextField
+                        label="Local/Endereço"
+                        fullWidth
+                        required
+                        value={dados.local}
+                        onChange={(e) => handleChange("local", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("local")}
+                        error={Boolean(getCampoObrigatorioErro("local"))}
+                        helperText={getCampoObrigatorioErro("local")}
+                        placeholder="Ex: Rua das Flores, 123 - Centro"
                     />
 
                     <TextField
@@ -106,6 +208,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.anfitriao}
                         onChange={(e) => handleChange("anfitriao", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("anfitriao")}
+                        error={Boolean(getCampoObrigatorioErro("anfitriao"))}
+                        helperText={getCampoObrigatorioErro("anfitriao")}
                         placeholder="Nome do anfitrião"
                     />
 
@@ -115,6 +220,9 @@ export function ModalCadastroEncontro({
                         required
                         value={dados.preletor}
                         onChange={(e) => handleChange("preletor", e.target.value)}
+                        onBlur={() => marcarCampoComoTocado("preletor")}
+                        error={Boolean(getCampoObrigatorioErro("preletor"))}
+                        helperText={getCampoObrigatorioErro("preletor")}
                         placeholder="Nome do preletor"
                     />
 
@@ -145,18 +253,29 @@ export function ModalCadastroEncontro({
                             <MenuItem value="sim">Sim</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <TextField
+                        label="Observações"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={dados.observacoes || ""}
+                        onChange={(e) => handleChange("observacoes", e.target.value)}
+                        placeholder="Observações sobre o encontro (opcional)"
+                    />
                 </Box>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 3 }}>
-                <Button onClick={handleClose} color="inherit">
+                <Button onClick={handleClose} color="inherit" disabled={salvando}>
                     Cancelar
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
                     sx={{ bgcolor: "#5E79B3" }}
+                    disabled={salvando}
                 >
-                    Salvar
+                    {salvando ? "Salvando..." : "Salvar"}
                 </Button>
             </DialogActions>
         </Dialog>
