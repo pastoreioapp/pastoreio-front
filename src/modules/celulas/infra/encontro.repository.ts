@@ -1,35 +1,42 @@
 import { createClient } from "@/shared/supabase/client";
-import type { Encontro, EncontroInsert } from "../domain/encontro";
+import type { Encontro } from "../domain/encontro";
+
+const TABLE = "encontros";
 
 export class EncontroRepository {
   async findAll(): Promise<Encontro[]> {
     const supabase = createClient();
-    
+
     const { data, error } = await supabase
-      .from("encontros")
-      .select("*")
+      .from(TABLE)
+      .select("*, frequencias_celula(*)")
       .eq("deletado", false)
       .order("data", { ascending: false });
-    
+
     if (error) {
       console.error("Erro ao buscar encontros:", error);
       throw new Error(error.message);
     }
-    
-    // Retornar dados do banco diretamente
-    const encontrosFormatados = (data || []).map((encontro: any) => ({
-      ...encontro,
-      frequencia: encontro.frequencia || [],
-    }));
-    
+
+    const encontrosFormatados = (data || []).map((encontro: any) => {
+      const frequencias = (encontro.frequencias_celula || []).filter(
+        (f: any) => !f.deletado
+      );
+      const { frequencias_celula: _, ...dadosEncontro } = encontro;
+      return {
+        ...dadosEncontro,
+        frequencia: frequencias,
+      };
+    });
+
     return encontrosFormatados as Encontro[];
   }
 
-  async create(dados: EncontroInsert): Promise<Encontro> {
+  async create(dados: Encontro): Promise<Encontro> {
     const supabase = createClient();
     
     const { data, error } = await supabase
-      .from("encontros")
+      .from(TABLE)
       .insert([dados])
       .select()
       .single();

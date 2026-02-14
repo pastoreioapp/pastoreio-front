@@ -13,8 +13,9 @@ import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastr
 import { useState } from "react";
 import { EncontroService } from "@/modules/celulas/application/encontro.service";
 import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
-import type { EncontroInsert } from "@/modules/celulas/domain/encontro";
 import { enqueueSnackbar } from "notistack";
+import { Encontro } from "@/modules/celulas/domain/encontro";
+import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 export default function Encontros() {
     const {
@@ -25,39 +26,25 @@ export default function Encontros() {
         erro,
         refetch,
     } = useEncontrosSelecionados();
+    const {loggedUser} = useAppAuthentication();
 
     const [modalAberto, setModalAberto] = useState(false);
 
     const handleSalvarEncontro = async (dados: DadosEncontro) => {
         try {
-            const observacoesNormalizadas = [
-                `Anfitrião: ${dados.anfitriao}`,
-                `Preletor: ${dados.preletor}`,
-                `Houve supervisão do setor: ${dados.supervisao === "sim" ? "Sim" : "Não"}`,
-                `Houve conversões: ${dados.conversoes === "sim" ? "Sim" : "Não"}`,
-                dados.observacoes?.trim() ? `Observações: ${dados.observacoes.trim()}` : "",
-            ]
-                .filter(Boolean)
-                .join("\n");
-
-            // Buscar email do usuário autenticado
-            const { createClient } = await import("@/shared/supabase/client");
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            const userEmail = user?.email || "sistema";
-
-            const dadosParaSalvar: EncontroInsert = {
+            const dadosParaSalvar: Encontro = {
                 celula_id: dados.celula_id || null,
                 data: dados.data,
                 tema: dados.tema,
-                observacoes: observacoesNormalizadas,
                 horario: `${dados.horario}:00`,
                 local: dados.local,
+                anfitriao: dados.anfitriao,
+                preletor: dados.preletor,
                 supervisao: dados.supervisao === "sim",
                 conversoes: dados.conversoes === "sim",
+                observacoes: dados.observacoes,
                 criado_em: new Date().toISOString(),
-                criado_por: userEmail,
-                deletado: false,
+                criado_por: loggedUser?.email || "UNKNOWN"
             };
 
             const repo = new EncontroRepository();

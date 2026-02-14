@@ -27,6 +27,8 @@ const MensagemNenhumEncontroSelecionado = () => (
 export function Informacao({ data }: { data: Encontro | null }) {
     if (!data) return <MensagemNenhumEncontroSelecionado />;
 
+    const numeroParticipantes = data.frequencia?.filter(frequencia => frequencia.presente).length;
+
     const grupos = [
         {
             campos: [
@@ -39,22 +41,31 @@ export function Informacao({ data }: { data: Encontro | null }) {
                     }),
                 },
                 { label: "Anfitrião", valor: data.anfitriao },
-                {
-                    label: "Número de participantes",
-                    valor: data.numeroParticipantes,
-                },
+                { label: "Local", valor: data.local },
             ],
         },
         {
             campos: [
                 {
-                    label: "Preletor (quem levou a palavra)",
+                    label: "Preletor",
                     valor: data.preletor,
                 },
                 { label: "Houve supervisão do setor", valor: data.supervisao },
                 { label: "Houve conversões", valor: data.conversoes },
             ],
         },
+        {
+            campos: [
+                {
+                    label: "Número de participantes",
+                    valor: numeroParticipantes ?? 0,
+                },
+                {
+                    label: "Observações",
+                    valor: data.observacoes ?? "",
+                },
+            ]
+        }
     ];
 
     return (

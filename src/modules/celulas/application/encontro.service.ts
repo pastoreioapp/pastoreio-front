@@ -1,4 +1,4 @@
-import type { Encontro, EncontroInsert } from "../domain/encontro";
+import type { Encontro } from "../domain/encontro";
 import { EncontroRepository } from "../infra/encontro.repository";
 
 export class EncontroService {
@@ -8,7 +8,7 @@ export class EncontroService {
     return this.repo.findAll();
   }
 
-  async create(dados: EncontroInsert): Promise<Encontro> {
+  async create(dados: Encontro): Promise<Encontro> {
     return this.repo.create(dados);
   }
 }

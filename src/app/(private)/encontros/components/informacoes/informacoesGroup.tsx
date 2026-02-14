@@ -28,14 +28,6 @@ export function InformacoesGroup({
                             disableUnderline
                             disabled
                         />
-                        {campo.label === "Anfitrião" && (
-                            <Typography
-                                fontSize={11}
-                                sx={{ color: "#0099F8", cursor: "pointer" }}
-                            >
-                                (endereço)
-                            </Typography>
-                        )}
                     </Box>
                 </Box>
             ))}
