@@ -31,7 +31,7 @@ export function InformacaoHeader({
                     boxShadow: "inset 0 0 0 6px #91A3D8",
                 }}
             >
-                {displayNome.charAt(0).toUpperCase() || "?"}
+                {displayNome.charAt(0) || "?"}
             </Avatar>
             <Typography
                 sx={{ mt: 2, fontSize: "18px", fontWeight: "500" }}

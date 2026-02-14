@@ -1,34 +1,53 @@
-import { Box, Input, InputLabel, Typography } from "@mui/material";
+import { Box, Divider, InputLabel, Typography } from "@mui/material";
 
 export function InformacoesGroup({
+    titulo,
     campos,
 }: {
+    titulo: string;
     campos: { label: string; valor: string | number | boolean }[];
 }) {
     return (
-        <Box>
+        <Box
+            sx={{
+                width: "100%",
+            }}
+        >
+            <Box>
+                <Typography sx={{ color: "#C5C5C5", fontSize: "1rem", fontWeight: 500 }}>
+                    {titulo}
+                </Typography>
+                <Divider
+                    sx={{
+                        my: 2,
+                        borderColor: "#C5C5C5",
+                        width: "100%",
+                    }}
+                />
+            </Box>
             {campos.map((campo, index) => (
-                <Box key={index} sx={{ mb: "12px" }}>
+                <Box key={index} sx={{ mb: 2 }}>
                     <InputLabel
                         sx={{
-                            color: "#000",
-                            fontSize: "14px",
-                            fontWeight: "600",
+                            color: "#C5C5C5",
+                            fontSize: ".85rem",
+                            fontWeight: 800,
                         }}
                     >
                         {campo.label}
                     </InputLabel>
-                    <Box sx={{ display: "flex", gap: "1px" }}>
-                        <Input
-                            value={typeof campo.valor === "boolean" ? (campo.valor ? "Sim" : "Não") : campo.valor}
-                            sx={{
-                                fontSize: "11px",
-                                width: "100%",
-                            }}
-                            disableUnderline
-                            disabled
-                        />
-                    </Box>
+                    <Typography
+                        sx={{
+                            fontSize: ".9rem",
+                            width: "100%",
+                            color: "#000",
+                            mt: 0.5,
+                        }}
+                    >
+                        {typeof campo.valor === "boolean"
+                            ? (campo.valor ? "Sim" : "Não")
+                            : campo.valor}
+                    </Typography>
                 </Box>
             ))}
         </Box>

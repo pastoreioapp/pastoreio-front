@@ -2,7 +2,7 @@
 
 import DashboardCard from "@/ui/components/ui/DashboardCard";
 import PageContainer from "@/ui/components/pages/PageContainer";
-import { Box, Button } from "@mui/material";
+import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-encontro/filtro";
 import { useEncontrosSelecionados } from "./hooks/useEncontroSelecionado";
@@ -18,10 +18,14 @@ import { Encontro } from "@/modules/celulas/domain/encontro";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 export default function Encontros() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
     const {
         encontros,
         encontrosSelecionado,
         toggleEncontrosSelecionado,
+        deselectEncontro,
         loading,
         erro,
         refetch,
@@ -64,40 +68,50 @@ export default function Encontros() {
 
     return (
         <PageContainer title="Encontros" description="Página Encontros">
-            <DashboardCard>
-                <Box>
-                    <Box sx={{ display: "flex", justifyContent: "end" }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => setModalAberto(true)}
-                            sx={{
-                                bgcolor: "#5E79B3",
-                                fontSize: 13,
-                                fontWeight: 600,
-                                display: "flex",
-                                gap: 1,
-                                color: "#fff",
-                            }}
-                        >
-                            <IconPlus width={16} /> Registrar encontro
-                        </Button>
-                    </Box>
+            <Box>
+                <Box sx={{ display: "flex", justifyContent: "end" }}>
+                    <Button
+                        variant="contained"
+                        onClick={() => setModalAberto(true)}
+                        sx={{
+                            bgcolor: "#5E79B3",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            display: "flex",
+                            gap: 1,
+                            color: "#fff",
+                        }}
+                    >
+                        <IconPlus width={16} /> Registrar encontro
+                    </Button>
+                </Box>
 
-                    <Box sx={{ display: "flex", pt: "24px" }}>
-                        <Box width={348}>
+                <Box sx={{
+                    display: "flex",
+                    pt: 5,
+                    gap: { xs: 3, md: 5 },
+                    flexDirection: { xs: "column", md: "row" },
+                }}>
+                    {(!isMobile || !encontrosSelecionado) && (
+                        <Box sx={{ width: { xs: "100%", md: 348 } }}>
                             <Filtro
                                 data={encontros}
                                 onSelect={toggleEncontrosSelecionado}
                                 encontroSelecionado={encontrosSelecionado}
                             />
                         </Box>
+                    )}
 
-                        <Box flex={1} sx={{ pl: "33px", pr: "17px" }}>
-                            <Informacao data={encontrosSelecionado || null} />
+                    {(!isMobile || !!encontrosSelecionado) && (
+                        <Box flex={1} sx={{ pl: { xs: 0, md: "33px" }, pr: { xs: 0, md: "17px" } }}>
+                            <Informacao
+                                data={encontrosSelecionado || null}
+                                onBack={isMobile ? deselectEncontro : undefined}
+                            />
                         </Box>
-                    </Box>
+                    )}
                 </Box>
-            </DashboardCard>
+            </Box>
 
             <ModalCadastroEncontro
                 open={modalAberto}

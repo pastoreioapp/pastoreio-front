@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useEncontros } from "./useEncontros";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 
@@ -7,22 +7,21 @@ export function useEncontrosSelecionados() {
     const [encontrosSelecionado, setEncontrosSelecionado] =
         useState<Encontro | null>(null);
 
-    useEffect(() => {
-        if (encontros.length > 0) {
-            setEncontrosSelecionado(encontros[0]);
-        }
-    }, [encontros]);
-
-    function toggleEncontrosSelecionado(membro: Encontro) {
+    function toggleEncontrosSelecionado(encontro: Encontro) {
         setEncontrosSelecionado((prev) =>
-            prev?.id === membro.id ? null : membro
+            prev?.id === encontro.id ? null : encontro
         );
+    }
+
+    function deselectEncontro() {
+        setEncontrosSelecionado(null);
     }
 
     return {
         encontros,
         encontrosSelecionado,
         toggleEncontrosSelecionado,
+        deselectEncontro,
         loading,
         erro,
         refetch,

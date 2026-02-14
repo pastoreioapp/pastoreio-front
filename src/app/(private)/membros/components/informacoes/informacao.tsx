@@ -132,6 +132,7 @@ export function Informacao({
 
                 <Box sx={{
                     display: "flex",
+                    mt: 4,
                     flexDirection: { xs: "column", md: "row" },
                     gap: { xs: 0, md: 5 },
                     flex: { md: 1 },

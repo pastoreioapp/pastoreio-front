@@ -41,7 +41,7 @@ export function Filtro({
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{
                     width: "100%",
-                    maxWidth: "330px",
+                    maxWidth: { xs: "100%", md: "330px" },
                     height: "50px",
                     "& .MuiOutlinedInput-root": {
                         backgroundColor: "#F8F8F8",

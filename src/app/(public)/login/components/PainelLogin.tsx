@@ -18,8 +18,6 @@ import {
   VisibilityOff,
   Email,
   Phone,
-  Google,
-  PersonAdd,
   ArrowBack,
 } from "@mui/icons-material";
 import InputMask from "react-input-mask";

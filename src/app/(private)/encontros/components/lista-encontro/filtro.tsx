@@ -40,7 +40,8 @@ export function Filtro({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{
-                    width: "330px",
+                    width: "100%",
+                    maxWidth: { xs: "100%", md: "330px" },
                     height: "50px",
                     "& .MuiOutlinedInput-root": {
                         backgroundColor: "#F8F8F8",
@@ -57,7 +58,7 @@ export function Filtro({
                         "& .MuiInputBase-input::placeholder": {
                             color: "#929EAE",
                             opacity: 1,
-                            fontSize: "14px",
+                            fontSize: ".9rem",
                         },
                     },
                 }}
@@ -66,10 +67,10 @@ export function Filtro({
                         <InputAdornment position="start">
                             <Search
                                 sx={{
-                                    width: "24px",
-                                    height: "24px",
-                                    color: "#1B212D",
-                                    marginRight: "15px",
+                                    width: 30,
+                                    height: 30,
+                                    color: "#929EAE",
+                                    marginRight: 2,
                                 }}
                             />
                         </InputAdornment>
