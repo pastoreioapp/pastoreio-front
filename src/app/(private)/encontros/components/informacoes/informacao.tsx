@@ -5,7 +5,6 @@ import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
 import { InformacoesGroup } from "./informacoesGroup";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { EtapasTabs } from "./etapasTabs";
-import { enqueueSnackbar } from "notistack";
 
 const MensagemNenhumEncontroSelecionado = () => (
     <Box
@@ -28,9 +27,11 @@ const MensagemNenhumEncontroSelecionado = () => (
 export function Informacao({
     data,
     onBack,
+    onEditar,
 }: {
     data: Encontro | null;
     onBack?: () => void;
+    onEditar?: () => void;
 }) {
     if (!data) return <MensagemNenhumEncontroSelecionado />;
 
@@ -109,7 +110,7 @@ export function Informacao({
                     </Box>
 
                     <Typography
-                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
+                        onClick={onEditar}
                         sx={{
                             fontSize: "1rem",
                             fontWeight: 600,
@@ -185,7 +186,7 @@ export function Informacao({
                     }}
                 >
                     <Typography
-                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
+                        onClick={onEditar}
                         sx={{
                             fontSize: "1rem",
                             fontWeight: 600,

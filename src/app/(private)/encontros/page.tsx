@@ -33,34 +33,71 @@ export default function Encontros() {
     const {loggedUser} = useAppAuthentication();
 
     const [modalAberto, setModalAberto] = useState(false);
+    const [encontroEditando, setEncontroEditando] = useState<Encontro | null>(null);
 
     const handleSalvarEncontro = async (dados: DadosEncontro) => {
         try {
-            const dadosParaSalvar: Encontro = {
-                celula_id: dados.celula_id || null,
-                data: dados.data,
-                tema: dados.tema,
-                horario: `${dados.horario}:00`,
-                local: dados.local,
-                anfitriao: dados.anfitriao,
-                preletor: dados.preletor,
-                supervisao: dados.supervisao === "sim",
-                conversoes: dados.conversoes === "sim",
-                observacoes: dados.observacoes,
-                criado_em: new Date().toISOString(),
-                criado_por: loggedUser?.email || "UNKNOWN"
-            };
-
             const repo = new EncontroRepository();
             const service = new EncontroService(repo);
-            await service.create(dadosParaSalvar);
+
+            if (encontroEditando?.id) {
+                // Modo edição
+                const dadosParaAtualizar: Partial<Encontro> = {
+                    celula_id: dados.celula_id || null,
+                    data: dados.data,
+                    tema: dados.tema,
+                    horario: `${dados.horario}:00`,
+                    local: dados.local,
+                    anfitriao: dados.anfitriao,
+                    preletor: dados.preletor,
+                    supervisao: dados.supervisao === "sim",
+                    conversoes: dados.conversoes === "sim",
+                    observacoes: dados.observacoes,
+                    atualizado_em: new Date().toISOString(),
+                    atualizado_por: loggedUser?.email || "UNKNOWN"
+                };
+
+                await service.update(encontroEditando.id, dadosParaAtualizar);
+                enqueueSnackbar("Encontro atualizado com sucesso!", { variant: "success", autoHideDuration: 2000 });
+            } else {
+                // Modo criação
+                const dadosParaSalvar: Encontro = {
+                    celula_id: dados.celula_id || null,
+                    data: dados.data,
+                    tema: dados.tema,
+                    horario: `${dados.horario}:00`,
+                    local: dados.local,
+                    anfitriao: dados.anfitriao,
+                    preletor: dados.preletor,
+                    supervisao: dados.supervisao === "sim",
+                    conversoes: dados.conversoes === "sim",
+                    observacoes: dados.observacoes,
+                    criado_em: new Date().toISOString(),
+                    criado_por: loggedUser?.email || "UNKNOWN"
+                };
+
+                await service.create(dadosParaSalvar);
+                enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success", autoHideDuration: 2000 });
+            }
 
             setModalAberto(false);
-            enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success", autoHideDuration: 2000 });
+            setEncontroEditando(null);
             await refetch();
         } catch (error: any) {
             throw new Error(error?.message || "Erro ao salvar encontro.");
         }
+    };
+
+    const handleEditarEncontro = () => {
+        if (!encontrosSelecionado) return;
+        
+        setEncontroEditando(encontrosSelecionado);
+        setModalAberto(true);
+    };
+
+    const handleFecharModal = () => {
+        setModalAberto(false);
+        setEncontroEditando(null);
     };
 
     if (loading) return <LoadingBox />;
@@ -107,6 +144,7 @@ export default function Encontros() {
                             <Informacao
                                 data={encontrosSelecionado || null}
                                 onBack={isMobile ? deselectEncontro : undefined}
+                                onEditar={handleEditarEncontro}
                             />
                         </Box>
                     )}
@@ -115,8 +153,21 @@ export default function Encontros() {
 
             <ModalCadastroEncontro
                 open={modalAberto}
-                onClose={() => setModalAberto(false)}
+                onClose={handleFecharModal}
                 onSave={handleSalvarEncontro}
+                dadosIniciais={encontroEditando ? {
+                    celula_id: encontroEditando.celula_id,
+                    tema: encontroEditando.tema,
+                    data: encontroEditando.data,
+                    horario: encontroEditando.horario.substring(0, 5), // Remove os segundos
+                    local: encontroEditando.local,
+                    anfitriao: encontroEditando.anfitriao,
+                    preletor: encontroEditando.preletor,
+                    supervisao: encontroEditando.supervisao ? "sim" : "não",
+                    conversoes: encontroEditando.conversoes ? "sim" : "não",
+                    observacoes: encontroEditando.observacoes,
+                } : null}
+                encontroId={encontroEditando?.id || null}
             />
         </PageContainer>
     );
