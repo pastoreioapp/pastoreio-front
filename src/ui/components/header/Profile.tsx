@@ -312,6 +312,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 </MenuItem>
 
                 <MenuItem
+                    disabled={true}
                     selected={activeItem === "Ajustes"}
                     onClick={() => handleItemClick("Ajustes")}
                     sx={menuItemStyles}
@@ -325,6 +326,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 <Divider sx={{ my: 1 }} />
 
                 <MenuItem
+                    disabled={true}
                     sx={{
                         ...menuItemStyles,
                         justifyContent: "space-between",
@@ -346,6 +348,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 </MenuItem>
 
                 <MenuItem
+                    disabled={true}
                     selected={activeItem === "Suporte"}
                     onClick={() => handleItemClick("Suporte")}
                     sx={menuItemStyles}

@@ -30,7 +30,7 @@ export function MembroListItem({
                 px: "15.32px",
                 gap: "17px",
                 width: "100%",
-                maxWidth: "330px",
+                maxWidth: { xs: "100%", md: "330px" },
                 height: "90px",
                 transition: "background-color 0.2s ease-in-out",
                 "&:hover": {

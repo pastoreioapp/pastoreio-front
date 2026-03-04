@@ -1,8 +1,10 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Box, Tab } from "@mui/material";
+import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
 import { EtapaCard } from "./etapaCard";
 import { listaTrajetoria } from "./listaTrajetoria";
+import { IconInfoCircle, IconInfoCircleFilled, IconInfoOctagon } from "@tabler/icons-react";
+import { IconChartBar } from "@tabler/icons-react";
 
 const STYLE_TAB = {
     fontSize: { xs: "14px", md: "16px" },
@@ -81,10 +83,20 @@ export function EtapasTabs() {
                     </Box>
                 </TabPanel>
                 <TabPanel value="2">
-                    <Box mx="145px">Cursos EMP</Box>
+                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
+                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                            <IconInfoCircleFilled size={24} />
+                            Funcionalidade disponível em breve!
+                        </Typography>
+                    </Box>
                 </TabPanel>
                 <TabPanel value="3">
-                    <Box mx="145px">Frequência</Box>
+                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
+                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                            <IconInfoCircleFilled size={24} />
+                            Funcionalidade disponível em breve!
+                        </Typography>
+                    </Box>
                 </TabPanel>
             </TabContext>
         </Box>

@@ -69,7 +69,7 @@ export default function PainelRegistro() {
         try {
             await appAuthentication.runGoogleLogin();
         } catch (error: any) {
-            enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error" });
+            enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error", autoHideDuration: 2000 });
         }
     };
 
@@ -98,11 +98,11 @@ export default function PainelRegistro() {
         setPasswordTouched(true);
 
         if (!isLoginValid()) {
-            enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", { variant: "error" });
+            enqueueSnackbar(loginError || "Preencha o campo de login corretamente.", { variant: "error", autoHideDuration: 2000 });
             return;
         }
         if (passwordError) {
-            enqueueSnackbar(passwordError, { variant: "error" });
+            enqueueSnackbar(passwordError, { variant: "error", autoHideDuration: 2000 });
             return;
         }
         if (firstNameError || lastNameError) {
@@ -117,10 +117,10 @@ export default function PainelRegistro() {
                 await appAuthentication.runUserRegister(loginValue, userPassword, fullName, loginType);
             } catch (error: any) {
                 const errorMessage = error.message || "Falha ao registrar conta. Tente novamente mais tarde ou contate os administradores";
-                enqueueSnackbar(errorMessage, { variant: "error" });
+                enqueueSnackbar(errorMessage, { variant: "error", autoHideDuration: 2000 });
             }
         } else {
-            enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error" });
+            enqueueSnackbar("Preencha todos os campos obrigatórios.", { variant: "error", autoHideDuration: 2000 });
         }
     };
 

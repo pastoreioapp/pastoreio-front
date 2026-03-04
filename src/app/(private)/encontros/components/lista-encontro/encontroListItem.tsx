@@ -16,6 +16,8 @@ export function EncontroListItem({
         year: "numeric",
     });
 
+    const numeroParticipantes = encontro.frequencia?.filter(frequencia => frequencia.presente).length;
+
     return (
         <ListItemButton
             onClick={onClick}
@@ -28,8 +30,9 @@ export function EncontroListItem({
                 py: "15px",
                 px: "15.32px",
                 gap: "17px",
-                width: "330px",
-                height: "90px",
+                width: "100%",
+                maxWidth: { xs: "100%", md: "330px" },
+                height: "100px",
                 transition: "background-color 0.2s ease-in-out",
                 "&:hover": {
                     backgroundColor: "#DCE8E7",
@@ -43,16 +46,26 @@ export function EncontroListItem({
             }}
         >
             <Box flex={1}>
-                <Typography fontSize={16}>{encontro.tema}</Typography>
-                <Divider
-                    sx={{ borderColor: "#757575", mt: "2px", mb: "4px" }}
+                <Typography fontSize={16} sx={{ mb: 1}}>Tema: {encontro.tema}</Typography>
+                <Divider 
+                    sx={{ borderColor: "#C5C5C5", mt: "2px", mb: "4px" }}
                 />
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                    }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "space-between" }} >
+                    <Box
+                        sx={{
+                            bgcolor:"#5E79B3",
+                            mt: 1,
+                            py: 0.3,
+                            px: 1,
+                            color: "#fff",
+                            borderRadius: 1,
+                            width: "fit-content",
+                        }}
+                    >
+                        <Typography fontSize={10} fontWeight={600}>
+                            {numeroParticipantes} participante{numeroParticipantes === 1 ? "" : "s"}
+                        </Typography>
+                    </Box>
                     <Typography
                         fontSize={12}
                         fontWeight={600}
@@ -60,20 +73,6 @@ export function EncontroListItem({
                     >
                         {dataFormatada}
                     </Typography>
-
-                    <Box
-                        sx={{
-                            bgcolor: selected ? "#5E79B3" : "#DCE8E7",
-                            color: selected ? "#FFFFFF" : "#1B212D",
-                            borderRadius: "3px",
-                            py: "0px",
-                            px: "4px",
-                        }}
-                    >
-                        <Typography fontSize={10} fontWeight={600}>
-                            {encontro.numeroParticipantes} participantes
-                        </Typography>
-                    </Box>
                 </Box>
             </Box>
         </ListItemButton>

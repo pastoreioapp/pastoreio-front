@@ -5,9 +5,11 @@ import { Frequencia } from "./frequencia";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 
 const STYLE_TAB = {
-    fontSize: "16px",
+    fontSize: { xs: "14px", md: "16px" },
     fontWeight: "500",
-    width: "180px",
+    width: { xs: "auto", md: "180px" },
+    minWidth: "unset",
+    padding: { xs: 1.5, md: 2.5 },
     color: "#C5C5C5",
     "&.Mui-selected": {
         color: "#000",
@@ -24,7 +26,8 @@ export function EtapasTabs({ data }: { data: Encontro["frequencia"] }) {
             paddingTop="50px"
             marginX="auto"
             sx={{
-                width: "800px",
+                width: { xs: "100%", md: "800px" },
+                maxWidth: "100%",
                 overflowX: "auto",
             }}
         >
@@ -45,7 +48,6 @@ export function EtapasTabs({ data }: { data: Encontro["frequencia"] }) {
                         }}
                     >
                         <Tab label="Frequência" value="1" sx={STYLE_TAB} />
-                        <Tab label="Materiais" value="2" sx={STYLE_TAB} />
                     </TabList>
                 </Box>
                 <TabPanel
@@ -58,9 +60,6 @@ export function EtapasTabs({ data }: { data: Encontro["frequencia"] }) {
                     <Box display="flex" justifyContent="center" gap={2}>
                         <Frequencia data={data} />
                     </Box>
-                </TabPanel>
-                <TabPanel value="2">
-                    <Box>Materiais</Box>
                 </TabPanel>
             </TabContext>
         </Box>

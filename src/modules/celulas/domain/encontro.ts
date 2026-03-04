@@ -1,13 +1,21 @@
 import { Frequencia } from "./frequencia";
 
 export interface Encontro {
-    id: string;
+    id?: string;
+    celula_id?: string | null;
     tema: string;
     data: string;
+    horario: string;
+    local: string;
     anfitriao: string;
-    numeroParticipantes: number;
     preletor: string;
-    supervisao: "sim" | "não";
-    conversoes: "sim" | "não";
-    frequencia: Frequencia[];
+    supervisao: boolean;
+    conversoes: boolean;
+    observacoes?: string;
+    criado_em: string;
+    criado_por: string;
+    atualizado_em?: string;
+    atualizado_por?: string;
+
+    frequencia?: Frequencia[];
 }

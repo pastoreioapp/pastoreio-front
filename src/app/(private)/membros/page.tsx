@@ -37,7 +37,7 @@ export default function Membros() {
                 <Box sx={{ display: "flex", justifyContent: "end" }}>
                     <Button
                         variant="contained"
-                        onClick={() => enqueueSnackbar("Funcionalidade em construção — disponível em breve!", { variant: "info" })}
+                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
                         sx={{
                             bgcolor: "#5E79B3",
                             fontSize: 13,

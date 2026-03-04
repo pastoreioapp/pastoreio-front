@@ -10,7 +10,6 @@ export function InformacoesGroup({
     return (
         <Box
             sx={{
-                mt: "32px",
                 width: "100%",
             }}
         >
