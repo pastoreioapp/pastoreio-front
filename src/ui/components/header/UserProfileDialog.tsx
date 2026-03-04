@@ -20,14 +20,18 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
-import { useState, ChangeEvent, useRef } from "react";
+import SaveIcon from "@mui/icons-material/Save";
+import { useState, ChangeEvent, useRef, useEffect, ReactNode } from "react";
 import { Usuario } from "@/modules/controleacesso/domain/usuario";
 import { LoggedUserResponse } from "@/modules/controleacesso/domain/types";
-import InputMask from "react-input-mask";
 import { AlertColor } from "@mui/material/Alert";
 import { Dispatch, SetStateAction } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/pt-br";
+import { patchUsuario } from "@/modules/controleacesso/application/usuario.service";
+import { useDispatch } from "react-redux";
+import { setLoggedUser } from "@/ui/stores/features/loggedUserSlice";
 
 interface UserProfileDialogProps {
     open: boolean;
@@ -36,27 +40,93 @@ interface UserProfileDialogProps {
     onAvatarChange?: Dispatch<SetStateAction<string | null>>;
 }
 
-export function getInitials(nome?: string): string {
-    if (!nome || typeof nome !== "string") return "U";
-    const partes = nome.trim().split(" ");
-    return partes.length === 1
-        ? partes[0][0].toUpperCase()
-        : partes[0][0].toUpperCase() +
-              partes[partes.length - 1][0].toUpperCase();
+export function getInitials(nome?: string, sobrenome?: string): string {
+    const nomeLimpo = nome?.trim() || "";
+    const sobrenomeLimpo = sobrenome?.trim() || "";
+
+    if (!nomeLimpo && !sobrenomeLimpo) return "U";
+    if (!sobrenomeLimpo) return nomeLimpo[0].toUpperCase();
+
+    return (nomeLimpo[0] + sobrenomeLimpo[0]).toUpperCase();
 }
 
-const getDefaultFormData = (user: Partial<Usuario> = {}) => ({
+export const applyPhoneMask = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length === 0) return "";
+    if (cleaned.length <= 2) return `(${cleaned}`;
+    if (cleaned.length <= 7)
+        return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`;
+};
+
+const getDefaultFormData = (
+    user: Partial<Usuario> & { sobrenome?: string } = {},
+) => ({
     nome: user.nome || "",
+    sobrenome: user.sobrenome || "",
     funcao: user.funcao || "",
-    telefone: user.telefone || "",
+    telefone: applyPhoneMask(user.telefone || ""),
     email: user.email || "",
     nascimento: user.nascimento || "",
     endereco: user.endereco || "",
     estadoCivil: user.estadoCivil || "",
-    conjuge: user.conjuge || "",
-    filhos: user.filhos || "Não",
+    filhos: user.filhos || "",
     ministerio: user.ministerio || "",
 });
+
+const FieldWrapper = ({
+    label,
+    value,
+    isEditing,
+    children,
+}: {
+    label: string;
+    value: string | ReactNode;
+    isEditing: boolean;
+    children: ReactNode;
+}) => {
+    const theme = useTheme();
+
+    if (isEditing) {
+        return <>{children}</>;
+    }
+
+    return (
+        <Box
+            sx={{
+                mb: 1.5,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                pb: 0.5,
+                height: "100%",
+            }}
+        >
+            <Typography
+                variant="caption"
+                sx={{
+                    color: theme.palette.primary.main,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    display: "block",
+                    mb: 0.5,
+                    fontSize: "0.7rem",
+                }}
+            >
+                {label}
+            </Typography>
+            <Typography
+                variant="body1"
+                sx={{
+                    color: theme.palette.text.primary,
+                    lineHeight: 1.2,
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                }}
+            >
+                {value || "-"}
+            </Typography>
+        </Box>
+    );
+};
 
 export default function UserProfileDialog({
     open,
@@ -64,10 +134,11 @@ export default function UserProfileDialog({
     user,
 }: UserProfileDialogProps) {
     const theme = useTheme();
+    const dispatch = useDispatch();
+
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState(() => getDefaultFormData(user));
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -75,9 +146,17 @@ export default function UserProfileDialog({
     const [snackbarSeverity, setSnackbarSeverity] =
         useState<AlertColor>("success");
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (user) {
+            setFormData(getDefaultFormData(user));
+        }
+    }, [user]);
+
     const showSnackbar = (
         message: string,
-        severity: AlertColor = "success"
+        severity: AlertColor = "success",
     ) => {
         setSnackbarMessage(message);
         setSnackbarSeverity(severity);
@@ -95,19 +174,49 @@ export default function UserProfileDialog({
         }
     };
 
-    const handleChange = (field: keyof Usuario, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    const handleChange = (field: string, value: string) => {
+        if (field === "telefone") {
+            setFormData((prev) => ({
+                ...prev,
+                [field]: applyPhoneMask(value),
+            }));
+        } else {
+            setFormData((prev) => ({ ...prev, [field]: value }));
+        }
     };
 
     const handleEditToggle = async () => {
         if (isEditing) {
             setIsSaving(true);
             try {
-                await new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Erro ao salvar")), 1500)
+                const payload: Partial<Usuario> = {
+                    ...formData,
+                    filhos:
+                        formData.filhos === "Sim" || formData.filhos === "Não"
+                            ? formData.filhos
+                            : undefined,
+                };
+
+                await patchUsuario(payload);
+
+                showSnackbar("Dados salvos com sucesso!", "success");
+                setIsEditing(false);
+
+                if (user) {
+                    dispatch(
+                        setLoggedUser({
+                            ...user,
+                            ...formData,
+                            nome: formData.nome,
+                            sobrenome: formData.sobrenome,
+                        }),
+                    );
+                }
+            } catch (error: any) {
+                showSnackbar(
+                    error.message || "Algo deu errado ao salvar os dados.",
+                    "error",
                 );
-            } catch {
-                showSnackbar("Algo deu errado ao salvar os dados.", "error");
             } finally {
                 setIsSaving(false);
             }
@@ -125,22 +234,53 @@ export default function UserProfileDialog({
 
     const triggerFileInput = () => fileInputRef.current?.click();
 
-    const commonInputProps = {
-        InputProps: {
-            readOnly: !isEditing,
-            disableUnderline: true,
-            sx: {
-                backgroundColor: "#eee",
-                borderRadius: 2,
-                color: "#000",
+    const nomeCompleto = `${formData.nome} ${formData.sobrenome}`.trim();
+
+    function getMainUserRole(perfis: string[]): string {
+        return perfis && perfis[0];
+    }
+
+    const baseFieldProps = {
+        size: "small" as const,
+        fullWidth: true,
+        variant: "outlined" as const,
+        sx: {
+            "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+                "& fieldset": {
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                },
+                "&:hover fieldset": {
+                    borderColor: `${theme.palette.primary.dark} !important`,
+                },
+                "&.Mui-focused fieldset": {
+                    borderColor: `${theme.palette.primary.main} !important`,
+                },
+                "&.Mui-disabled": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    "& fieldset": {
+                        borderColor: "rgba(0, 0, 0, 0.12) !important",
+                    },
+                },
+            },
+            "& .MuiInputBase-input": {
+                color: "rgba(0, 0, 0, 0.87)",
+                "&.Mui-disabled": {
+                    color: "rgba(0, 0, 0, 0.38)",
+                    WebkitTextFillColor: "rgba(0, 0, 0, 0.38)",
+                },
+                "&::placeholder": {
+                    opacity: "1 !important",
+                    color: "rgba(0, 0, 0, 0.4) !important",
+                },
             },
         },
     };
 
-    function getMainUserRole(perfis: string[]): string {
-        // FIXME: implement logic to choose the right role
-        return perfis && perfis[0];
-    }
+    const editInputProps = {
+        ...baseFieldProps,
+        InputLabelProps: { shrink: true },
+    };
 
     return (
         <Dialog
@@ -150,7 +290,7 @@ export default function UserProfileDialog({
             maxWidth="sm"
             sx={{
                 "& .MuiDialog-paper": {
-                    borderRadius: 4,
+                    borderRadius: 3,
                     backgroundColor: "#fff",
                     color: "#000",
                 },
@@ -163,12 +303,13 @@ export default function UserProfileDialog({
                     position: "absolute",
                     right: 12,
                     top: 12,
-                    color: theme.palette.grey[700],
+                    color: theme.palette.grey[500],
                 }}
             >
                 <CloseIcon />
             </IconButton>
-            <DialogContent sx={{ pt: 5 }}>
+
+            <DialogContent sx={{ pt: 5, pb: 4, px: 4 }}>
                 <Box
                     position="relative"
                     display="flex"
@@ -177,7 +318,7 @@ export default function UserProfileDialog({
                     mb={4}
                 >
                     <Avatar
-                        alt={user.nome}
+                        alt={nomeCompleto}
                         src={avatarUrl || undefined}
                         sx={{
                             width: 96,
@@ -187,10 +328,13 @@ export default function UserProfileDialog({
                             bgcolor: theme.palette.primary.main,
                             color: "#fff",
                             mb: 1,
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                         }}
                     >
-                        {!avatarUrl && getInitials(user.nome)}
+                        {!avatarUrl &&
+                            getInitials(formData.nome, formData.sobrenome)}
                     </Avatar>
+
                     {isEditing && (
                         <>
                             <IconButton
@@ -201,11 +345,12 @@ export default function UserProfileDialog({
                                     top: 70,
                                     right: "calc(50% - 48px)",
                                     backgroundColor: "#fff",
-                                    border: "1px solid #ccc",
-                                    "&:hover": { backgroundColor: "#f0f0f0" },
+                                    border: `1px solid ${theme.palette.divider}`,
+                                    "&:hover": { backgroundColor: "#f5f5f5" },
+                                    boxShadow: 1,
                                 }}
                             >
-                                <EditIcon fontSize="small" />
+                                <EditIcon fontSize="small" color="primary" />
                             </IconButton>
                             <input
                                 type="file"
@@ -216,236 +361,258 @@ export default function UserProfileDialog({
                             />
                         </>
                     )}
-                    <Typography variant="h5" fontWeight={600}>
-                        {formData.nome}
+
+                    <Typography
+                        variant="h5"
+                        fontWeight={700}
+                        textAlign="center"
+                        mt={1}
+                    >
+                        {nomeCompleto || "Usuário"}
                     </Typography>
+
                     <Typography
                         variant="body2"
                         sx={{
                             color: "#fff",
-                            backgroundColor: "#173D8A",
-                            px: 1,
+                            backgroundColor: "#5E79B3",
+                            px: 2,
                             py: 0.5,
                             borderRadius: 1,
-                            mt: 0.5,
+                            mt: 1,
+                            fontSize: "0.7rem",
+                            fontWeight: "bold",
+                            letterSpacing: 0.5,
+                            textTransform: "uppercase",
                         }}
                     >
                         {getMainUserRole(user.perfis)}
                     </Typography>
                 </Box>
-                <Grid container spacing={2}>
-                    {isEditing ? (
-                        <Grid item xs={12}>
+
+                <Grid container spacing={3}>
+                    {isEditing && (
+                        <>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Nome"
+                                    value={formData.nome}
+                                    placeholder="Digite seu nome"
+                                    onChange={(e) =>
+                                        handleChange("nome", e.target.value)
+                                    }
+                                    {...editInputProps}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Sobrenome"
+                                    value={formData.sobrenome}
+                                    placeholder="Digite seu sobrenome"
+                                    onChange={(e) =>
+                                        handleChange(
+                                            "sobrenome",
+                                            e.target.value,
+                                        )
+                                    }
+                                    {...editInputProps}
+                                />
+                            </Grid>
+                        </>
+                    )}
+
+                    <Grid item xs={12} sm={6}>
+                        <FieldWrapper
+                            label="E-mail"
+                            value={formData.email}
+                            isEditing={isEditing}
+                        >
                             <TextField
-                                fullWidth
-                                label="Nome"
-                                variant="filled"
-                                value={formData.nome}
+                                label="E-mail"
+                                value={formData.email}
+                                placeholder="exemplo@gmail.com"
                                 onChange={(e) =>
-                                    handleChange("nome", e.target.value)
+                                    handleChange("email", e.target.value)
                                 }
-                                {...commonInputProps}
-                                sx={{
-                                    "& .MuiInputLabel-root": {
-                                        color: theme.palette.primary.main,
+                                disabled={user?.provider !== "phone"}
+                                helperText={
+                                    user?.provider !== "phone"
+                                        ? "Gerenciado pela credencial de login"
+                                        : ""
+                                }
+                                FormHelperTextProps={{
+                                    sx: {
+                                        color: theme.palette.text.secondary,
+                                        marginX: 0,
+                                    },
+                                }}
+                                {...editInputProps}
+                            />
+                        </FieldWrapper>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <FieldWrapper
+                            label="Telefone"
+                            value={formData.telefone || "-"}
+                            isEditing={isEditing}
+                        >
+                            <TextField
+                                label="Telefone"
+                                value={formData.telefone}
+                                placeholder="(00) 00000-0000"
+                                onChange={(e) =>
+                                    handleChange("telefone", e.target.value)
+                                }
+                                disabled={user?.provider === "phone"}
+                                helperText={
+                                    user?.provider === "phone"
+                                        ? "Gerenciado pela credencial de login"
+                                        : ""
+                                }
+                                FormHelperTextProps={{
+                                    sx: {
+                                        color: theme.palette.text.secondary,
+                                        marginX: 0,
+                                    },
+                                }}
+                                {...editInputProps}
+                            />
+                        </FieldWrapper>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <FieldWrapper
+                            label="Endereço"
+                            value={formData.endereco}
+                            isEditing={isEditing}
+                        >
+                            <TextField
+                                label="Endereço"
+                                value={formData.endereco}
+                                placeholder="Rua, Número, Bairro"
+                                onChange={(e) =>
+                                    handleChange("endereco", e.target.value)
+                                }
+                                {...editInputProps}
+                            />
+                        </FieldWrapper>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <FieldWrapper
+                            label="Data de Nascimento"
+                            value={
+                                formData.nascimento
+                                    ? dayjs(formData.nascimento).format(
+                                          "DD/MM/YYYY",
+                                      )
+                                    : ""
+                            }
+                            isEditing={isEditing}
+                        >
+                            <DatePicker
+                                label="Data de Nascimento"
+                                format="DD/MM/YYYY"
+                                value={
+                                    formData.nascimento
+                                        ? dayjs(formData.nascimento)
+                                        : null
+                                }
+                                onChange={(date: Dayjs | null) =>
+                                    handleChange(
+                                        "nascimento",
+                                        date && date.isValid()
+                                            ? date.toDate().toISOString()
+                                            : "",
+                                    )
+                                }
+                                sx={baseFieldProps.sx}
+                                slotProps={{
+                                    textField: {
+                                        ...editInputProps,
+                                        placeholder: "DD/MM/AAAA",
                                     },
                                 }}
                             />
-                        </Grid>
-                    ) : null}
+                        </FieldWrapper>
+                    </Grid>
 
-                    <Grid item xs={12}>
-                        <InputMask
-                            mask="(99) 99999-9999"
-                            value={formData.telefone}
-                            onChange={(e) =>
-                                isEditing &&
-                                handleChange("telefone", e.target.value)
-                            }
-                            disabled={!isEditing}
+                    <Grid item xs={12} sm={6}>
+                        <FieldWrapper
+                            label="Estado Civil"
+                            value={formData.estadoCivil}
+                            isEditing={isEditing}
                         >
-                            {(inputProps: any) => (
-                                <TextField
-                                    {...inputProps}
-                                    fullWidth
-                                    label="Telefone"
-                                    variant="filled"
-                                    InputProps={{
-                                        ...commonInputProps.InputProps,
-                                        readOnly: !isEditing,
-                                        disabled: !isEditing,
-                                    }}
-                                    sx={{
-                                        "& .MuiInputLabel-root": {
-                                            color: theme.palette.primary.main,
-                                        },
-                                    }}
-                                />
-                            )}
-                        </InputMask>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Endereço"
-                            variant="filled"
-                            value={formData.endereco}
-                            onChange={(e) =>
-                                isEditing &&
-                                handleChange("endereco", e.target.value)
-                            }
-                            InputProps={{
-                                ...commonInputProps.InputProps,
-                                readOnly: !isEditing,
-                                disabled: !isEditing,
-                            }}
-                            sx={{
-                                "& .MuiInputLabel-root": {
-                                    color: theme.palette.primary.main,
-                                },
-                            }}
-                        />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <DatePicker
-                            label="Data de Nascimento"
-                            format="DD/MM/YYYY"
-                            value={
-                                formData.nascimento
-                                    ? dayjs(formData.nascimento)
-                                    : null
-                            }
-                            onChange={(date: Dayjs | null) =>
-                                handleChange(
-                                    "nascimento",
-                                    date && date.isValid()
-                                        ? date.toDate().toISOString()
-                                        : ""
-                                )
-                            }
-                            readOnly={!isEditing}
-                            slots={
-                                !isEditing
-                                    ? { openPickerIcon: () => null }
-                                    : undefined
-                            }
-                            slotProps={{
-                                textField: {
-                                    fullWidth: true,
-                                    variant: "filled",
-                                    disabled: !isEditing,
-                                    InputProps: {
-                                        readOnly: !isEditing,
-                                        disableUnderline: true,
-                                        sx: {
-                                            backgroundColor: "#eee",
-                                            borderRadius: 2,
-                                            color: "#000",
-                                        },
-                                    },
-                                    InputLabelProps: {
-                                        shrink: true,
-                                    },
-                                    sx: {
-                                        "& label": {
-                                            color:
-                                                theme.palette.primary.main +
-                                                " !important",
-                                        },
-                                        "& .MuiInputBase-input.Mui-disabled": {
-                                            WebkitTextFillColor:
-                                                theme.palette.text.disabled,
-                                        },
-                                        "& .Mui-disabled": {
-                                            color: theme.palette.text.disabled,
-                                        },
-                                    },
-                                },
-                            }}
-                        />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        {isEditing ? (
-                            <FormControl
-                                fullWidth
-                                variant="filled"
-                                sx={{ borderRadius: 2 }}
-                            >
-                                <InputLabel
-                                    sx={{ color: theme.palette.primary.main }}
-                                >
-                                    Estado Civil
-                                </InputLabel>
+                            <FormControl {...baseFieldProps}>
+                                <InputLabel shrink>Estado Civil</InputLabel>
                                 <Select
                                     value={formData.estadoCivil}
                                     onChange={(e) =>
                                         handleChange(
                                             "estadoCivil",
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
-                                    disableUnderline
+                                    label="Estado Civil"
+                                    notched
+                                    displayEmpty
                                 >
+                                    <MenuItem
+                                        value=""
+                                        disabled
+                                        sx={{ display: "none" }}
+                                    >
+                                        Selecione
+                                    </MenuItem>
                                     {[
-                                        {key: "Solteiro", name: "Solteiro(a)"},
-                                        {key: "Casado", name: "Casado(a)"},
-                                        {key: "Divorciado", name: "Divorciado(a)"},
-                                        {key: "Viúvo", name: "Viúvo(a)"}
+                                        {
+                                            key: "Solteiro",
+                                            name: "Solteiro(a)",
+                                        },
+                                        { key: "Casado", name: "Casado(a)" },
+                                        {
+                                            key: "Divorciado",
+                                            name: "Divorciado(a)",
+                                        },
+                                        { key: "Viúvo", name: "Viúvo(a)" },
                                     ].map((item) => (
-                                        <MenuItem key={item.key} value={item.name}>
+                                        <MenuItem
+                                            key={item.key}
+                                            value={item.name}
+                                        >
                                             {item.name}
                                         </MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
-                        ) : (
-                            <TextField
-                                fullWidth
-                                label="Estado Civil"
-                                variant="filled"
-                                disabled
-                                value={formData.estadoCivil}
-                                {...commonInputProps}
-                                sx={{
-                                    "& label": {
-                                        color:
-                                            theme.palette.primary.main +
-                                            " !important",
-                                    },
-                                    "& .MuiInputBase-input.Mui-disabled": {
-                                        WebkitTextFillColor:
-                                            theme.palette.text.disabled,
-                                    },
-                                    "& .Mui-disabled": {
-                                        color: theme.palette.text.disabled,
-                                    },
-                                }}
-                            />
-                        )}
+                        </FieldWrapper>
                     </Grid>
 
                     <Grid item xs={12}>
-                        {isEditing ? (
-                            <FormControl
-                                fullWidth
-                                variant="filled"
-                                sx={{ borderRadius: 2 }}
-                            >
-                                <InputLabel
-                                    sx={{ color: theme.palette.primary.main }}
-                                >
-                                    Filhos
-                                </InputLabel>
+                        <FieldWrapper
+                            label="Filhos"
+                            value={formData.filhos}
+                            isEditing={isEditing}
+                        >
+                            <FormControl {...baseFieldProps}>
+                                <InputLabel shrink>Filhos</InputLabel>
                                 <Select
                                     value={formData.filhos}
                                     onChange={(e) =>
                                         handleChange("filhos", e.target.value)
                                     }
-                                    disableUnderline
+                                    label="Filhos"
+                                    notched
+                                    displayEmpty
                                 >
+                                    <MenuItem
+                                        value=""
+                                        disabled
+                                        sx={{ display: "none" }}
+                                    >
+                                        Selecione
+                                    </MenuItem>
                                     {["Sim", "Não"].map((item) => (
                                         <MenuItem key={item} value={item}>
                                             {item}
@@ -453,106 +620,74 @@ export default function UserProfileDialog({
                                     ))}
                                 </Select>
                             </FormControl>
-                        ) : (
-                            <TextField
-                                fullWidth
-                                label="Filhos"
-                                variant="filled"
-                                disabled
-                                value={formData.filhos}
-                                {...commonInputProps}
-                                sx={{
-                                    "& label": {
-                                        color:
-                                            theme.palette.primary.main +
-                                            " !important",
-                                    },
-                                    "& .MuiInputBase-input.Mui-disabled": {
-                                        WebkitTextFillColor:
-                                            theme.palette.text.disabled,
-                                    },
-                                    "& .Mui-disabled": {
-                                        color: theme.palette.text.disabled,
-                                    },
-                                }}
-                            />
-                        )}
+                        </FieldWrapper>
                     </Grid>
 
                     <Grid item xs={12}>
-                        <TextField
-                            fullWidth
+                        <FieldWrapper
                             label="Ministério(s)"
-                            variant="filled"
-                            disabled={true}
                             value={formData.ministerio}
-                            InputProps={{
-                                readOnly: !isEditing,
-                                disableUnderline: true,
-                                sx: {
-                                    borderRadius: 2,
-                                },
-                            }}
-                            sx={{
-                                "& label": {
-                                    color:
-                                        theme.palette.primary.main +
-                                        " !important",
-                                },
-                                "& .MuiInputBase-input.Mui-disabled": {
-                                    WebkitTextFillColor:
-                                        theme.palette.text.disabled,
-                                },
-                                "& .Mui-disabled": {
-                                    color: theme.palette.text.disabled,
-                                },
-                            }}
-                        />
+                            isEditing={isEditing}
+                        >
+                            <TextField
+                                label="Ministério(s)"
+                                value={formData.ministerio}
+                                placeholder="Nenhum"
+                                disabled={true}
+                                helperText="Gerenciado pela secretaria da igreja"
+                                FormHelperTextProps={{
+                                    sx: {
+                                        color: theme.palette.text.secondary,
+                                        marginX: 0,
+                                    },
+                                }}
+                                {...editInputProps}
+                            />
+                        </FieldWrapper>
                     </Grid>
                 </Grid>
-                <Box mt={4} display="flex" justifyContent="flex-end" gap={2}>
-                    {isEditing ? (
+
+                <Box mt={5} display="flex" justifyContent="flex-end" gap={2}>
+                    {isEditing && (
                         <Button
                             onClick={() => {
                                 setIsEditing(false);
                                 setFormData(getDefaultFormData(user));
                                 setAvatarUrl(null);
                             }}
-                            variant={"outlined"}
+                            variant="outlined"
                             sx={{
                                 textTransform: "none",
-                                fontWeight: 500,
                                 borderRadius: 2,
-                                px: 4,
-                                mb: 1,
-                                minWidth: 100,
+                                px: 3,
+                                color: theme.palette.text.primary,
+                                borderColor: theme.palette.divider,
+                                "&:hover": {
+                                    borderColor: theme.palette.text.secondary,
+                                    backgroundColor: "transparent",
+                                },
                             }}
                         >
                             Cancelar
                         </Button>
-                    ) : null}
+                    )}
                     <Button
                         variant={isEditing ? "contained" : "outlined"}
                         color="primary"
                         onClick={handleEditToggle}
                         disabled={isSaving}
-                        sx={{
-                            textTransform: "none",
-                            fontWeight: 500,
-                            borderRadius: 2,
-                            px: 4,
-                            mb: 1,
-                            minWidth: 100,
-                        }}
+                        startIcon={isEditing ? <SaveIcon /> : <EditIcon />}
+                        sx={{ textTransform: "none", borderRadius: 2, px: 4 }}
                     >
                         {isSaving
                             ? "Salvando..."
                             : isEditing
-                            ? "Salvar"
-                            : "Editar"}
+                              ? "Salvar"
+                              : "Editar"}
                     </Button>
                 </Box>
             </DialogContent>
+
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}

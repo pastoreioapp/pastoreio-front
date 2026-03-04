@@ -63,13 +63,14 @@ interface ProfileProps {
     onMenuItemClick?: (item: string) => void;
 }
 
-export function getInitials(nome?: string): string {
-    if (!nome) return "";
-    const partes = nome.trim().split(" ");
-    return partes.length === 1
-        ? partes[0][0].toUpperCase()
-        : partes[0][0].toUpperCase() +
-              partes[partes.length - 1][0].toUpperCase();
+export function getInitials(nome?: string, sobrenome?: string): string {
+    const nomeLimpo = nome?.trim() || "";
+    const sobrenomeLimpo = sobrenome?.trim() || "";
+
+    if (!nomeLimpo && !sobrenomeLimpo) return "U";
+    if (!sobrenomeLimpo) return nomeLimpo[0].toUpperCase();
+
+    return (nomeLimpo[0] + sobrenomeLimpo[0]).toUpperCase();
 }
 
 export default function Profile({ onMenuItemClick }: ProfileProps) {
@@ -80,7 +81,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [toastOpen, setToastOpen] = useState(false);
 
     const { runLogout, loggedUser: usuario } = useAppAuthentication();
-    
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -95,6 +96,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const handleItemClick = async (item: string) => {
         if (item === "Sair") {
             await runLogout();
+            handleClose();
+            window.location.href = "/login";
         } else if (item === "Perfil") {
             setOpenProfileDialog(true);
             handleClose();
@@ -126,6 +129,10 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
             fontWeight: 500,
         },
     };
+
+    const nomeCompleto = usuario
+        ? `${usuario.nome || ""} ${usuario.sobrenome || ""}`.trim()
+        : "";
 
     return (
         <Box>
@@ -173,29 +180,34 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             color: "#fff",
                         }}
                     >
-                        {!avatarUrl && (usuario ? getInitials(usuario.nome) : "")}
+                        {!avatarUrl &&
+                            (usuario
+                                ? getInitials(usuario.nome, usuario.sobrenome)
+                                : "")}
                     </Avatar>
                 </Box>
                 {!isMobile && (
                     <>
-                        <Typography 
-                            variant="body1" 
-                            fontWeight="600" 
-                            sx={{ 
+                        <Typography
+                            variant="body1"
+                            fontWeight="600"
+                            sx={{
                                 mx: 1.5,
                                 fontFamily: poppins.style.fontFamily,
                                 fontSize: "15px",
                                 color: "#1B212D",
                             }}
                         >
-                            {usuario ? usuario.nome : ""}
+                            {nomeCompleto}
                         </Typography>
                         <IconCaretDownFilled
                             size="18"
                             color="#929EAE"
                             style={{
                                 transition: "transform 0.2s ease-in-out",
-                                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                transform: isOpen
+                                    ? "rotate(180deg)"
+                                    : "rotate(0deg)",
                             }}
                         />
                     </>
@@ -238,7 +250,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         <Avatar
                             src={avatarUrl || undefined}
                             sx={{
-                                bgcolor: "#0d3b8a",
+                                bgcolor: "#5E79B3",
                                 width: 48,
                                 height: 48,
                                 fontSize: "16px",
@@ -247,18 +259,38 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                             }}
                         >
                             {!avatarUrl &&
-                                (usuario ? getInitials(usuario.nome) : "")}
+                                (usuario
+                                    ? getInitials(
+                                          usuario.nome,
+                                          usuario.sobrenome,
+                                      )
+                                    : "")}
                         </Avatar>
                     </Badge>
-                    <Box ml={2}>
+                    <Box ml={2} sx={{ overflow: "hidden" }}>
                         <Typography
                             variant="h6"
                             component="h2"
                             fontWeight="600"
+                            sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                            }}
                         >
-                            {usuario ? usuario.nome : ""}
+                            {nomeCompleto}
                         </Typography>
-                        <Typography variant="body2" color="#6b7280">
+                        <Typography
+                            variant="body2"
+                            color="#6b7280"
+                            title={usuario ? usuario.email : ""}
+                            sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                display: "block",
+                            }}
+                        >
                             {usuario
                                 ? usuario.email
                                 : "usuário não autenticado"}

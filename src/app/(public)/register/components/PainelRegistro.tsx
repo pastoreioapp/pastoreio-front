@@ -34,14 +34,16 @@ type RegisterStep = "menu" | "email" | "phone";
 export default function PainelRegistro() {
     const theme = useTheme();
     const appAuthentication = useAppAuthentication();
-
+    
     const [step, setStep] = useState<RegisterStep>("menu");
     const [userLogin, setUserLogin] = useState<string>("");
-    const [userName, setUserName] = useState<string>("");
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
     const [userPassword, setUserPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState(false);
     const [loginTouched, setLoginTouched] = useState(false);
-    const [nameTouched, setNameTouched] = useState(false);
+    const [firstNameTouched, setFirstNameTouched] = useState(false);
+    const [lastNameTouched, setLastNameTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
 
     const loginType: RegisterLoginType = step === "phone" ? "phone" : "email";
@@ -53,10 +55,12 @@ export default function PainelRegistro() {
     const handleBack = () => {
         setStep("menu");
         setUserLogin("");
-        setUserName("");
+        setFirstName("");
+        setLastName("");
         setUserPassword("");
         setLoginTouched(false);
-        setNameTouched(false);
+        setFirstNameTouched(false);
+        setLastNameTouched(false);
         setPasswordTouched(false);
         setShowPassword(false);
     };
@@ -82,13 +86,15 @@ export default function PainelRegistro() {
     };
 
     const loginError = loginTouched ? getLoginValidationError(userLogin, loginType) : null;
-    const nameError = nameTouched && !userName.trim() ? "Campo obrigatório" : null;
+    const firstNameError = firstNameTouched && !firstName.trim() ? "Campo obrigatório" : null;
+    const lastNameError = lastNameTouched && !lastName.trim() ? "Campo obrigatório" : null;
     const passwordError = passwordTouched ? getPasswordValidationError(userPassword) : null;
 
     const handleRegistrarButtonClick = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoginTouched(true);
-        setNameTouched(true);
+        setFirstNameTouched(true);
+        setLastNameTouched(true);
         setPasswordTouched(true);
 
         if (!isLoginValid()) {
@@ -99,14 +105,16 @@ export default function PainelRegistro() {
             enqueueSnackbar(passwordError, { variant: "error" });
             return;
         }
-        if (nameError) {
-            enqueueSnackbar(nameError, { variant: "error" });
+        if (firstNameError || lastNameError) {
+            enqueueSnackbar("Preencha nome e sobrenome.", { variant: "error" });
             return;
         }
-        if (userName.trim() && userPassword) {
+        if (firstName.trim() && lastName.trim() && userPassword) {
             try {
                 const loginValue = getLoginValueForApi();
-                await appAuthentication.runUserRegister(loginValue, userPassword, userName.trim(), loginType);
+                const fullName = `${firstName.trim()} ${lastName.trim()}`;
+
+                await appAuthentication.runUserRegister(loginValue, userPassword, fullName, loginType);
             } catch (error: any) {
                 const errorMessage = error.message || "Falha ao registrar conta. Tente novamente mais tarde ou contate os administradores";
                 enqueueSnackbar(errorMessage, { variant: "error" });
@@ -136,7 +144,6 @@ export default function PainelRegistro() {
         },
     };
 
-    /* ─── STEP: MENU ─── */
     if (step === "menu") {
         return (
             <>
@@ -236,7 +243,6 @@ export default function PainelRegistro() {
         );
     }
 
-    /* ─── STEP: FORMULÁRIO ─── */
     return (
         <>
             <Typography
@@ -299,34 +305,66 @@ export default function PainelRegistro() {
                         />
                     )}
 
-                    <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        component="label"
-                        htmlFor="name"
-                        sx={{
-                            color: theme.palette.grey[600],
-                            fontSize: "0.875rem",
-                            mt: 2.5,
-                            mb: 0.5,
-                            display: "block",
-                        }}
-                    >
-                        Nome completo <span style={{ color: theme.palette.error.main }}>*</span>
-                    </Typography>
-                    <CustomTextField
-                        required
-                        fullWidth
-                        error={!!nameError}
-                        helperText={nameError}
-                        id="name"
-                        variant="outlined"
-                        placeholder="Insira o seu nome completo"
-                        value={userName}
-                        onChange={(event) => setUserName(event.target.value)}
-                        onBlur={() => setNameTouched(true)}
-                        sx={inputSx}
-                    />
+                    <Stack direction="row" spacing={2} sx={{ mt: 2.5 }}>
+                        <Box sx={{ width: "100%" }}>
+                            <Typography
+                                variant="subtitle1"
+                                fontWeight={600}
+                                component="label"
+                                htmlFor="firstName"
+                                sx={{
+                                    color: theme.palette.grey[600],
+                                    fontSize: "0.875rem",
+                                    mb: 0.5,
+                                    display: "block",
+                                }}
+                            >
+                                Nome <span style={{ color: theme.palette.error.main }}>*</span>
+                            </Typography>
+                            <CustomTextField
+                                required
+                                fullWidth
+                                error={!!firstNameError}
+                                helperText={firstNameError}
+                                id="firstName"
+                                variant="outlined"
+                                placeholder="Seu nome"
+                                value={firstName}
+                                onChange={(event) => setFirstName(event.target.value)}
+                                onBlur={() => setFirstNameTouched(true)}
+                                sx={inputSx}
+                            />
+                        </Box>
+                        <Box sx={{ width: "100%" }}>
+                            <Typography
+                                variant="subtitle1"
+                                fontWeight={600}
+                                component="label"
+                                htmlFor="lastName"
+                                sx={{
+                                    color: theme.palette.grey[600],
+                                    fontSize: "0.875rem",
+                                    mb: 0.5,
+                                    display: "block",
+                                }}
+                            >
+                                Sobrenome <span style={{ color: theme.palette.error.main }}>*</span>
+                            </Typography>
+                            <CustomTextField
+                                required
+                                fullWidth
+                                error={!!lastNameError}
+                                helperText={lastNameError}
+                                id="lastName"
+                                variant="outlined"
+                                placeholder="Seu sobrenome"
+                                value={lastName}
+                                onChange={(event) => setLastName(event.target.value)}
+                                onBlur={() => setLastNameTouched(true)}
+                                sx={inputSx}
+                            />
+                        </Box>
+                    </Stack>
 
                     <Typography
                         variant="subtitle1"
