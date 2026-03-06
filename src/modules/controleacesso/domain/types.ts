@@ -17,6 +17,14 @@ export interface LoggedUserResponse {
   telefone: string;
   perfis: Array<string>;
   isUsuarioExterno: boolean;
+  nascimento?: string;
+  endereco?: string;
+  estadoCivil?: string;
+  conjuge?: string;
+  filhos?: "Sim" | "Não";
+  ministerio?: string;
+  funcao?: string;
+  provider?: string;
 }
 
 export enum Perfil {

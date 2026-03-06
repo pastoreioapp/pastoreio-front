@@ -17,19 +17,12 @@ export default function RecentTransactions() {
             <>
                 <Timeline
                     className="theme-timeline"
-                    nonce={undefined}
-                    onResize={undefined}
-                    onResizeCapture={undefined}
                     sx={{
                         p: 0,
-                        mb: "-40px",
+                        mb: "20px",
                         "& .MuiTimelineConnector-root": {
                             width: "1px",
                             backgroundColor: "#efefef",
-                        },
-                        [`& .${timelineOppositeContentClasses.root}`]: {
-                            flex: 0.5,
-                            paddingLeft: 0,
                         },
                     }}
                 >
