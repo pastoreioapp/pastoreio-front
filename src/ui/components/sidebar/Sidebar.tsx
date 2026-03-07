@@ -139,6 +139,7 @@ const LogoArea = () => (
                 alt="Logo"
                 width={240}
                 height={154}
+                priority
             />
         </Box>
     </Box>

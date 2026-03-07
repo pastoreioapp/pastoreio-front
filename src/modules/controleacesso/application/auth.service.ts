@@ -4,79 +4,102 @@ import type { LoggedUserResponse } from "../domain/types";
 import { Perfil } from "../domain/types";
 
 async function getUserProfiles(
-  supabase: SupabaseClient,
-  userId: string,
-  userMetadata?: Record<string, unknown>
+    supabase: SupabaseClient,
+    userId: string,
+    userMetadata?: Record<string, unknown>,
 ): Promise<string[]> {
-  try {
-    const { data: profileData, error } = await supabase
-      .from("user_profiles")
-      .select("profile")
-      .eq("user_id", userId)
-      .single();
+    const profiles = userMetadata?.profiles;
+    if (Array.isArray(profiles)) return profiles;
 
-    if (!error && profileData) {
-      return Array.isArray(profileData.profile)
-        ? profileData.profile
-        : [profileData.profile];
+    const profile = userMetadata?.profile;
+    if (profile) {
+        return Array.isArray(profile)
+            ? (profile as string[])
+            : [profile as string];
     }
-  } catch {
-    // Tabela não existe ou erro - continua para fallback
+
+    return [Perfil.MEMBRO];
+}
+
+function formatPhone(phone?: string): string {
+  if (!phone) return "";
+  let cleaned = phone.replace(/\D/g, "");
+  
+  if (cleaned.startsWith("55") && cleaned.length > 11) {
+     cleaned = cleaned.substring(2);
   }
-
-  const profiles = userMetadata?.profiles;
-  if (Array.isArray(profiles)) return profiles;
-
-  const profile = userMetadata?.profile;
-  if (profile) {
-    return Array.isArray(profile) ? profile : [profile];
-  }
-
-  return [Perfil.MEMBRO];
+  
+  return cleaned;
 }
 
 export async function mapSupabaseUserToLoggedUser(
-  supabase: SupabaseClient,
-  user: User | null
+    supabase: SupabaseClient,
+    user: User | null,
 ): Promise<LoggedUserResponse | null> {
-  if (!user) return null;
+    if (!user) return null;
 
-  const profiles = await getUserProfiles(supabase, user.id, user.user_metadata);
+    const profiles = await getUserProfiles(
+        supabase,
+        user.id,
+        user.user_metadata,
+    );
 
-  const fullName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    user.email?.split("@")[0] ||
-    "Usuário";
+    const { data: membroData } = await supabase
+        .from("membros")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
 
-  const nameParts = fullName.split(" ");
-  const nome = nameParts[0] || "";
-  const sobrenome = nameParts.slice(1).join(" ") || "";
+    const fullName =
+        membroData?.nome ||
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "Usuário";
 
-  const numericId =
-    user.id
-      .split("-")
-      .reduce((acc, part) => acc + parseInt(part.slice(0, 4), 16), 0) %
-    2147483647;
+    const nameParts = fullName.split(" ");
+    const nome = nameParts[0] || "";
+    const sobrenome = nameParts.slice(1).join(" ") || "";
 
-  return {
-    id: numericId || 1,
-    nome,
-    sobrenome,
-    login: user.email || "",
-    email: user.email || "",
-    telefone: user.user_metadata?.phone || "",
-    perfis: profiles,
-    isUsuarioExterno: false,
-  };
+    const numericId =
+        user.id
+            .split("-")
+            .reduce((acc, part) => acc + parseInt(part.slice(0, 4), 16), 0) %
+        2147483647;
+
+    const loginProvider = user.app_metadata?.provider || "email";
+
+    return {
+        id: numericId || 1,
+        nome: nome,
+        sobrenome: sobrenome,
+        login: user.email || "",
+        email: membroData?.email || user.email || "",
+        perfis: profiles,
+        isUsuarioExterno: false,
+        telefone: formatPhone(
+            membroData?.telefone ||
+                user.phone ||
+                user.user_metadata?.phone ||
+                "",
+        ),
+        nascimento: membroData?.data_nascimento || "",
+        endereco: membroData?.endereco || "",
+        estadoCivil: membroData?.estado_civil || "",
+        conjuge: membroData?.conjuge || "",
+        filhos: membroData?.filhos || "Não",
+        ministerio: membroData?.ministerio || "",
+        funcao: membroData?.funcao || "",
+        provider: loginProvider,
+    };
 }
 
 export async function getCurrentUser(
-  supabase: SupabaseClient
+    supabase: SupabaseClient,
 ): Promise<LoggedUserResponse | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  return mapSupabaseUserToLoggedUser(supabase, user);
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    return mapSupabaseUserToLoggedUser(supabase, user);
 }

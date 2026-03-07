@@ -14,13 +14,15 @@ import {
     MenuItem,
     Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { enqueueSnackbar } from "notistack";
 
 interface ModalCadastroEncontroProps {
     open: boolean;
     onClose: () => void;
     onSave: (dados: DadosEncontro) => Promise<void>;
+    dadosIniciais?: DadosEncontro | null;
+    encontroId?: string | null;
 }
 
 export interface DadosEncontro {
@@ -40,10 +42,12 @@ export function ModalCadastroEncontro({
     open,
     onClose,
     onSave,
+    dadosIniciais,
+    encontroId,
 }: ModalCadastroEncontroProps) {
     type CampoObrigatorio = "tema" | "data" | "horario" | "local" | "anfitriao" | "preletor";
 
-    const [dados, setDados] = useState<DadosEncontro>({
+    const dadosPadrao: DadosEncontro = {
         celula_id: null,
         tema: "",
         data: "",
@@ -54,7 +58,9 @@ export function ModalCadastroEncontro({
         supervisao: "não",
         conversoes: "não",
         observacoes: "",
-    });
+    };
+
+    const [dados, setDados] = useState<DadosEncontro>(dadosIniciais || dadosPadrao);
 
     const [salvando, setSalvando] = useState(false);
     const [camposTocados, setCamposTocados] = useState<Record<CampoObrigatorio, boolean>>({
@@ -65,6 +71,15 @@ export function ModalCadastroEncontro({
         anfitriao: false,
         preletor: false,
     });
+
+    // Atualiza os dados quando dadosIniciais mudar (modo edição)
+    useEffect(() => {
+        if (dadosIniciais) {
+            setDados(dadosIniciais);
+        } else {
+            setDados(dadosPadrao);
+        }
+    }, [dadosIniciais, open]);
 
     const getCampoObrigatorioErro = (campo: CampoObrigatorio) => {
         if (!camposTocados[campo]) {
@@ -120,18 +135,7 @@ export function ModalCadastroEncontro({
 
     const handleClose = () => {
         // Limpa o formulário ao fechar
-        setDados({
-            celula_id: null,
-            tema: "",
-            data: "",
-            horario: "19:00",
-            local: "",
-            anfitriao: "",
-            preletor: "",
-            supervisao: "não",
-            conversoes: "não",
-            observacoes: "",
-        });
+        setDados(dadosPadrao);
         setCamposTocados({
             tema: false,
             data: false,
@@ -147,7 +151,7 @@ export function ModalCadastroEncontro({
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle>
                 <Typography variant="h5" fontWeight={600}>
-                    Registrar Encontro
+                    {encontroId ? "Editar Encontro" : "Registrar Encontro"}
                 </Typography>
             </DialogTitle>
             <DialogContent>

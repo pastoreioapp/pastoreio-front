@@ -55,4 +55,26 @@ export class EncontroRepository {
     
     return data;
   }
+
+  async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
+    const supabase = createClient();
+    
+    const { data, error } = await supabase
+      .from(TABLE)
+      .update(dados)
+      .eq("id", id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Erro ao atualizar encontro:", error);
+      throw new Error(error.message);
+    }
+    
+    if (!data) {
+      throw new Error("Nenhum dado retornado do Supabase após atualização");
+    }
+    
+    return data;
+  }
 }

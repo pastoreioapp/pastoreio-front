@@ -11,4 +11,8 @@ export class EncontroService {
   async create(dados: Encontro): Promise<Encontro> {
     return this.repo.create(dados);
   }
+
+  async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
+    return this.repo.update(id, dados);
+  }
 }
