@@ -61,16 +61,10 @@ export async function mapSupabaseUserToLoggedUser(
     const nome = nameParts[0] || "";
     const sobrenome = nameParts.slice(1).join(" ") || "";
 
-    const numericId =
-        user.id
-            .split("-")
-            .reduce((acc, part) => acc + parseInt(part.slice(0, 4), 16), 0) %
-        2147483647;
-
     const loginProvider = user.app_metadata?.provider || "email";
 
     return {
-        id: numericId || 1,
+        id: membroData?.id != null ? String(membroData.id) : user.id,
         nome: nome,
         sobrenome: sobrenome,
         login: user.email || "",

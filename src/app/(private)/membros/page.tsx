@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
@@ -12,7 +13,7 @@ import { Informacao } from "./components/informacoes/informacao";
 import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
 import { enqueueSnackbar } from "notistack";
 
-export default function Membros() {
+function MembrosContent() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const searchParams = useSearchParams();
@@ -85,5 +86,13 @@ export default function Membros() {
                 </Box>
             </Box>
         </PageContainer>
+    );
+}
+
+export default function Membros() {
+    return (
+        <Suspense fallback={<LoadingBox />}>
+            <MembrosContent />
+        </Suspense>
     );
 }
