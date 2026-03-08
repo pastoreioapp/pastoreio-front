@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
@@ -14,8 +15,11 @@ import { enqueueSnackbar } from "notistack";
 export default function Membros() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const searchParams = useSearchParams();
     // TODO: obter celulaId do usuário logado (ex.: contexto, rota /celulas/[id]/membros ou sessão)
     const celulaId = 3;
+    const membroIdParam = searchParams.get("membroId");
+    const membroIdInicial = membroIdParam ? Number(membroIdParam) : null;
     const {
         membros,
         membroSelecionado,
@@ -23,7 +27,10 @@ export default function Membros() {
         deselectMembro,
         loading,
         erro,
-    } = useMembrosSelecionados(celulaId);
+    } = useMembrosSelecionados(
+        celulaId,
+        Number.isFinite(membroIdInicial) ? membroIdInicial : null
+    );
 
     if (loading) return <LoadingBox />;
     if (erro) return <ErrorBox message={erro} />;
