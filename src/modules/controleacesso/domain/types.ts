@@ -9,7 +9,7 @@ export interface AuthResponse {
 }
 
 export interface LoggedUserResponse {
-  id: number;
+  id: string;
   nome: string;
   sobrenome: string;
   login: string;

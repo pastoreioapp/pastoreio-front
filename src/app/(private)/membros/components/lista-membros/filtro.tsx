@@ -3,7 +3,7 @@
 import { Search } from "@mui/icons-material";
 import { Box, InputAdornment, List, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import { MembroListItem } from "./membroListItem";
 
 export function Filtro({
@@ -11,9 +11,9 @@ export function Filtro({
     onSelect,
     membroSelecionado,
 }: {
-    data: MembroListItemDto[];
-    onSelect: (membro: MembroListItemDto) => void;
-    membroSelecionado: MembroListItemDto | null;
+    data: MembroDaCelulaListItemDto[];
+    onSelect: (membro: MembroDaCelulaListItemDto) => void;
+    membroSelecionado: MembroDaCelulaListItemDto | null;
 }) {
     const [search, setSearch] = useState("");
 

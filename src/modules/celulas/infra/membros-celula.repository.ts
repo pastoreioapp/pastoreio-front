@@ -1,13 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
-import { rowToMembroListItemDto } from "./membros-celula.mapper";
+import type { MembroDaCelulaListItemDto } from "../application/dtos";
+import { rowToMembroDaCelulaListItemDto } from "./membros-celula.mapper";
 
 const TABLE = "membros_celula";
 
 export class MembrosCelulaRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  async findMembrosByCelulaId(celulaId: number): Promise<MembroListItemDto[]> {
+  async findMembrosByCelulaId(
+    celulaId: number
+  ): Promise<MembroDaCelulaListItemDto[]> {
     const { data, error } = await this.supabase
       .from(TABLE)
       .select("id, celula_id, membro_id, papel_celula, data_entrada, deletado, membros(*)")
@@ -17,9 +19,11 @@ export class MembrosCelulaRepository {
 
     if (error) throw error;
 
-    const rows = (data ?? []) as unknown as Parameters<typeof rowToMembroListItemDto>[0][];
+    const rows = (data ?? []) as unknown as Parameters<
+      typeof rowToMembroDaCelulaListItemDto
+    >[0][];
     return rows
       .filter((row) => row.membros && !row.membros.deletado)
-      .map(rowToMembroListItemDto);
+      .map(rowToMembroDaCelulaListItemDto);
   }
 }

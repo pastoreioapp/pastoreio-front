@@ -1,12 +1,31 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMembros } from "./useMembros";
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
-export function useMembrosSelecionados(celulaId: number) {
+export function useMembrosSelecionados(
+    celulaId: number,
+    membroIdInicial?: number | null
+) {
     const { membros, loading, erro } = useMembros(celulaId);
-    const [membroSelecionado, setMembroSelecionado] = useState<MembroListItemDto | null>(null);
+    const [membroSelecionado, setMembroSelecionado] = useState<MembroDaCelulaListItemDto | null>(null);
+    const hasAppliedInitialSelection = useRef(false);
 
-    function toggleMembroSelecionado(membro: MembroListItemDto) {
+    useEffect(() => {
+        if (loading || hasAppliedInitialSelection.current) {
+            return;
+        }
+
+        hasAppliedInitialSelection.current = true;
+
+        if (membroIdInicial == null) {
+            return;
+        }
+
+        const membroInicial = membros.find((membro) => membro.id === membroIdInicial) ?? null;
+        setMembroSelecionado(membroInicial);
+    }, [loading, membroIdInicial, membros]);
+
+    function toggleMembroSelecionado(membro: MembroDaCelulaListItemDto) {
         setMembroSelecionado((prev) =>
             prev?.id === membro.id ? null : membro
         );
