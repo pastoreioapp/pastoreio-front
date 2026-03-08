@@ -1,4 +1,4 @@
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import type { MembroDaCelulaListItemDto } from "../application/dtos";
 
 type MembrosCelulaRow = {
   id: number;
@@ -26,12 +26,16 @@ type MembrosCelulaRow = {
   } | null;
 };
 
-export function rowToMembroListItemDto(row: MembrosCelulaRow): MembroListItemDto {
+export function rowToMembroDaCelulaListItemDto(
+  row: MembrosCelulaRow
+): MembroDaCelulaListItemDto {
   const m = row.membros;
   if (!m) {
     return {
       id: row.membro_id,
-      userId: "",
+      vinculoId: row.id,
+      celulaId: row.celula_id,
+      userId: null,
       nome: null,
       funcao: row.papel_celula ?? null,
       email: null,
@@ -45,11 +49,14 @@ export function rowToMembroListItemDto(row: MembrosCelulaRow): MembroListItemDto
       discipulando: null,
       ministerio: null,
       ativo: false,
+      dataEntrada: row.data_entrada ?? null,
     };
   }
   return {
     id: m.id,
-    userId: m.user_id != null ? String(m.user_id) : "",
+    vinculoId: row.id,
+    celulaId: row.celula_id,
+    userId: m.user_id != null ? String(m.user_id) : null,
     nome: m.nome != null ? String(m.nome) : null,
     funcao: row.papel_celula ?? null,
     email: m.email != null ? String(m.email) : null,
@@ -63,5 +70,6 @@ export function rowToMembroListItemDto(row: MembrosCelulaRow): MembroListItemDto
     discipulando: m.discipulando != null ? String(m.discipulando) : null,
     ministerio: m.ministerio != null ? String(m.ministerio) : null,
     ativo: Boolean(m.ativo),
+    dataEntrada: row.data_entrada != null ? String(row.data_entrada) : null,
   };
 }

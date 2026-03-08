@@ -2,7 +2,6 @@ export interface MembroListItemDto {
   id: number;
   userId: string;
   nome: string | null;
-  funcao: string | null;
   email: string | null;
   telefone: string | null;
   dataNascimento: string | null;
@@ -20,7 +19,6 @@ export interface MembroDetailDto {
   id: number;
   userId: string;
   nome: string | null;
-  funcao: string | null;
   email: string | null;
   telefone: string | null;
   dataNascimento: string | null;

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { listMembrosDaCelula } from "@/app/actions/celulas";
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
 export function useMembros(celulaId: number) {
-    const [membros, setMembros] = useState<MembroListItemDto[]>([]);
+    const [membros, setMembros] = useState<MembroDaCelulaListItemDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
 

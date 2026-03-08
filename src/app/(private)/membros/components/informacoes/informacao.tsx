@@ -2,7 +2,7 @@
 
 import { Box, IconButton, Typography } from "@mui/material";
 import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
-import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
 import { EtapasTabs } from "./etapasTabs";
@@ -30,7 +30,7 @@ export function Informacao({
     data,
     onBack,
 }: {
-    data: MembroListItemDto | null;
+    data: MembroDaCelulaListItemDto | null;
     onBack?: () => void;
 }) {
 
