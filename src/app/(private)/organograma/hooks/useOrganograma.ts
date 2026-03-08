@@ -15,7 +15,7 @@ type UseOrganogramaState = {
     isEmpty: boolean;
 };
 
-export function useOrganograma(): UseOrganogramaState {
+export function useOrganograma(columnsPerLine: number): UseOrganogramaState {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export function useOrganograma(): UseOrganogramaState {
             try {
                 const membros: MembroDaCelulaListItemDto[] = await listMembrosDaCelula(celulaId);
                 const pessoas = membros.map(mapMembroToOrganogramaPessoa);
-                const graph = buildOrganogramaGraph(pessoas);
+                const graph = buildOrganogramaGraph(pessoas, columnsPerLine);
 
                 if (!isMounted) {
                     return;
@@ -61,7 +61,7 @@ export function useOrganograma(): UseOrganogramaState {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [celulaId, columnsPerLine]);
 
     return {
         nodes,

@@ -13,12 +13,18 @@ const ROLE_ORDER: OrganogramaRole[] = [
 
 function buildLevelNodes(
     pessoas: OrganogramaPessoa[],
-    levelBaseY: number
+    levelBaseY: number,
+    columnsPerLine: number
 ): OrganogramaNode[] {
     return pessoas.map<OrganogramaNode>((pessoa, index) => ({
         id: pessoa.id.toString(),
         type: "pessoa",
-        position: calculateLevelPosition(index, pessoas.length, levelBaseY),
+        position: calculateLevelPosition(
+            index,
+            pessoas.length,
+            levelBaseY,
+            columnsPerLine
+        ),
         data: {
             label: pessoa.nome,
             tags: pessoa.tags,
@@ -47,7 +53,10 @@ function buildLevelEdges(
     );
 }
 
-export function buildOrganogramaGraph(pessoas: OrganogramaPessoa[]): {
+export function buildOrganogramaGraph(
+    pessoas: OrganogramaPessoa[],
+    columnsPerLine: number
+): {
     nodes: OrganogramaNode[];
     edges: OrganogramaEdge[];
 } {
@@ -67,9 +76,14 @@ export function buildOrganogramaGraph(pessoas: OrganogramaPessoa[]): {
     let currentLevelBaseY = 0;
     const nodes = ROLE_ORDER.flatMap((role) => {
         const pessoasDoNivel = pessoasPorRole[role];
-        const nodesDoNivel = buildLevelNodes(pessoasDoNivel, currentLevelBaseY);
+        const nodesDoNivel = buildLevelNodes(
+            pessoasDoNivel,
+            currentLevelBaseY,
+            columnsPerLine
+        );
 
-        currentLevelBaseY += getLevelRowCount(pessoasDoNivel.length) * GAP_Y;
+        currentLevelBaseY +=
+            getLevelRowCount(pessoasDoNivel.length, columnsPerLine) * GAP_Y;
 
         return nodesDoNivel;
     });

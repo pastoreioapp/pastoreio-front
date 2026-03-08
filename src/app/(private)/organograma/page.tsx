@@ -1,12 +1,23 @@
 "use client";
 
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import {
+    Alert,
+    Box,
+    CircularProgress,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { OrganogramaFlow } from "./components/OrganogramaFlow";
 import { useOrganograma } from "./hooks/useOrganograma";
 
 export default function Orgonograma() {
-    const { nodes, edges, loading, error, isEmpty } = useOrganograma();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"));
+    const columnsPerLine = isMobile ? 2 : isTablet ? 3 : 4;
+    const { nodes, edges, loading, error, isEmpty } = useOrganograma(columnsPerLine);
 
     return (
         <PageContainer
@@ -15,7 +26,7 @@ export default function Orgonograma() {
         >
             <Box
                 className="bg-white rounded-xl shadow-lg border px-4 py-3"
-                sx={{ width: "100%", height: 1000 }}
+                sx={{ width: "100%", height: isMobile ? 700 : 1000 }}
             >
                 {loading ? (
                     <Box
