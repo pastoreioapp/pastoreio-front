@@ -4,7 +4,6 @@ import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { OrganogramaFlow } from "./components/OrganogramaFlow";
 import { useOrganograma } from "./hooks/useOrganograma";
-import { ORGANOGRAMA_CANVAS_HEIGHT } from "./lib/layout";
 
 export default function Orgonograma() {
     const { nodes, edges, loading, error, isEmpty } = useOrganograma();
@@ -16,7 +15,7 @@ export default function Orgonograma() {
         >
             <Box
                 className="bg-white rounded-xl shadow-lg border px-4 py-3"
-                sx={{ width: "100%", height: ORGANOGRAMA_CANVAS_HEIGHT }}
+                sx={{ width: "100%", height: 1000 }}
             >
                 {loading ? (
                     <Box

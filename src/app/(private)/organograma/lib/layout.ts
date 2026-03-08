@@ -1,36 +1,41 @@
-const CARDS_PER_LINE = 3;
+const CARDS_PER_LINE = 4;
 const GAP_X = 300;
-const GAP_Y = 180;
-const LEADER_Y = 0;
-const MEMBER_START_Y = GAP_Y;
+export const GAP_Y = 180;
 const BASE_X = 100;
-const SINGLE_LEADER_X = 400;
-const TWO_LEADERS_POSITIONS = [250, 550] as const;
+const LEVEL_START_Y = 0;
 
 export const ORGANOGRAMA_CARD_WIDTH = 240;
-export const ORGANOGRAMA_CANVAS_HEIGHT = 750;
 
-export function calculateLeaderPosition(index: number, total: number) {
-    if (total === 1) {
-        return { x: SINGLE_LEADER_X, y: LEADER_Y };
-    }
+function calculateHorizontalOffset(itemsInLevel: number, currentRowItems: number) {
+    const effectiveCount = Math.min(itemsInLevel, currentRowItems);
+    const rowWidth = (effectiveCount - 1) * GAP_X;
 
-    if (total === 2) {
-        return { x: TWO_LEADERS_POSITIONS[index] ?? SINGLE_LEADER_X, y: LEADER_Y };
-    }
-
-    return {
-        x: BASE_X + index * GAP_X,
-        y: LEADER_Y,
-    };
+    return BASE_X - rowWidth / 2;
 }
 
-export function calculateMemberPosition(index: number) {
+export function getLevelRowCount(itemsInLevel: number) {
+    if (itemsInLevel <= 0) {
+        return 0;
+    }
+
+    return Math.ceil(itemsInLevel / CARDS_PER_LINE);
+}
+
+export function calculateLevelPosition(
+    index: number,
+    itemsInLevel: number,
+    levelBaseY: number
+) {
     const row = Math.floor(index / CARDS_PER_LINE);
     const column = index % CARDS_PER_LINE;
+    const isLastRow = row === Math.floor((itemsInLevel - 1) / CARDS_PER_LINE);
+    const itemsInCurrentRow = isLastRow
+        ? ((itemsInLevel - 1) % CARDS_PER_LINE) + 1
+        : CARDS_PER_LINE;
+    const startX = calculateHorizontalOffset(itemsInLevel, itemsInCurrentRow);
 
     return {
-        x: BASE_X + column * GAP_X,
-        y: MEMBER_START_Y + row * GAP_Y,
+        x: startX + column * GAP_X,
+        y: LEVEL_START_Y + levelBaseY + row * GAP_Y,
     };
 }
