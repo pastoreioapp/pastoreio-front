@@ -237,7 +237,20 @@ export default function UserProfileDialog({
     const nomeCompleto = `${formData.nome} ${formData.sobrenome}`.trim();
 
     function getMainUserRole(perfis: string[]): string {
-        return perfis && perfis[0];
+        if (!perfis || perfis.length === 0) return "Perfil desconhecido";
+        const role = perfis[0];
+        switch (role) {
+            case "ADMINISTRADOR_SISTEMA":
+                return "Administrador do Sistema";
+            case "ADMINISTRADOR_IGREJA":
+                return "Administrador da Igreja";
+            case "LIDER_CELULA":
+                return "Líder de Célula";
+            case "MEMBRO":
+                return "Membro";
+            default:
+                return "";
+        }
     }
 
     const baseFieldProps = {

@@ -9,8 +9,6 @@ type Props = {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: Props) {
-    // TODO: remover isso quando a tabela de perfis for criada
-    allowedRoles = [];
     const router = useRouter();
     const { loggedUser, userIsAuthenticated } = useAppAuthentication();
 

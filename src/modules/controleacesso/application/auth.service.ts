@@ -6,17 +6,32 @@ import { Perfil } from "../domain/types";
 async function getUserProfiles(
     supabase: SupabaseClient,
     userId: string,
-    userMetadata?: Record<string, unknown>,
 ): Promise<string[]> {
-    const profiles = userMetadata?.profiles;
-    if (Array.isArray(profiles)) return profiles;
+    const { data: userProfileRow, error: fetchError } = await supabase
+        .from("user_profiles")
+        .select("profile")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-    const profile = userMetadata?.profile;
-    if (profile) {
-        return Array.isArray(profile)
-            ? (profile as string[])
-            : [profile as string];
+    if (fetchError) throw new Error(`Erro ao buscar perfis do usuário: ${fetchError.message}`);
+
+    if (
+        userProfileRow?.profile &&
+        Array.isArray(userProfileRow.profile) &&
+        userProfileRow.profile.length > 0
+    ) {
+        return userProfileRow.profile as string[];
     }
+
+    const { error: insertError } = await supabase.from("user_profiles").upsert(
+        {
+            user_id: userId,
+            profile: [Perfil.MEMBRO],
+        },
+        { onConflict: "user_id" },
+    );
+
+    if (insertError) throw new Error(`Erro ao criar perfil do usuário: ${insertError.message}`);
 
     return [Perfil.MEMBRO];
 }
@@ -41,7 +56,6 @@ export async function mapSupabaseUserToLoggedUser(
     const profiles = await getUserProfiles(
         supabase,
         user.id,
-        user.user_metadata,
     );
 
     const { data: membroData } = await supabase

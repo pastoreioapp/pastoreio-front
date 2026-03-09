@@ -278,3 +278,27 @@ CREATE TABLE "acompanhamento_pastoral_membros" (
   "membro_id" bigint REFERENCES "membros" ("id"),
   PRIMARY KEY ("acompanhamento_id", "membro_id")
 );
+
+-- Tabela de perfis de usuário (controle de acesso)
+CREATE TABLE user_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  profile TEXT[] NOT NULL DEFAULT ARRAY['MEMBRO'],
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
+
+CREATE OR REPLACE FUNCTION update_user_profiles_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.atualizado_em = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_user_profiles_updated_at
+  BEFORE UPDATE ON user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION update_user_profiles_updated_at();
