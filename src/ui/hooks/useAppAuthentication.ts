@@ -129,6 +129,21 @@ export function useAppAuthentication() {
     }
   };
 
+  const runResetPasswordForEmail = async (email: string): Promise<void> => {
+    const redirectTo = `${window.location.origin}/api/auth/callback?next=/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    if (error) throw error;
+  };
+
+  const runUpdatePassword = async (newPassword: string): Promise<void> => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) throw error;
+  };
+
   const runLogout = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
@@ -147,6 +162,8 @@ export function useAppAuthentication() {
     runGoogleLogin,
     runPasswordUserLogin,
     runUserRegister,
+    runResetPasswordForEmail,
+    runUpdatePassword,
     runLogout,
     userIsAuthenticated,
     loggedUser,

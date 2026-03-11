@@ -366,7 +366,7 @@ export default function PainelLogin() {
                         <Typography
                             variant="body1"
                             component={Link}
-                            href="/recover"
+                            href="/forgot-password"
                             sx={{
                                 textDecoration: "none",
                                 color: theme.palette.primary.main,

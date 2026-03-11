@@ -10,6 +10,7 @@
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/shared/supabase/client";
 import { mapSupabaseUserToLoggedUser } from "@/modules/controleacesso/application/auth.service";
 import { setLoggedUser, clearLoggedUser } from "@/ui/stores/features/loggedUserSlice";
@@ -19,6 +20,8 @@ const supabase = createClient();
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
     const dispatch = useDispatch();
+    const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
         const checkInitialSession = async () => {
@@ -42,6 +45,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: AuthChangeEvent, session) => {
+                if (event === 'PASSWORD_RECOVERY' && session?.user) {
+                    if (pathname !== '/reset-password') {
+                        router.push('/reset-password');
+                    }
+                    return;
+                }
+
                 if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
                     const loggedUserData = await mapSupabaseUserToLoggedUser(supabase, session.user);
                     if (loggedUserData) {
@@ -56,7 +66,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         return () => {
             subscription.unsubscribe();
         };
-    }, [dispatch]);
+    }, [dispatch, router, pathname]);
 
     return <>{children}</>;
 }
