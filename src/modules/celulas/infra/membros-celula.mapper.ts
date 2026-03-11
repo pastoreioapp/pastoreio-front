@@ -1,4 +1,5 @@
 import type { MembroDaCelulaListItemDto } from "../application/dtos";
+import { parsePapelCelula } from "../domain/papel-celula";
 
 type MembrosCelulaRow = {
   id: number;
@@ -30,6 +31,8 @@ export function rowToMembroDaCelulaListItemDto(
   row: MembrosCelulaRow
 ): MembroDaCelulaListItemDto {
   const m = row.membros;
+  const papelCelula = parsePapelCelula(row.papel_celula);
+
   if (!m) {
     return {
       id: row.membro_id,
@@ -37,7 +40,7 @@ export function rowToMembroDaCelulaListItemDto(
       celulaId: row.celula_id,
       userId: null,
       nome: null,
-      funcao: row.papel_celula ?? null,
+      funcao: papelCelula,
       email: null,
       telefone: null,
       dataNascimento: null,
@@ -58,7 +61,7 @@ export function rowToMembroDaCelulaListItemDto(
     celulaId: row.celula_id,
     userId: m.user_id != null ? String(m.user_id) : null,
     nome: m.nome != null ? String(m.nome) : null,
-    funcao: row.papel_celula ?? null,
+    funcao: papelCelula,
     email: m.email != null ? String(m.email) : null,
     telefone: m.telefone != null ? String(m.telefone) : null,
     dataNascimento: m.data_nascimento != null ? String(m.data_nascimento) : null,

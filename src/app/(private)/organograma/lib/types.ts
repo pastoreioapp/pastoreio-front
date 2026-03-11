@@ -1,8 +1,6 @@
-export type OrganogramaRole =
-    | "LIDER_CELULA"
-    | "AUXILIAR_CELULA"
-    | "MEMBRO"
-    | "VISITANTE";
+import type { PapelCelula } from "@/modules/celulas/domain/papel-celula";
+
+export type OrganogramaRole = PapelCelula;
 
 export type OrganogramaPessoa = {
     id: number;

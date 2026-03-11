@@ -1,3 +1,5 @@
+import type { PapelCelula } from "@/modules/celulas/domain/papel-celula";
+import { getFuncaoCores, getFuncaoLabel } from "../../lib/getFuncaoLabel";
 import { Avatar, Box, Typography } from "@mui/material";
 
 export function InformacaoHeader({
@@ -5,10 +7,10 @@ export function InformacaoHeader({
     funcao,
 }: {
     nome: string | null;
-    funcao: string | null;
+    funcao: PapelCelula | null;
 }) {
     const displayNome = nome ?? "";
-    const displayFuncao = funcao ?? "";
+    const displayFuncao = getFuncaoLabel(funcao);
     return (
         <Box
             sx={{
@@ -40,11 +42,10 @@ export function InformacaoHeader({
             </Typography>
             <Box
                 sx={{
-                    bgcolor: displayFuncao === "MEMBRO" ? "#DCE8E6" : "#5E79B3",
+                    ...getFuncaoCores(funcao),
                     mt: 1,
                     py: .5,
                     px: 2,
-                    color: displayFuncao === "MEMBRO" ? "#1B212D" : "#fff",
                     borderRadius: 1,
                 }}
             >

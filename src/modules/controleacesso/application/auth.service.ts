@@ -1,8 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { PAPEIS_CELULA_LIDERANCA } from "@/modules/celulas/domain/papel-celula";
 import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
 import type { LoggedUserResponse } from "../domain/types";
-import { PAPEIS_LIDERANCA_CELULA, Perfil } from "../domain/types";
+import { Perfil } from "../domain/types";
 
 async function getUserProfiles(
     supabase: SupabaseClient,
@@ -72,7 +73,7 @@ async function getCelulaContext(
     const membrosCelulaRepository = new MembrosCelulaRepository(supabase);
     return membrosCelulaRepository.findCelulaContextByMembroId(
         membroId,
-        PAPEIS_LIDERANCA_CELULA,
+        PAPEIS_CELULA_LIDERANCA,
     );
 }
 

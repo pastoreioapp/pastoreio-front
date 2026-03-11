@@ -1,3 +1,4 @@
+import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 import type { Edge, Node } from "reactflow";
 import { GAP_Y, calculateLevelPosition, getLevelRowCount } from "./layout";
 import type { OrganogramaNodeData, OrganogramaPessoa, OrganogramaRole } from "./types";
@@ -5,10 +6,10 @@ import type { OrganogramaNodeData, OrganogramaPessoa, OrganogramaRole } from "./
 type OrganogramaNode = Node<OrganogramaNodeData>;
 type OrganogramaEdge = Edge;
 const ROLE_ORDER: OrganogramaRole[] = [
-    "LIDER_CELULA",
-    "AUXILIAR_CELULA",
-    "MEMBRO",
-    "VISITANTE",
+    PapelCelula.LIDER_CELULA,
+    PapelCelula.AUXILIAR_CELULA,
+    PapelCelula.MEMBRO,
+    PapelCelula.VISITANTE,
 ];
 
 function buildLevelNodes(
@@ -66,10 +67,10 @@ export function buildOrganogramaGraph(
             return acc;
         },
         {
-            LIDER_CELULA: [],
-            AUXILIAR_CELULA: [],
-            MEMBRO: [],
-            VISITANTE: [],
+            [PapelCelula.LIDER_CELULA]: [],
+            [PapelCelula.AUXILIAR_CELULA]: [],
+            [PapelCelula.MEMBRO]: [],
+            [PapelCelula.VISITANTE]: [],
         }
     );
 

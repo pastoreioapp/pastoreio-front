@@ -1,12 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MembroDaCelulaListItemDto } from "../application/dtos";
+import type { PapelCelula } from "../domain/papel-celula";
+import { parsePapelCelula } from "../domain/papel-celula";
 import { rowToMembroDaCelulaListItemDto } from "./membros-celula.mapper";
 
 const TABLE = "membros_celula";
 
 export interface MembroCelulaContext {
   celulaId: number;
-  papelCelula: string;
+  papelCelula: PapelCelula;
 }
 
 export class MembrosCelulaRepository {
@@ -34,7 +36,7 @@ export class MembrosCelulaRepository {
 
   async findCelulaContextByMembroId(
     membroId: number,
-    allowedRoles: readonly string[],
+    allowedRoles: readonly PapelCelula[],
   ): Promise<MembroCelulaContext | null> {
     const { data, error } = await this.supabase
       .from(TABLE)
@@ -51,9 +53,14 @@ export class MembrosCelulaRepository {
       return null;
     }
 
+    const papelCelula = parsePapelCelula(data.papel_celula);
+    if (!papelCelula) {
+      return null;
+    }
+
     return {
       celulaId: Number(data.celula_id),
-      papelCelula: String(data.papel_celula),
+      papelCelula,
     };
   }
 }

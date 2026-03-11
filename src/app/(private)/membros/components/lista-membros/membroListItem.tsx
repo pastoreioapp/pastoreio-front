@@ -1,4 +1,5 @@
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import { getFuncaoCores, getFuncaoLabel } from "../../lib/getFuncaoLabel";
 import {
     Avatar,
     Box,
@@ -56,17 +57,16 @@ export function MembroListItem({
                 />
                 <Box
                     sx={{
-                        bgcolor: membro.funcao === "MEMBRO" ? "#DCE8E6" : "#5E79B3",
+                        ...getFuncaoCores(membro.funcao),
                         mt: 1,
                         py: 0.3,
                         px: 1,
-                        color: membro.funcao === "MEMBRO" ? "#1B212D" : "#fff",
                         borderRadius: 1,
                         width: "fit-content",
                     }}
                 >
                     <Typography sx={{ fontSize: ".7rem", fontWeight: "600" }}>
-                        {membro.funcao}
+                        {getFuncaoLabel(membro.funcao)}
                     </Typography>
                 </Box>
             </Box>

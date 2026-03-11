@@ -1,3 +1,5 @@
+import type { PapelCelula } from "@/modules/celulas/domain/papel-celula";
+
 export interface UserLogin {
   login: string;
   password: string;
@@ -19,7 +21,7 @@ export interface LoggedUserResponse {
   perfis: Array<string>;
   isUsuarioExterno: boolean;
   celulaId?: number;
-  papelCelula?: string;
+  papelCelula?: PapelCelula;
   nascimento?: string;
   endereco?: string;
   estadoCivil?: string;
