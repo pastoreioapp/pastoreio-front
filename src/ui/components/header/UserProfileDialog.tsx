@@ -246,6 +246,8 @@ export default function UserProfileDialog({
                 return "Administrador da Igreja";
             case "LIDER_CELULA":
                 return "Líder de Célula";
+            case "AUXILIAR_CELULA":
+                return "Auxiliar de Célula";
             case "MEMBRO":
                 return "Membro";
             default:

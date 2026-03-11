@@ -10,6 +10,7 @@ export interface AuthResponse {
 
 export interface LoggedUserResponse {
   id: string;
+  membroId?: number;
   nome: string;
   sobrenome: string;
   login: string;
@@ -17,6 +18,8 @@ export interface LoggedUserResponse {
   telefone: string;
   perfis: Array<string>;
   isUsuarioExterno: boolean;
+  celulaId?: number;
+  papelCelula?: string;
   nascimento?: string;
   endereco?: string;
   estadoCivil?: string;
@@ -31,6 +34,7 @@ export enum Perfil {
   ADMINISTRADOR_SISTEMA = "ADMINISTRADOR_SISTEMA",
   ADMINISTRADOR_IGREJA = "ADMINISTRADOR_IGREJA",
   LIDER_CELULA = "LIDER_CELULA",
+  AUXILIAR_CELULA = "AUXILIAR_CELULA",
   MEMBRO = "MEMBRO",
 }
 
@@ -38,4 +42,10 @@ export const CELULA_ROLES = [
   Perfil.ADMINISTRADOR_SISTEMA,
   Perfil.ADMINISTRADOR_IGREJA,
   Perfil.LIDER_CELULA,
+  Perfil.AUXILIAR_CELULA,
 ];
+
+export const PAPEIS_LIDERANCA_CELULA = [
+  Perfil.LIDER_CELULA,
+  Perfil.AUXILIAR_CELULA
+] as const;

@@ -1,31 +1,44 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
+import { hasRequiredRole } from "@/modules/controleacesso/domain/navigation";
 
 type Props = {
     children: React.ReactNode,
-    allowedRoles?: string[]
+    allowedRoles?: readonly string[]
 }
 
 export function ProtectedRoute({ children, allowedRoles }: Props) {
     const router = useRouter();
     const { loggedUser, userIsAuthenticated } = useAppAuthentication();
+    const isAuthenticated = userIsAuthenticated();
+    const hasLoggedUser = Boolean(loggedUser?.id);
+    const requiresRoles = Boolean(allowedRoles && allowedRoles.length > 0);
+    const hasSomeRole = requiresRoles
+        ? hasRequiredRole(loggedUser?.perfis, allowedRoles)
+        : true;
+    const shouldRedirectUnauthorized =
+        isAuthenticated && hasLoggedUser && requiresRoles && !hasSomeRole;
 
-    if(!allowedRoles || allowedRoles.length === 0) {
-        if(!userIsAuthenticated()) return null;
+    useEffect(() => {
+        if (shouldRedirectUnauthorized) {
+            router.replace("/nao-autorizado");
+        }
+    }, [router, shouldRedirectUnauthorized]);
+
+    if(!requiresRoles) {
+        if(!isAuthenticated) return null;
 
         return <>{children}</>;
     }
 
-    if(!userIsAuthenticated() || !loggedUser || !loggedUser.id) {
+    if(!isAuthenticated || !hasLoggedUser) {
         return null;
     }
 
-    const hasSomeRole = allowedRoles.some(role => loggedUser.perfis?.includes(role));
-
-    if(!hasSomeRole) {
-        router.push('/nao-autorizado');
+    if(shouldRedirectUnauthorized) {
         return null;
     }
 

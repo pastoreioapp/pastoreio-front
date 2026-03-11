@@ -3,12 +3,17 @@ import { useMembros } from "./useMembros";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
 export function useMembrosSelecionados(
-    celulaId: number,
+    celulaId?: number | null,
     membroIdInicial?: number | null
 ) {
     const { membros, loading, erro } = useMembros(celulaId);
     const [membroSelecionado, setMembroSelecionado] = useState<MembroDaCelulaListItemDto | null>(null);
     const hasAppliedInitialSelection = useRef(false);
+
+    useEffect(() => {
+        hasAppliedInitialSelection.current = false;
+        setMembroSelecionado(null);
+    }, [celulaId, membroIdInicial]);
 
     useEffect(() => {
         if (loading || hasAppliedInitialSelection.current) {

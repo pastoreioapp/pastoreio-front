@@ -1,6 +1,6 @@
 export type OrganogramaRole =
-    | "LIDER"
-    | "AUXILIAR"
+    | "LIDER_CELULA"
+    | "AUXILIAR_CELULA"
     | "MEMBRO"
     | "VISITANTE";
 

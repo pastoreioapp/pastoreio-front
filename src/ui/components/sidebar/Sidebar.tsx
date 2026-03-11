@@ -14,9 +14,10 @@ import {
 import { IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menuitems, MenuItemType } from "./MenuItems";
+import { MenuItemType, getAccessibleMenuItems } from "./MenuItems";
 import { usePathname } from "next/navigation";
 import { poppins } from "@/ui/utils/theme";
+import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 interface SidebarProps {
     mobileOpen: boolean;
@@ -101,9 +102,12 @@ const NavItem = ({
 
 const SidebarItemsList = ({ onNavigate }: { onNavigate?: () => void }) => {
     const pathDirect = usePathname();
+    const { loggedUser } = useAppAuthentication();
+    const visibleMenuItems = getAccessibleMenuItems(loggedUser?.perfis);
+
     return (
         <List component="nav" sx={{ pt: "50px" }}>
-            {Menuitems.map((item) => (
+            {visibleMenuItems.map((item) => (
                 <NavItem 
                     key={item.id} 
                     item={item} 

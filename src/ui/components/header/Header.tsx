@@ -13,8 +13,9 @@ import {
 import Profile from "./Profile";
 import { IconMenu2 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
-import { Menuitems } from "../sidebar/MenuItems";
+import { getAccessibleMenuItemByPath } from "../sidebar/MenuItems";
 import { poppins } from "@/ui/utils/theme";
+import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 interface HeaderProps {
     onMenuClick: () => void;
@@ -22,7 +23,8 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
     const pathname = usePathname();
-    const currentItem = Menuitems.find((item) => item.href === pathname);
+    const { loggedUser } = useAppAuthentication();
+    const currentItem = getAccessibleMenuItemByPath(pathname, loggedUser?.perfis);
     const pageTitle = currentItem ? currentItem.title : "Central da Célula";
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));

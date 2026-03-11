@@ -7,7 +7,7 @@ type Props = {
     description?: string;
     children: JSX.Element | JSX.Element[];
     title?: string;
-    allowedRoles?: string[];
+    allowedRoles?: readonly string[];
 };
 
 export default function PageContainer({ title, description, children, allowedRoles }: Props) {

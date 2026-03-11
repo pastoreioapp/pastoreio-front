@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEncontros } from "./useEncontros";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 
-export function useEncontrosSelecionados() {
-    const { encontros, loading, erro, refetch } = useEncontros();
+export function useEncontrosSelecionados(celulaId?: number | null) {
+    const { encontros, loading, erro, refetch } = useEncontros(celulaId);
     const [encontrosSelecionado, setEncontrosSelecionado] =
         useState<Encontro | null>(null);
+
+    useEffect(() => {
+        setEncontrosSelecionado(null);
+    }, [celulaId]);
 
     function toggleEncontrosSelecionado(encontro: Encontro) {
         setEncontrosSelecionado((prev) =>

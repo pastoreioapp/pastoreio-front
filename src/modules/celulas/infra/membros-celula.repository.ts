@@ -4,6 +4,11 @@ import { rowToMembroDaCelulaListItemDto } from "./membros-celula.mapper";
 
 const TABLE = "membros_celula";
 
+export interface MembroCelulaContext {
+  celulaId: number;
+  papelCelula: string;
+}
+
 export class MembrosCelulaRepository {
   constructor(private supabase: SupabaseClient) {}
 
@@ -25,5 +30,30 @@ export class MembrosCelulaRepository {
     return rows
       .filter((row) => row.membros && !row.membros.deletado)
       .map(rowToMembroDaCelulaListItemDto);
+  }
+
+  async findCelulaContextByMembroId(
+    membroId: number,
+    allowedRoles: readonly string[],
+  ): Promise<MembroCelulaContext | null> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("celula_id, papel_celula")
+      .eq("membro_id", membroId)
+      .eq("deletado", false)
+      .in("papel_celula", [...allowedRoles])
+      .order("id", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data?.celula_id || !data?.papel_celula) {
+      return null;
+    }
+
+    return {
+      celulaId: Number(data.celula_id),
+      papelCelula: String(data.papel_celula),
+    };
   }
 }

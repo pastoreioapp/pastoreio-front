@@ -15,21 +15,35 @@ type UseOrganogramaState = {
     isEmpty: boolean;
 };
 
-export function useOrganograma(columnsPerLine: number): UseOrganogramaState {
+const CELULA_NAO_VINCULADA_MESSAGE =
+    "Nenhuma célula vinculada foi encontrada para o usuário logado.";
+
+export function useOrganograma(
+    columnsPerLine: number,
+    celulaId?: number | null,
+): UseOrganogramaState {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // TODO: obter celulaId do usuário logado (ex.: contexto, rota /celulas/[id]/organograma ou sessão)
-    const celulaId = 3;
-
     useEffect(() => {
+        if (celulaId == null) {
+            setNodes([]);
+            setEdges([]);
+            setError(CELULA_NAO_VINCULADA_MESSAGE);
+            setLoading(false);
+            return;
+        }
+
+        const resolvedCelulaId = celulaId;
         let isMounted = true;
 
         async function loadOrganograma() {
             try {
-                const membros: MembroDaCelulaListItemDto[] = await listMembrosDaCelula(celulaId);
+                setLoading(true);
+                setError(null);
+                const membros: MembroDaCelulaListItemDto[] = await listMembrosDaCelula(resolvedCelulaId);
                 const pessoas = membros.map(mapMembroToOrganogramaPessoa);
                 const graph = buildOrganogramaGraph(pessoas, columnsPerLine);
 

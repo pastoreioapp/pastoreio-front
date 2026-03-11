@@ -1,11 +1,11 @@
 import PageContainer from "@/ui/components/pages/PageContainer";
 import UnderConstructionCard from "@/ui/components/ui/UnderConstructionCard";
-import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
+import { LIDER_ONLY_ROLES } from "@/modules/controleacesso/domain/navigation";
 import { IconChartBar } from "@tabler/icons-react";
 
 export default function Dashboard() {
     return (
-        <PageContainer title="Dashboard" description="Visão geral da célula e métricas" allowedRoles={CELULA_ROLES}>
+        <PageContainer title="Dashboard" description="Visão geral da célula e métricas" allowedRoles={LIDER_ONLY_ROLES}>
             <UnderConstructionCard
                 title="Dashboard em construção"
                 description="Em breve você terá uma visão consolidada da sua célula: indicadores, crescimento e atividades recentes."

@@ -3,13 +3,30 @@ import type { Encontro } from "../domain/encontro";
 
 const TABLE = "encontros";
 
+function mapEncontros(data: any[] | null): Encontro[] {
+  return (data || []).map((encontro: any) => {
+    const frequencias = (encontro.frequencias_celula || [])
+      .filter((f: any) => !f.deletado)
+      .map((f: any) => {
+        const { membros, ...rest } = f;
+        return { ...rest, membro_nome: membros?.nome };
+      });
+    const { frequencias_celula: _, ...dadosEncontro } = encontro;
+    return {
+      ...dadosEncontro,
+      frequencia: frequencias,
+    };
+  }) as Encontro[];
+}
+
 export class EncontroRepository {
-  async findAll(): Promise<Encontro[]> {
+  async findByCelulaId(celulaId: number): Promise<Encontro[]> {
     const supabase = createClient();
 
     const { data, error } = await supabase
       .from(TABLE)
       .select("*, frequencias_celula(*, membros(nome))")
+      .eq("celula_id", celulaId)
       .eq("deletado", false)
       .order("data", { ascending: false });
 
@@ -18,21 +35,7 @@ export class EncontroRepository {
       throw new Error(error.message);
     }
 
-    const encontrosFormatados = (data || []).map((encontro: any) => {
-      const frequencias = (encontro.frequencias_celula || [])
-        .filter((f: any) => !f.deletado)
-        .map((f: any) => {
-          const { membros, ...rest } = f;
-          return { ...rest, membro_nome: membros?.nome };
-        });
-      const { frequencias_celula: _, ...dadosEncontro } = encontro;
-      return {
-        ...dadosEncontro,
-        frequencia: frequencias,
-      };
-    });
-
-    return encontrosFormatados as Encontro[];
+    return mapEncontros(data);
   }
 
   async create(dados: Encontro): Promise<Encontro> {

@@ -1,11 +1,11 @@
 import PageContainer from "@/ui/components/pages/PageContainer";
 import UnderConstructionCard from "@/ui/components/ui/UnderConstructionCard";
-import { CELULA_ROLES } from "@/modules/controleacesso/domain/types";
+import { LIDER_ONLY_ROLES } from "@/modules/controleacesso/domain/navigation";
 import { IconGrowth } from "@tabler/icons-react";
 
 export default function Multiplicacao() {
     return (
-        <PageContainer title="Multiplicação" description="Acompanhamento de novas células e crescimento" allowedRoles={CELULA_ROLES}>
+        <PageContainer title="Multiplicação" description="Acompanhamento de novas células e crescimento" allowedRoles={LIDER_ONLY_ROLES}>
             <UnderConstructionCard
                 title="Multiplicação em construção"
                 description="Esta área será dedicada ao acompanhamento do processo de multiplicação de novas células."

@@ -38,7 +38,7 @@ export function OrganogramaFlow({ nodes, edges }: OrganogramaFlowProps) {
                     elementsSelectable={true}
                     defaultEdgeOptions={{
                         type: "smoothstep",
-                        animated: true,
+                        animated: false,
                         style: {
                             strokeWidth: 2,
                             stroke: "#D3D3D3",

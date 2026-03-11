@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
 import type { LoggedUserResponse } from "../domain/types";
-import { Perfil } from "../domain/types";
+import { PAPEIS_LIDERANCA_CELULA, Perfil } from "../domain/types";
 
 async function getUserProfiles(
     supabase: SupabaseClient,
@@ -47,6 +48,34 @@ function formatPhone(phone?: string): string {
   return cleaned;
 }
 
+function toOptionalNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
+async function getCelulaContext(
+    supabase: SupabaseClient,
+    membroId?: number,
+) {
+    if (membroId == null) {
+        return null;
+    }
+
+    const membrosCelulaRepository = new MembrosCelulaRepository(supabase);
+    return membrosCelulaRepository.findCelulaContextByMembroId(
+        membroId,
+        PAPEIS_LIDERANCA_CELULA,
+    );
+}
+
 export async function mapSupabaseUserToLoggedUser(
     supabase: SupabaseClient,
     user: User | null,
@@ -58,11 +87,18 @@ export async function mapSupabaseUserToLoggedUser(
         user.id,
     );
 
-    const { data: membroData } = await supabase
+    const { data: membroData, error: membroError } = await supabase
         .from("membros")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
+
+    if (membroError) {
+        throw new Error(`Erro ao buscar membro do usuário: ${membroError.message}`);
+    }
+
+    const membroId = toOptionalNumber(membroData?.id);
+    const celulaContext = await getCelulaContext(supabase, membroId);
 
     const fullName =
         membroData?.nome ||
@@ -78,13 +114,16 @@ export async function mapSupabaseUserToLoggedUser(
     const loginProvider = user.app_metadata?.provider || "email";
 
     return {
-        id: membroData?.id != null ? String(membroData.id) : user.id,
+        id: membroId != null ? String(membroId) : user.id,
+        membroId,
         nome: nome,
         sobrenome: sobrenome,
         login: user.email || "",
         email: membroData?.email || user.email || "",
         perfis: profiles,
         isUsuarioExterno: false,
+        celulaId: celulaContext?.celulaId,
+        papelCelula: celulaContext?.papelCelula,
         telefone: formatPhone(
             membroData?.telefone ||
                 user.phone ||

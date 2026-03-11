@@ -5,49 +5,52 @@ import {
   IconMessage2,
   IconUsersGroup,
 } from "@tabler/icons-react";
-import { uniqueId } from "lodash";
+import {
+  APP_ROUTE_ACCESS,
+  AppRoutePath,
+  hasRequiredRole,
+  type RouteAccessConfig,
+} from "@/modules/controleacesso/domain/navigation";
 import React from "react";
 
-export interface MenuItemType {
+type MenuIconType = React.ElementType<{
+  size?: string | number;
+  stroke?: string | number;
+  variant?: string;
+}>;
+
+export interface MenuItemType extends RouteAccessConfig {
   id: string;
-  title: string;
-  icon: React.ElementType<{
-    size?: string | number;
-    stroke?: string | number;
-    variant?: string;
-  }>;
-  href: string;
+  icon: MenuIconType;
 }
 
-export const Menuitems: MenuItemType[] = [
-  {
-    id: uniqueId(),
-    title: "Central da célula",
-    icon: IconHome,
-    href: "/dashboard",
-  },
-  {
-    id: uniqueId(),
-    title: "Membros",
-    icon: IconUser,
-    href: "/membros",
-  },
-  {
-    id: uniqueId(),
-    title: "Organograma",
-    icon: IconLayoutDashboard,
-    href: "/organograma",
-  },
-  {
-    id: uniqueId(),
-    title: "Encontros",
-    icon: IconMessage2,
-    href: "/encontros",
-  },
-  {
-    id: uniqueId(),
-    title: "Multiplicação",
-    icon: IconUsersGroup,
-    href: "/multiplicacao",
-  },
-];
+const MENU_ITEM_ICONS: Record<AppRoutePath, MenuIconType> = {
+  "/dashboard": IconHome,
+  "/membros": IconUser,
+  "/organograma": IconLayoutDashboard,
+  "/encontros": IconMessage2,
+  "/multiplicacao": IconUsersGroup,
+};
+
+export const Menuitems: MenuItemType[] = APP_ROUTE_ACCESS.map((route) => ({
+  id: route.href,
+  title: route.title,
+  href: route.href,
+  allowedRoles: route.allowedRoles,
+  icon: MENU_ITEM_ICONS[route.href],
+}));
+
+export function getAccessibleMenuItems(
+  userRoles: readonly string[] | undefined,
+): MenuItemType[] {
+  return Menuitems.filter((item) =>
+    hasRequiredRole(userRoles, item.allowedRoles),
+  );
+}
+
+export function getAccessibleMenuItemByPath(
+  pathname: string,
+  userRoles: readonly string[] | undefined,
+): MenuItemType | undefined {
+  return getAccessibleMenuItems(userRoles).find((item) => item.href === pathname);
+}

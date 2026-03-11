@@ -5,8 +5,8 @@ import type { OrganogramaNodeData, OrganogramaPessoa, OrganogramaRole } from "./
 type OrganogramaNode = Node<OrganogramaNodeData>;
 type OrganogramaEdge = Edge;
 const ROLE_ORDER: OrganogramaRole[] = [
-    "LIDER",
-    "AUXILIAR",
+    "LIDER_CELULA",
+    "AUXILIAR_CELULA",
     "MEMBRO",
     "VISITANTE",
 ];
@@ -66,8 +66,8 @@ export function buildOrganogramaGraph(
             return acc;
         },
         {
-            LIDER: [],
-            AUXILIAR: [],
+            LIDER_CELULA: [],
+            AUXILIAR_CELULA: [],
             MEMBRO: [],
             VISITANTE: [],
         }

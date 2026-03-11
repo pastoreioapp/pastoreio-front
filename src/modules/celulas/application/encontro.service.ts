@@ -4,8 +4,8 @@ import { EncontroRepository } from "../infra/encontro.repository";
 export class EncontroService {
   constructor(private readonly repo: EncontroRepository) {}
 
-  async list(): Promise<Encontro[]> {
-    return this.repo.findAll();
+  async list(celulaId: number): Promise<Encontro[]> {
+    return this.repo.findByCelulaId(celulaId);
   }
 
   async create(dados: Encontro): Promise<Encontro> {
