@@ -1,8 +1,10 @@
 import { createClient } from "@/shared/supabase/client";
 import type { Usuario } from "../domain/usuario";
+import { AvatarRepository } from "../infra/avatar.repository";
 
 export async function patchUsuario(
     dados: Partial<Usuario>,
+    avatarFile?: File,
 ): Promise<Partial<Usuario>> {
     const supabase = createClient();
 
@@ -17,12 +19,18 @@ export async function patchUsuario(
         throw new Error("Usuário não autenticado");
     }
 
+    let avatarUrl: string | undefined;
+    if (avatarFile) {
+        const avatarRepo = new AvatarRepository(supabase);
+        avatarUrl = await avatarRepo.upload(user.id, avatarFile);
+    }
+
     const nomeCompleto = `${dados.nome || ""} ${dados.sobrenome || ""}`.trim();
     const telefoneLimpo = dados.telefone
         ? String(dados.telefone).replace(/\D/g, "")
         : "";
 
-    const updatePayload: any = {
+    const updatePayload: Record<string, unknown> = {
         nome: nomeCompleto,
         email: dados.email || null,
         telefone: telefoneLimpo,
@@ -32,6 +40,10 @@ export async function patchUsuario(
         conjuge: dados.conjuge || null,
         filhos: dados.filhos || "Não",
     };
+
+    if (avatarUrl) {
+        updatePayload.avatar_url = avatarUrl;
+    }
 
     const { data: updatedData, error: dbError } = await supabase
         .from("membros")
@@ -58,5 +70,6 @@ export async function patchUsuario(
             );
         }
     }
-    return dados;
+
+    return { ...dados, avatarUrl };
 }

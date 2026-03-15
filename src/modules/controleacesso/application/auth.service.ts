@@ -139,6 +139,7 @@ export async function mapSupabaseUserToLoggedUser(
         ministerio: membroData?.ministerio || "",
         funcao: membroData?.funcao || "",
         provider: loginProvider,
+        avatarUrl: membroData?.avatar_url || user.user_metadata?.avatar_url || "",
     };
 }
 

@@ -77,10 +77,12 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [openProfileDialog, setOpenProfileDialog] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [toastOpen, setToastOpen] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
 
     const { runLogout, loggedUser: usuario } = useAppAuthentication();
+
+    const avatarUrl = usuario?.avatarUrl || null;
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -95,9 +97,16 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
 
     const handleItemClick = async (item: string) => {
         if (item === "Sair") {
-            await runLogout();
             handleClose();
-            window.location.href = "/login";
+            setLoggingOut(true);
+
+            try {
+                await runLogout();
+            } catch {
+                setToastOpen(true);
+            } finally {
+                setLoggingOut(false);
+            }
         } else if (item === "Perfil") {
             setOpenProfileDialog(true);
             handleClose();
@@ -130,9 +139,8 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
         },
     };
 
-    const nomeCompleto = usuario
-        ? `${usuario.nome || ""} ${usuario.sobrenome || ""}`.trim()
-        : "";
+    const primeiroSobrenome = usuario?.sobrenome?.split(" ")[0] || "";
+    const nomeCompleto = usuario ? `${usuario.nome || ""} ${primeiroSobrenome}`.trim() : "";
 
     return (
         <Box>
@@ -362,6 +370,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 <Divider sx={{ my: 1 }} />
 
                 <MenuItem
+                    disabled={loggingOut}
                     onClick={() => handleItemClick("Sair")}
                     sx={{
                         display: "flex",
@@ -401,7 +410,6 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                         open={openProfileDialog}
                         onClose={() => setOpenProfileDialog(false)}
                         user={usuario}
-                        onAvatarChange={setAvatarUrl}
                     />
                 )}
             </Menu>
@@ -413,7 +421,7 @@ export default function Profile({ onMenuItemClick }: ProfileProps) {
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
                 <MuiAlert severity="error" sx={{ width: "100%" }}>
-                    Algo deu errado ao carregar as informações do usuário.
+                    Nao foi possivel finalizar o logout. Tente novamente.
                 </MuiAlert>
             </Snackbar>
         </Box>

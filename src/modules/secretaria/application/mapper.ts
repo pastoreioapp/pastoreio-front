@@ -16,6 +16,7 @@ export function toListItemDto(m: Membro): MembroListItemDto {
     discipulador: m.discipulador,
     discipulando: m.discipulando,
     ministerio: m.ministerio,
+    avatarUrl: m.avatarUrl,
     ativo: m.ativo,
   };
 }
@@ -35,6 +36,7 @@ export function toDetailDto(m: Membro): MembroDetailDto {
     discipulador: m.discipulador,
     discipulando: m.discipulando,
     ministerio: m.ministerio,
+    avatarUrl: m.avatarUrl,
     ativo: m.ativo,
     criadoEm: m.criadoEm,
     criadoPor: m.criadoPor,

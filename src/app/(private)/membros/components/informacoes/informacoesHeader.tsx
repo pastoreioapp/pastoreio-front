@@ -5,9 +5,11 @@ import { Avatar, Box, Typography } from "@mui/material";
 export function InformacaoHeader({
     nome,
     funcao,
+    avatarUrl,
 }: {
     nome: string | null;
     funcao: PapelCelula | null;
+    avatarUrl?: string | null;
 }) {
     const displayNome = nome ?? "";
     const displayFuncao = getFuncaoLabel(funcao);
@@ -23,6 +25,7 @@ export function InformacaoHeader({
             }}
         >
             <Avatar
+                src={avatarUrl || undefined}
                 sx={{
                     width: "130px",
                     height: "130px",

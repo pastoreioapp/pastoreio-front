@@ -15,6 +15,7 @@ export function rowToMembro(row: Record<string, unknown>): Membro {
     discipulador: row.discipulador != null ? String(row.discipulador) : null,
     discipulando: row.discipulando != null ? String(row.discipulando) : null,
     ministerio: row.ministerio != null ? String(row.ministerio) : null,
+    avatarUrl: row.avatar_url != null ? String(row.avatar_url) : null,
     ativo: Boolean(row.ativo),
     criadoEm: String(row.criado_em),
     criadoPor: String(row.criado_por ?? ""),
@@ -38,6 +39,7 @@ export function membroToRow(m: Partial<Membro>): Record<string, unknown> {
   if (m.discipulador !== undefined) row.discipulador = m.discipulador ?? null;
   if (m.discipulando !== undefined) row.discipulando = m.discipulando ?? null;
   if (m.ministerio !== undefined) row.ministerio = m.ministerio ?? null;
+  if (m.avatarUrl !== undefined) row.avatar_url = m.avatarUrl ?? null;
   if (m.ativo !== undefined) row.ativo = m.ativo;
   if (m.criadoEm != null) row.criado_em = m.criadoEm;
   if (m.criadoPor != null) row.criado_por = m.criadoPor;

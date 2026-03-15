@@ -30,6 +30,7 @@ export interface LoggedUserResponse {
   ministerio?: string;
   funcao?: string;
   provider?: string;
+  avatarUrl?: string;
 }
 
 export enum Perfil {

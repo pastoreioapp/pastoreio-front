@@ -31,9 +31,9 @@ export function mapMembroToOrganogramaPessoa(
 
     return {
         id: source.id,
-        nome: source.nome ?? "",
+        nome: source.nome?.split(" ").slice(0, 2).join(" ") ?? "",
         tags: buildTags(role),
-        foto: `https://i.pravatar.cc/150?img=${(source.id % 30) + 1}`,
+        foto: source.avatarUrl || undefined,
         role,
         hierarchyLevel: ROLE_LEVELS[role],
         isLeader: role === PapelCelula.LIDER_CELULA,

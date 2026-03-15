@@ -146,10 +146,12 @@ export function useAppAuthentication() {
 
   const runLogout = async (): Promise<void> => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       dispatch(clearLoggedUser());
-      router.push("/login");
-    } catch (error) {
+      router.replace("/login");
+    } catch (error: unknown) {
       console.error("Logout error:", error);
       throw error;
     }

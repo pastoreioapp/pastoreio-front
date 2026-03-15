@@ -17,6 +17,7 @@ export interface MembroDaCelulaListItemDto {
   discipulador: string | null;
   discipulando: string | null;
   ministerio: string | null;
+  avatarUrl: string | null;
   ativo: boolean;
   dataEntrada: string | null;
 }

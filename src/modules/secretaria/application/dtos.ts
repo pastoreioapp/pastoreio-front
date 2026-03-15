@@ -12,6 +12,7 @@ export interface MembroListItemDto {
   discipulador: string | null;
   discipulando: string | null;
   ministerio: string | null;
+  avatarUrl: string | null;
   ativo: boolean;
 }
 
@@ -29,6 +30,7 @@ export interface MembroDetailDto {
   discipulador: string | null;
   discipulando: string | null;
   ministerio: string | null;
+  avatarUrl: string | null;
   ativo: boolean;
   criadoEm: string;
   criadoPor: string;

@@ -12,6 +12,7 @@ export interface Membro {
   discipulador: string | null;
   discipulando: string | null;
   ministerio: string | null;
+  avatarUrl: string | null;
   ativo: boolean;
   criadoEm: string;
   criadoPor: string;

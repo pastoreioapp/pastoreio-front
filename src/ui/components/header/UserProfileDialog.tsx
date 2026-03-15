@@ -25,19 +25,18 @@ import { useState, ChangeEvent, useRef, useEffect, ReactNode } from "react";
 import { Usuario } from "@/modules/controleacesso/domain/usuario";
 import { LoggedUserResponse } from "@/modules/controleacesso/domain/types";
 import { AlertColor } from "@mui/material/Alert";
-import { Dispatch, SetStateAction } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/pt-br";
 import { patchUsuario } from "@/modules/controleacesso/application/usuario.service";
 import { useDispatch } from "react-redux";
 import { setLoggedUser } from "@/ui/stores/features/loggedUserSlice";
+import { resizeImage } from "@/ui/utils/imageUtils";
 
 interface UserProfileDialogProps {
     open: boolean;
     onClose: () => void;
     user: LoggedUserResponse;
-    onAvatarChange?: Dispatch<SetStateAction<string | null>>;
 }
 
 export function getInitials(nome?: string, sobrenome?: string): string {
@@ -138,7 +137,8 @@ export default function UserProfileDialog({
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatarUrl || null);
+    const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
     const [formData, setFormData] = useState(() => getDefaultFormData(user));
 
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -151,6 +151,7 @@ export default function UserProfileDialog({
     useEffect(() => {
         if (user) {
             setFormData(getDefaultFormData(user));
+            setAvatarUrl(user.avatarUrl || null);
         }
     }, [user]);
 
@@ -168,6 +169,7 @@ export default function UserProfileDialog({
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setPendingAvatarFile(file);
             const reader = new FileReader();
             reader.onloadend = () => setAvatarUrl(reader.result as string);
             reader.readAsDataURL(file);
@@ -197,26 +199,36 @@ export default function UserProfileDialog({
                             : undefined,
                 };
 
-                await patchUsuario(payload);
+                let resizedFile: File | undefined;
+                if (pendingAvatarFile) {
+                    resizedFile = await resizeImage(pendingAvatarFile);
+                }
+
+                const result = await patchUsuario(payload, resizedFile);
 
                 showSnackbar("Dados salvos com sucesso!", "success");
                 setIsEditing(false);
+                setPendingAvatarFile(null);
 
                 if (user) {
+                    const newAvatarUrl = result.avatarUrl || avatarUrl;
                     dispatch(
                         setLoggedUser({
                             ...user,
                             ...formData,
                             nome: formData.nome,
                             sobrenome: formData.sobrenome,
+                            avatarUrl: newAvatarUrl,
                         }),
                     );
+                    if (newAvatarUrl) {
+                        setAvatarUrl(newAvatarUrl);
+                    }
                 }
-            } catch (error: any) {
-                showSnackbar(
-                    error.message || "Algo deu errado ao salvar os dados.",
-                    "error",
-                );
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error ? error.message : "Erro ao salvar os dados. Tente novamente.";
+                showSnackbar("Erro ao salvar os dados. Tente novamente.", "error");
             } finally {
                 setIsSaving(false);
             }
@@ -228,7 +240,8 @@ export default function UserProfileDialog({
     const handleClose = () => {
         setIsEditing(false);
         setFormData(getDefaultFormData(user));
-        setAvatarUrl(null);
+        setAvatarUrl(user.avatarUrl || null);
+        setPendingAvatarFile(null);
         onClose();
     };
 
@@ -668,7 +681,8 @@ export default function UserProfileDialog({
                             onClick={() => {
                                 setIsEditing(false);
                                 setFormData(getDefaultFormData(user));
-                                setAvatarUrl(null);
+                                setAvatarUrl(user.avatarUrl || null);
+                                setPendingAvatarFile(null);
                             }}
                             variant="outlined"
                             sx={{

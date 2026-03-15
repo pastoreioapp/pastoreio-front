@@ -10,5 +10,6 @@ export interface Usuario {
     conjuge: string;
     filhos: "Sim" | "Não";
     ministerio: string;
+    avatarUrl?: string;
   }
   

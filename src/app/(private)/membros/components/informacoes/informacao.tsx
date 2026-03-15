@@ -130,7 +130,7 @@ export function Informacao({
                     alignItems: { xs: "center", md: "flex-start" },
                 }}
             >
-                <InformacaoHeader nome={data.nome} funcao={data.funcao} />
+                <InformacaoHeader nome={data.nome} funcao={data.funcao} avatarUrl={data.avatarUrl} />
 
                 <Box sx={{
                     display: "flex",

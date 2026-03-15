@@ -22,6 +22,7 @@ type MembrosCelulaRow = {
     discipulador: string | null;
     discipulando: string | null;
     ministerio: string | null;
+    avatar_url: string | null;
     ativo: boolean;
     deletado: boolean;
   } | null;
@@ -51,6 +52,7 @@ export function rowToMembroDaCelulaListItemDto(
       discipulador: null,
       discipulando: null,
       ministerio: null,
+      avatarUrl: null,
       ativo: false,
       dataEntrada: row.data_entrada ?? null,
     };
@@ -72,6 +74,7 @@ export function rowToMembroDaCelulaListItemDto(
     discipulador: m.discipulador != null ? String(m.discipulador) : null,
     discipulando: m.discipulando != null ? String(m.discipulando) : null,
     ministerio: m.ministerio != null ? String(m.ministerio) : null,
+    avatarUrl: m.avatar_url != null ? String(m.avatar_url) : null,
     ativo: Boolean(m.ativo),
     dataEntrada: row.data_entrada != null ? String(row.data_entrada) : null,
   };

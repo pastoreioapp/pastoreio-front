@@ -46,12 +46,15 @@ export function MembroListItem({
             }}
         >
             <ListItemAvatar>
-                <Avatar sx={{ width: 60, height: 60 }}>
+                <Avatar
+                    src={membro.avatarUrl || undefined}
+                    sx={{ width: 60, height: 60 }}
+                >
                     {membro.nome ? membro.nome.charAt(0).toUpperCase() : "?"}
                 </Avatar>
             </ListItemAvatar>
             <Box flex={1}>
-                <Typography fontSize={16}>{membro.nome}</Typography>
+                <Typography fontSize={16}>{membro.nome?.split(" ").slice(0, 2).join(" ")}</Typography>
                 <Divider
                     sx={{ borderColor: "#C5C5C5", mt: "2px", mb: "4px" }}
                 />

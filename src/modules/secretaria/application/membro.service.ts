@@ -32,6 +32,7 @@ export class MembroService {
       discipulador: dto.discipulador ?? null,
       discipulando: dto.discipulando ?? null,
       ministerio: dto.ministerio ?? null,
+      avatarUrl: null,
       ativo: dto.ativo,
       criadoEm: now,
       criadoPor,
