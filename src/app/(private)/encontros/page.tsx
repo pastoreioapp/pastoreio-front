@@ -5,13 +5,12 @@ import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-encontro/filtro";
 import { useEncontrosSelecionados } from "./hooks/useEncontroSelecionado";
-import { LoadingBox } from "./components/loading/LoadingBox";
-import { ErrorBox } from "./components/error/ErrorBox";
+import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
+import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useState } from "react";
-import { EncontroService } from "@/modules/celulas/application/encontro.service";
-import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
+import { createEncontro, updateEncontro } from "@/app/actions/encontros";
 import { enqueueSnackbar } from "notistack";
 import { Encontro } from "@/modules/celulas/domain/encontro";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
@@ -42,11 +41,7 @@ export default function Encontros() {
         }
 
         try {
-            const repo = new EncontroRepository();
-            const service = new EncontroService(repo);
-
             if (encontroEditando?.id) {
-                // Modo edição
                 const dadosParaAtualizar: Partial<Encontro> = {
                     celula_id: String(celulaId),
                     data: dados.data,
@@ -62,7 +57,7 @@ export default function Encontros() {
                     atualizado_por: loggedUser?.email || "UNKNOWN"
                 };
 
-                await service.update(encontroEditando.id, dadosParaAtualizar);
+                await updateEncontro(encontroEditando.id, dadosParaAtualizar);
                 enqueueSnackbar("Encontro atualizado com sucesso!", { variant: "success", autoHideDuration: 2000 });
             } else {
                 const dadosParaSalvar: Encontro = {
@@ -80,7 +75,7 @@ export default function Encontros() {
                     criado_por: loggedUser?.email || "UNKNOWN"
                 };
 
-                await service.create(dadosParaSalvar);
+                await createEncontro(dadosParaSalvar);
                 enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success", autoHideDuration: 2000 });
             }
 
@@ -122,12 +117,12 @@ export default function Encontros() {
                                 variant="contained"
                                 onClick={() => setModalAberto(true)}
                                 sx={{
-                                    bgcolor: "#5E79B3",
+                                    bgcolor: "primary.main",
                                     fontSize: 13,
                                     fontWeight: 600,
                                     display: "flex",
                                     gap: 1,
-                                    color: "#fff",
+                                    color: "common.white",
                                 }}
                             >
                                 <IconPlus width={16} /> Registrar encontro

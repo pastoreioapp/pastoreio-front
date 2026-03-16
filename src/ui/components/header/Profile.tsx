@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, MouseEvent } from "react";
-import { poppins } from "@/ui/utils/theme";
+import { poppins } from "@/ui/utils/fonts";
+import { getInitials } from "@/ui/utils/getInitials";
 import {
     Avatar,
     Box,
@@ -61,16 +62,6 @@ const onlineBadgeStyle = {
 
 interface ProfileProps {
     onMenuItemClick?: (item: string) => void;
-}
-
-export function getInitials(nome?: string, sobrenome?: string): string {
-    const nomeLimpo = nome?.trim() || "";
-    const sobrenomeLimpo = sobrenome?.trim() || "";
-
-    if (!nomeLimpo && !sobrenomeLimpo) return "U";
-    if (!sobrenomeLimpo) return nomeLimpo[0].toUpperCase();
-
-    return (nomeLimpo[0] + sobrenomeLimpo[0]).toUpperCase();
 }
 
 export default function Profile({ onMenuItemClick }: ProfileProps) {

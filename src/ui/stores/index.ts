@@ -1,11 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { loggedUserReducer } from "./features/loggedUserSlice";
-import { sidebarReducer } from "./features/sidebarSlice";
 
 export const store = configureStore({
     reducer: {
-        sidebar: sidebarReducer,
         loggedUser: loggedUserReducer
     },
 });

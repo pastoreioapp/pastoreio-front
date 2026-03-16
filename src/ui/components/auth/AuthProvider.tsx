@@ -8,7 +8,7 @@
  */
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/shared/supabase/client";
@@ -16,46 +16,33 @@ import { mapSupabaseUserToLoggedUser } from "@/modules/controleacesso/applicatio
 import { setLoggedUser, clearLoggedUser } from "@/ui/stores/features/loggedUserSlice";
 import { AuthChangeEvent } from "@supabase/supabase-js";
 
-const supabase = createClient();
-
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
+    const supabase = createClient();
     const dispatch = useDispatch();
     const router = useRouter();
     const pathname = usePathname();
+    const pathnameRef = useRef(pathname);
+
+    pathnameRef.current = pathname;
 
     useEffect(() => {
-        const checkInitialSession = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-
-                if (user) {
-                    const loggedUserData = await mapSupabaseUserToLoggedUser(supabase, user);
-                    if (loggedUserData) {
-                        dispatch(setLoggedUser(loggedUserData));
-                    }
-                } else {
-                    dispatch(clearLoggedUser());
-                }
-            } catch (error) {
-                console.error('Error checking initial session:', error);
-                dispatch(clearLoggedUser());
-            }
-        };
-        checkInitialSession();
-
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: AuthChangeEvent, session) => {
                 if (event === 'PASSWORD_RECOVERY' && session?.user) {
-                    if (pathname !== '/reset-password') {
-                        router.push('/reset-password');
+                    if (pathnameRef.current !== '/redefinir-senha') {
+                        router.push('/redefinir-senha');
                     }
                     return;
                 }
 
                 if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session?.user) {
-                    const loggedUserData = await mapSupabaseUserToLoggedUser(supabase, session.user);
-                    if (loggedUserData) {
-                        dispatch(setLoggedUser(loggedUserData));
+                    try {
+                        const loggedUserData = await mapSupabaseUserToLoggedUser(supabase, session.user);
+                        if (loggedUserData) {
+                            dispatch(setLoggedUser(loggedUserData));
+                        }
+                    } catch (err) {
+                        console.error('onAuthStateChange mapUser error:', err);
                     }
                 } else if (event === 'SIGNED_OUT') {
                     dispatch(clearLoggedUser());
@@ -66,7 +53,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         return () => {
             subscription.unsubscribe();
         };
-    }, [dispatch, router, pathname]);
+    }, [supabase, dispatch, router]);
 
     return <>{children}</>;
 }

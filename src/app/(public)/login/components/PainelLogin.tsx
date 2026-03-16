@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import {
   Box,
   Typography,
@@ -62,7 +62,7 @@ export default function PainelLogin() {
     const handleGoogleLoginButtonClick = async () => {
         try {
             await appAuthentication.runGoogleLogin();
-        } catch (error: any) {
+        } catch {
             enqueueSnackbar("Falha ao realizar login com Google. Tente novamente.", { variant: "error", autoHideDuration: 2000 });
         }
     };
@@ -211,7 +211,7 @@ export default function PainelLogin() {
                         <Typography
                             variant="body1"
                             component={Link}
-                            href="/register"
+                            href="/cadastro"
                             sx={{
                                 textDecoration: "none",
                                 color: theme.palette.primary.main,
@@ -258,7 +258,7 @@ export default function PainelLogin() {
                                 onChange={(event) => setUserLogin(event.target.value)}
                                 onBlur={() => setLoginTouched(true)}
                             >
-                                {(inputProps: any) => (
+                                {(inputProps: ComponentProps<typeof CustomTextField>) => (
                                     <CustomTextField
                                         {...inputProps}
                                         required
@@ -366,7 +366,7 @@ export default function PainelLogin() {
                         <Typography
                             variant="body1"
                             component={Link}
-                            href="/forgot-password"
+                            href="/esqueci-senha"
                             sx={{
                                 textDecoration: "none",
                                 color: theme.palette.primary.main,

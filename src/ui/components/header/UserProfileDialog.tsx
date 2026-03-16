@@ -31,22 +31,13 @@ import "dayjs/locale/pt-br";
 import { patchUsuario } from "@/modules/controleacesso/application/usuario.service";
 import { useDispatch } from "react-redux";
 import { setLoggedUser } from "@/ui/stores/features/loggedUserSlice";
+import { getInitials } from "@/ui/utils/getInitials";
 import { resizeImage } from "@/ui/utils/imageUtils";
 
 interface UserProfileDialogProps {
     open: boolean;
     onClose: () => void;
     user: LoggedUserResponse;
-}
-
-export function getInitials(nome?: string, sobrenome?: string): string {
-    const nomeLimpo = nome?.trim() || "";
-    const sobrenomeLimpo = sobrenome?.trim() || "";
-
-    if (!nomeLimpo && !sobrenomeLimpo) return "U";
-    if (!sobrenomeLimpo) return nomeLimpo[0].toUpperCase();
-
-    return (nomeLimpo[0] + sobrenomeLimpo[0]).toUpperCase();
 }
 
 export const applyPhoneMask = (value: string) => {

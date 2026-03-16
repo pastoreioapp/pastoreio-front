@@ -1,27 +1,36 @@
 "use client";
 
-import { Helmet, HelmetProvider } from "react-helmet-async";
+import { useEffect, type ReactNode } from "react";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 
 type Props = {
     description?: string;
-    children: JSX.Element | JSX.Element[];
+    children: ReactNode;
     title?: string;
     allowedRoles?: readonly string[];
 };
 
 export default function PageContainer({ title, description, children, allowedRoles }: Props) {
+    useEffect(() => {
+        if (title) {
+            document.title = title;
+        }
+
+        if (!description) return;
+
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+            metaDescription = document.createElement("meta");
+            metaDescription.setAttribute("name", "description");
+            document.head.appendChild(metaDescription);
+        }
+
+        metaDescription.setAttribute("content", description);
+    }, [description, title]);
+
     return (
         <ProtectedRoute allowedRoles={allowedRoles}>
-            <HelmetProvider>
-                <div>
-                    <Helmet>
-                        <title>{title}</title>
-                        <meta name="description" content={description} />
-                    </Helmet>
-                    {children}
-                </div>
-            </HelmetProvider>
+            <>{children}</>
         </ProtectedRoute>
     );
 }

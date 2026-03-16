@@ -1,11 +1,17 @@
-import PageContainer from "@/ui/components/pages/PageContainer";
 import UnderConstructionCard from "@/ui/components/ui/UnderConstructionCard";
+import { ProtectedRoute } from "@/ui/components/auth/ProtectedRoute";
 import { LIDER_ONLY_ROLES } from "@/modules/controleacesso/domain/navigation";
 import { IconGrowth } from "@tabler/icons-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Multiplicação",
+    description: "Acompanhamento de novas células e crescimento",
+};
 
 export default function Multiplicacao() {
     return (
-        <PageContainer title="Multiplicação" description="Acompanhamento de novas células e crescimento" allowedRoles={LIDER_ONLY_ROLES}>
+        <ProtectedRoute allowedRoles={LIDER_ONLY_ROLES}>
             <UnderConstructionCard
                 title="Multiplicação em construção"
                 description="Esta área será dedicada ao acompanhamento do processo de multiplicação de novas células."
@@ -15,6 +21,6 @@ export default function Multiplicacao() {
                     "Cronograma e etapas de multiplicação"
                 ]}
             />
-        </PageContainer>
+        </ProtectedRoute>
     );
 }

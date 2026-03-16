@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMembros } from "./useMembros";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
@@ -8,8 +8,9 @@ export function useMembrosSelecionados(
     membroIdInicial?: number | null
 ) {
     const { membros, loading, erro } = useMembros(celulaId);
-    const membrosVisiveis = membros.filter(
-        (membro) => membro.funcao !== PapelCelula.LIDER_CELULA
+    const membrosVisiveis = useMemo(
+        () => membros.filter((membro) => membro.funcao !== PapelCelula.LIDER_CELULA),
+        [membros]
     );
     const [membroSelecionado, setMembroSelecionado] = useState<MembroDaCelulaListItemDto | null>(null);
     const hasAppliedInitialSelection = useRef(false);

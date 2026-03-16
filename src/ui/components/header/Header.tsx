@@ -14,7 +14,7 @@ import Profile from "./Profile";
 import { IconMenu2 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { getAccessibleMenuItemByPath } from "../sidebar/MenuItems";
-import { poppins } from "@/ui/utils/theme";
+import { poppins } from "@/ui/utils/fonts";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 interface HeaderProps {

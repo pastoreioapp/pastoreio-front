@@ -1,23 +1,16 @@
 import { createClient } from "@/shared/supabase/client";
 import type { Usuario } from "../domain/usuario";
 import { AvatarRepository } from "../infra/avatar.repository";
+import { UsuarioRepository } from "../infra/usuario.repository";
+import type { UsuarioPersistencePayload } from "../infra/usuario.types";
 
 export async function patchUsuario(
     dados: Partial<Usuario>,
     avatarFile?: File,
 ): Promise<Partial<Usuario>> {
     const supabase = createClient();
-
-    const {
-        data: { session },
-        error: authError,
-    } = await supabase.auth.getSession();
-
-    const user = session?.user;
-
-    if (authError || !user) {
-        throw new Error("Usuário não autenticado");
-    }
+    const usuarioRepository = new UsuarioRepository(supabase);
+    const user = await usuarioRepository.getAuthenticatedUser();
 
     let avatarUrl: string | undefined;
     if (avatarFile) {
@@ -30,7 +23,7 @@ export async function patchUsuario(
         ? String(dados.telefone).replace(/\D/g, "")
         : "";
 
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload: UsuarioPersistencePayload = {
         nome: nomeCompleto,
         email: dados.email || null,
         telefone: telefoneLimpo,
@@ -45,31 +38,7 @@ export async function patchUsuario(
         updatePayload.avatar_url = avatarUrl;
     }
 
-    const { data: updatedData, error: dbError } = await supabase
-        .from("membros")
-        .update(updatePayload)
-        .eq("user_id", user.id)
-        .select();
-
-    if (dbError) {
-        throw new Error(`Erro no banco: ${dbError.message}`);
-    }
-
-    if (!updatedData || updatedData.length === 0) {
-        const { error: insertError } = await supabase.from("membros").insert({
-            user_id: user.id,
-            ativo: true,
-            criado_em: new Date().toISOString(),
-            criado_por: user.id,
-            ...updatePayload,
-        });
-
-        if (insertError) {
-            throw new Error(
-                `Erro ao criar perfil no banco: ${insertError.message}`,
-            );
-        }
-    }
+    await usuarioRepository.upsertByUserId(user.id, updatePayload, user.id);
 
     return { ...dados, avatarUrl };
 }

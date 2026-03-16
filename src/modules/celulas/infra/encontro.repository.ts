@@ -1,13 +1,21 @@
-import { createClient } from "@/shared/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Encontro } from "../domain/encontro";
+import type { Frequencia } from "../domain/frequencia";
 
 const TABLE = "encontros";
 
-function mapEncontros(data: any[] | null): Encontro[] {
-  return (data || []).map((encontro: any) => {
+type FrequenciaRow = Frequencia & {
+  membros?: { nome?: string; };
+};
+
+type EncontroRow = Encontro & {
+  frequencias_celula?: FrequenciaRow[];
+};
+
+function mapEncontros(data: EncontroRow[] | null): Encontro[] {
+  return (data || []).map((encontro) => {
     const frequencias = (encontro.frequencias_celula || [])
-      .filter((f: any) => !f.deletado)
-      .map((f: any) => {
+      .map((f) => {
         const { membros, ...rest } = f;
         return { ...rest, membro_nome: membros?.nome };
       });
@@ -20,14 +28,15 @@ function mapEncontros(data: any[] | null): Encontro[] {
 }
 
 export class EncontroRepository {
-  async findByCelulaId(celulaId: number): Promise<Encontro[]> {
-    const supabase = createClient();
+  constructor(private readonly supabase: SupabaseClient) {}
 
-    const { data, error } = await supabase
+  async findByCelulaId(celulaId: number): Promise<Encontro[]> {
+    const { data, error } = await this.supabase
       .from(TABLE)
       .select("*, frequencias_celula(*, membros(nome))")
       .eq("celula_id", celulaId)
       .eq("deletado", false)
+      .eq("frequencias_celula.deletado", false)
       .order("data", { ascending: false });
 
     if (error) {
@@ -39,9 +48,7 @@ export class EncontroRepository {
   }
 
   async create(dados: Encontro): Promise<Encontro> {
-    const supabase = createClient();
-    
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from(TABLE)
       .insert([dados])
       .select()
@@ -60,9 +67,7 @@ export class EncontroRepository {
   }
 
   async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
-    const supabase = createClient();
-    
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from(TABLE)
       .update(dados)
       .eq("id", id)

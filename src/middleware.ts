@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl
 
-  const publicRoutes = ['/login', '/register', '/recover', '/receiveCode', '/newPassword', '/forgot-password', '/reset-password', '/api/auth/callback']
+  const publicRoutes = ['/login', '/cadastro', '/recuperar', '/receber-codigo', '/nova-senha', '/esqueci-senha', '/redefinir-senha', '/api/auth/callback']
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 
   if (!isPublicRoute && !user) {
@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (user && (pathname === '/login' || pathname === '/register')) {
+  if (user && (pathname === '/login' || pathname === '/cadastro')) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/dashboard'
     return NextResponse.redirect(redirectUrl)

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
-import { EncontroService } from "@/modules/celulas/application/encontro.service";
-import { EncontroRepository } from "@/modules/celulas/infra/encontro.repository";
+import { listEncontros } from "@/app/actions/encontros";
 
 const CELULA_NAO_VINCULADA_MESSAGE =
   "Nenhuma célula vinculada foi encontrada para o usuário logado.";
@@ -25,9 +24,7 @@ export function useEncontros(celulaId?: number | null) {
     try {
       setLoading(true);
       setErro(null);
-      const repo = new EncontroRepository();
-      const service = new EncontroService(repo);
-      const data = await service.list(resolvedCelulaId);
+      const data = await listEncontros(resolvedCelulaId);
       setEncontros(data);
     } catch (error: unknown) {
       setErro(
@@ -39,49 +36,8 @@ export function useEncontros(celulaId?: number | null) {
   }, [celulaId]);
 
   useEffect(() => {
-    if (celulaId == null) {
-      setEncontros([]);
-      setErro(CELULA_NAO_VINCULADA_MESSAGE);
-      setLoading(false);
-      return;
-    }
-
-    const resolvedCelulaId = celulaId;
-    let isMounted = true;
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        setErro(null);
-        const repo = new EncontroRepository();
-        const service = new EncontroService(repo);
-        const data = await service.list(resolvedCelulaId);
-        if (!isMounted) {
-          return;
-        }
-
-        setEncontros(data);
-      } catch (error: unknown) {
-        if (!isMounted) {
-          return;
-        }
-
-        setErro(
-          error instanceof Error ? error.message : "Erro ao carregar encontros"
-        );
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [celulaId]);
+    void refetch();
+  }, [refetch]);
 
   return { encontros, loading, erro, refetch };
 }

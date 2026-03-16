@@ -1,21 +1,18 @@
 "use client";
 
 import { createClient } from "@/shared/supabase/client";
-import { mapSupabaseUserToLoggedUser } from "@/modules/controleacesso/application/auth.service";
 import type { UserLogin } from "@/modules/controleacesso/domain/types";
 import { formatPhoneToE164 } from "@/ui/utils/validation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   LoggedUserState,
-  setLoggedUser,
   clearLoggedUser,
 } from "@/ui/stores/features/loggedUserSlice";
 import { RootState } from "@/ui/stores";
 import { useRouter } from "next/navigation";
 
-const supabase = createClient();
-
 export function useAppAuthentication() {
+  const supabase = createClient();
   const dispatch = useDispatch();
   const router = useRouter();
   const loggedUser = useSelector<RootState>(
@@ -40,14 +37,7 @@ export function useAppAuthentication() {
       if (error) throw error;
 
       if (data.user) {
-        const loggedUserData = await mapSupabaseUserToLoggedUser(
-          supabase,
-          data.user
-        );
-        if (loggedUserData) {
-          dispatch(setLoggedUser(loggedUserData));
-          router.push("/dashboard");
-        }
+        router.push("/dashboard");
       }
     } catch (error: unknown) {
       console.error("Login error:", error);
@@ -114,14 +104,7 @@ export function useAppAuthentication() {
       }
 
       if (data.user && data.session) {
-        const loggedUserData = await mapSupabaseUserToLoggedUser(
-          supabase,
-          data.user
-        );
-        if (loggedUserData) {
-          dispatch(setLoggedUser(loggedUserData));
-          router.push("/dashboard");
-        }
+        router.push("/dashboard");
       }
     } catch (error: unknown) {
       console.error("Register error:", error);
@@ -130,7 +113,7 @@ export function useAppAuthentication() {
   };
 
   const runResetPasswordForEmail = async (email: string): Promise<void> => {
-    const redirectTo = `${window.location.origin}/api/auth/callback?next=/reset-password`;
+    const redirectTo = `${window.location.origin}/api/auth/callback?next=/redefinir-senha`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     });

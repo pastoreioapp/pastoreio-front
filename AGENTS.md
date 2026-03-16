@@ -26,6 +26,11 @@ O projeto segue Clean Architecture com foco em:
 
 > O domínio não conhece Next.js, React, Supabase ou qualquer framework.
 
+**Concessão adotada para este projeto:**
+
+> A camada de `application` pode depender diretamente de repositórios concretos da camada `infra` pois isso simplifica o entendimento e a manutenção do código para a equipe.
+> O isolamento obrigatório continua sendo do `domain`, que não deve conhecer infraestrutura.
+
 ---
 
 ### 1.2 Framework como Boundary
@@ -51,7 +56,7 @@ src/
 │
 ├── ui/                      # Camada de apresentação (React)
 │   ├── components/          # Componentes visuais
-│   ├── hooks/               # Hooks de UI
+│   ├── hooks/               # Hooks compartilhados de UI
 │   ├── contexts/            # Contexts globais
 │   └── stores/              # Redux / Zustand
 │
@@ -76,8 +81,9 @@ src/
 
 * Entidades
 * Value Objects
-* Interfaces (repositórios, gateways)
 * Casos de uso
+* Repositórios concretos chamados pela camada de `application`
+* Interfaces (repositórios, gateways) quando fizer sentido
 
 #### Proibido
 
@@ -114,12 +120,17 @@ Responsabilidades:
 
 * Orquestrar regras
 * Executar fluxos de negócio
-* Chamar interfaces definidas no domínio
+* Chamar repositórios da própria feature
+* Opcionalmente usar interfaces quando houver ganho real de desacoplamento
 
 Nunca deve:
 
-* Importar infraestrutura concreta
 * Conhecer React ou Next.js
+
+Pode:
+
+* Importar repositórios concretos de `infra/` da mesma feature
+* Manter a orquestração principal do caso de uso fora de `app/` e `ui/`
 
 ---
 
@@ -127,9 +138,20 @@ Nunca deve:
 
 Responsabilidades:
 
-* Implementar interfaces do domínio
 * Acesso a banco (Supabase)
 * Integrações externas
+* Repositórios concretos consumidos pela camada de `application`
+* Mappers, payloads, row types e tipos auxiliares de persistência
+
+Pode também:
+
+* Implementar interfaces do domínio quando isso trouxer benefício claro
+
+Diretriz de legibilidade:
+
+* Quando um repository começar a acumular muitos tipos auxiliares (`Payload`, `Record`, `Row`, `Mapper`), extraia esses tipos para arquivos dedicados em `infra/`
+* O objetivo é manter a classe do repository enxuta, com foco nas operações de persistência
+* Para tipos específicos de uma entidade, prefira nomes como `usuario.types.ts`, `usuario.mapper.ts`, etc.
 
 Aqui podem existir dependências técnicas.
 
@@ -139,7 +161,13 @@ Aqui podem existir dependências técnicas.
 
 ### 4.1 Hooks
 
-Local: `ui/hooks`
+Local principal: `ui/hooks`
+
+Exceção oficial:
+
+* Hooks específicos de uma única feature podem ficar co-localizados com a própria feature
+* Exemplos válidos: `app/(private)/membros/hooks`, `app/(private)/encontros/hooks`
+* Use `ui/hooks` para hooks compartilhados entre múltiplas features ou áreas
 
 Responsabilidades:
 
@@ -228,8 +256,8 @@ Regras:
 ```text
 UI → Adapters (Server Actions / API)
 Adapters → Application (Use Cases)
-Application → Domain
-Infra → Domain
+Application → Infra e/ou Domain
+Infra → Domain (quando necessário)
 ```
 
 ❌ Dependências inversas são proibidas.
@@ -244,7 +272,9 @@ Ao criar ou modificar código, a IA **deve**:
 2. Criar Use Cases antes de criar UI
 3. Nunca colocar regra de negócio em `app/` ou `ui/`
 4. Reutilizar Use Cases entre Server Actions e APIs
-5. Perguntar antes de violar qualquer regra aqui definida
+5. Preferir simplicidade para um time misto de juniores e sêniors
+6. Usar interfaces apenas quando houver benefício claro de desacoplamento, teste ou múltiplas implementações
+7. Perguntar antes de violar qualquer regra aqui definida
 
 ---
 

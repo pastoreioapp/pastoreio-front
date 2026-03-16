@@ -3,40 +3,8 @@ import type { User } from "@supabase/supabase-js";
 import { PAPEIS_CELULA_LIDERANCA } from "@/modules/celulas/domain/papel-celula";
 import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
 import type { LoggedUserResponse } from "../domain/types";
-import { Perfil } from "../domain/types";
-
-async function getUserProfiles(
-    supabase: SupabaseClient,
-    userId: string,
-): Promise<string[]> {
-    const { data: userProfileRow, error: fetchError } = await supabase
-        .from("user_profiles")
-        .select("profile")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-    if (fetchError) throw new Error(`Erro ao buscar perfis do usuário: ${fetchError.message}`);
-
-    if (
-        userProfileRow?.profile &&
-        Array.isArray(userProfileRow.profile) &&
-        userProfileRow.profile.length > 0
-    ) {
-        return userProfileRow.profile as string[];
-    }
-
-    const { error: insertError } = await supabase.from("user_profiles").upsert(
-        {
-            user_id: userId,
-            profile: [Perfil.MEMBRO],
-        },
-        { onConflict: "user_id" },
-    );
-
-    if (insertError) throw new Error(`Erro ao criar perfil do usuário: ${insertError.message}`);
-
-    return [Perfil.MEMBRO];
-}
+import { UserProfileRepository } from "../infra/user-profile.repository";
+import { UsuarioRepository } from "../infra/usuario.repository";
 
 function formatPhone(phone?: string): string {
   if (!phone) return "";
@@ -83,20 +51,11 @@ export async function mapSupabaseUserToLoggedUser(
 ): Promise<LoggedUserResponse | null> {
     if (!user) return null;
 
-    const profiles = await getUserProfiles(
-        supabase,
-        user.id,
-    );
+    const userProfileRepository = new UserProfileRepository(supabase);
+    const usuarioRepository = new UsuarioRepository(supabase);
 
-    const { data: membroData, error: membroError } = await supabase
-        .from("membros")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-    if (membroError) {
-        throw new Error(`Erro ao buscar membro do usuário: ${membroError.message}`);
-    }
+    const profiles = await userProfileRepository.findOrCreateProfiles(user.id);
+    const membroData = await usuarioRepository.findByUserId(user.id);
 
     const membroId = toOptionalNumber(membroData?.id);
     const celulaContext = await getCelulaContext(supabase, membroId);

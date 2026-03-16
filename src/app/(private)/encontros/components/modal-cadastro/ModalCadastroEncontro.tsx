@@ -38,6 +38,19 @@ export interface DadosEncontro {
     observacoes?: string;
 }
 
+const dadosPadrao: DadosEncontro = {
+    celula_id: null,
+    tema: "",
+    data: "",
+    horario: "19:00",
+    local: "",
+    anfitriao: "",
+    preletor: "",
+    supervisao: "não",
+    conversoes: "não",
+    observacoes: "",
+};
+
 export function ModalCadastroEncontro({
     open,
     onClose,
@@ -46,19 +59,6 @@ export function ModalCadastroEncontro({
     encontroId,
 }: ModalCadastroEncontroProps) {
     type CampoObrigatorio = "tema" | "data" | "horario" | "local" | "anfitriao" | "preletor";
-
-    const dadosPadrao: DadosEncontro = {
-        celula_id: null,
-        tema: "",
-        data: "",
-        horario: "19:00",
-        local: "",
-        anfitriao: "",
-        preletor: "",
-        supervisao: "não",
-        conversoes: "não",
-        observacoes: "",
-    };
 
     const [dados, setDados] = useState<DadosEncontro>(dadosIniciais || dadosPadrao);
 
@@ -72,14 +72,9 @@ export function ModalCadastroEncontro({
         preletor: false,
     });
 
-    // Atualiza os dados quando dadosIniciais mudar (modo edição)
     useEffect(() => {
-        if (dadosIniciais) {
-            setDados(dadosIniciais);
-        } else {
-            setDados(dadosPadrao);
-        }
-    }, [dadosIniciais, open]);
+        setDados(dadosIniciais ?? dadosPadrao);
+    }, [dadosIniciais]);
 
     const getCampoObrigatorioErro = (campo: CampoObrigatorio) => {
         if (!camposTocados[campo]) {
@@ -276,7 +271,7 @@ export function ModalCadastroEncontro({
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    sx={{ bgcolor: "#5E79B3" }}
+                    sx={{ bgcolor: "primary.main" }}
                     disabled={salvando}
                 >
                     {salvando ? "Salvando..." : "Salvar"}

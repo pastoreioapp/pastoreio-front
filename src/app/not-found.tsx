@@ -1,5 +1,3 @@
-"use client";
-
 import { Box, Typography, Button } from "@mui/material";
 import Image from "next/image";
 

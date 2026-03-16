@@ -16,7 +16,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MenuItemType, getAccessibleMenuItems } from "./MenuItems";
 import { usePathname } from "next/navigation";
-import { poppins } from "@/ui/utils/theme";
+import { poppins } from "@/ui/utils/fonts";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 
 interface SidebarProps {
