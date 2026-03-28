@@ -10,9 +10,10 @@ import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useState } from "react";
-import { createEncontro, updateEncontro } from "@/app/actions/encontros";
+import { salvarEncontroComFrequencias } from "@/app/actions/encontros";
 import { enqueueSnackbar } from "notistack";
 import { Encontro } from "@/modules/celulas/domain/encontro";
+import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
 
@@ -35,55 +36,38 @@ export default function Encontros() {
     const [modalAberto, setModalAberto] = useState(false);
     const [encontroEditando, setEncontroEditando] = useState<Encontro | null>(null);
 
-    const handleSalvarEncontro = async (dados: DadosEncontro) => {
+    const handleSalvarEncontro = async (payload: {
+        dados: DadosEncontro;
+        frequencias: FrequenciaSyncLinha[];
+    }) => {
         if (celulaId == null) {
             throw new Error("Nenhuma célula vinculada foi encontrada para o usuário logado.");
         }
 
+        const { dados, frequencias } = payload;
+
         try {
-            if (encontroEditando?.id) {
-                const dadosParaAtualizar: Partial<Encontro> = {
-                    celula_id: String(celulaId),
-                    data: dados.data,
-                    tema: dados.tema,
-                    horario: `${dados.horario}:00`,
-                    local: dados.local,
-                    anfitriao: dados.anfitriao,
-                    preletor: dados.preletor,
-                    supervisao: dados.supervisao === "sim",
-                    conversoes: dados.conversoes === "sim",
-                    observacoes: dados.observacoes,
-                    atualizado_em: new Date().toISOString(),
-                    atualizado_por: loggedUser?.email || "UNKNOWN"
-                };
+            await salvarEncontroComFrequencias({
+                celulaId,
+                editandoId: encontroEditando?.id ?? null,
+                dados,
+                frequencias,
+            });
 
-                await updateEncontro(encontroEditando.id, dadosParaAtualizar);
-                enqueueSnackbar("Encontro atualizado com sucesso!", { variant: "success", autoHideDuration: 2000 });
-            } else {
-                const dadosParaSalvar: Encontro = {
-                    celula_id: String(celulaId),
-                    data: dados.data,
-                    tema: dados.tema,
-                    horario: `${dados.horario}:00`,
-                    local: dados.local,
-                    anfitriao: dados.anfitriao,
-                    preletor: dados.preletor,
-                    supervisao: dados.supervisao === "sim",
-                    conversoes: dados.conversoes === "sim",
-                    observacoes: dados.observacoes,
-                    criado_em: new Date().toISOString(),
-                    criado_por: loggedUser?.email || "UNKNOWN"
-                };
-
-                await createEncontro(dadosParaSalvar);
-                enqueueSnackbar("Encontro registrado com sucesso!", { variant: "success", autoHideDuration: 2000 });
-            }
+            enqueueSnackbar(
+                encontroEditando?.id
+                    ? "Encontro e frequência atualizados com sucesso!"
+                    : "Encontro e frequência registrados com sucesso!",
+                { variant: "success", autoHideDuration: 2000 }
+            );
 
             setModalAberto(false);
             setEncontroEditando(null);
             await refetch();
-        } catch (error: any) {
-            throw new Error(error?.message || "Erro ao salvar encontro.");
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error ? error.message : "Erro ao salvar encontro.";
+            throw new Error(message);
         }
     };
 
@@ -161,6 +145,8 @@ export default function Encontros() {
                         open={modalAberto}
                         onClose={handleFecharModal}
                         onSave={handleSalvarEncontro}
+                        celulaId={celulaId ?? null}
+                        frequenciasExistentes={encontroEditando?.frequencia}
                         dadosIniciais={encontroEditando ? {
                             celula_id: encontroEditando.celula_id,
                             tema: encontroEditando.tema,
