@@ -1,0 +1,98 @@
+---
+description: Regras para código na camada de application (services, use cases, DTOs, mappers)
+globs: src/modules/*/application/**
+---
+
+# Regras do Application
+
+## Restrições absolutas
+
+- **Nenhum import** de React ou Next.js.
+- **Pode** importar repositórios concretos de `../infra/` da mesma feature (concessão arquitetural do projeto).
+- A orquestração do caso de uso fica aqui, **não** em `app/actions/` nem em `ui/`.
+
+## Convenções de código
+
+### Services (Use Cases)
+
+- Use **classes** com o sufixo `Service` (`MembroService`, `EncontroService`).
+- Receba repositórios via **constructor injection** (`constructor(private readonly repo: XRepository)`).
+- Use `private readonly` nos parâmetros do constructor.
+- Métodos devem ter nomes de domínio (`list`, `get`, `create`, `update`, `delete`), não nomes técnicos.
+
+### DTOs
+
+- Agrupe em um arquivo `dtos.ts` por feature.
+- Use o sufixo `Dto` (`MembroListItemDto`, `CreateMembroDto`, `UpdateMembroDto`).
+- DTOs são **interfaces** (não classes).
+- DTOs de saída representam o que a UI precisa. DTOs de entrada representam o que a action recebe.
+
+### Mappers
+
+- Quando a conversão entidade → DTO for necessária, crie funções em `mapper.ts`.
+- Funções de mapeamento são **puras** (sem side effects): `toListItemDto(membro: Membro): MembroListItemDto`.
+
+### Nomenclatura de arquivos
+
+- Services: `<entidade>.service.ts` (`membro.service.ts`, `encontro.service.ts`).
+- DTOs: `dtos.ts`.
+- Mappers: `mapper.ts`.
+
+### Exports
+
+- Sempre **named exports**.
+- Use `export type` para re-exports de tipos.
+
+## Template: Service
+
+```typescript
+// src/modules/<feature>/application/<entidade>.service.ts
+
+import { XRepository } from "../infra/x.repository";
+import type { Entidade } from "../domain/entidade";
+import type { CreateEntidadeDto, EntidadeListItemDto } from "./dtos";
+import { toListItemDto } from "./mapper";
+
+export class EntidadeService {
+    constructor(private readonly repo: XRepository) {}
+
+    async list(): Promise<EntidadeListItemDto[]> {
+        const items = await this.repo.findAll();
+        return items.map(toListItemDto);
+    }
+
+    async get(id: number): Promise<Entidade> {
+        return this.repo.findById(id);
+    }
+
+    async create(dto: CreateEntidadeDto, userId: string): Promise<Entidade> {
+        return this.repo.save({ ...dto, criadoPor: userId });
+    }
+
+    async delete(id: number): Promise<void> {
+        await this.repo.delete(id);
+    }
+}
+```
+
+## Template: DTOs
+
+```typescript
+// src/modules/<feature>/application/dtos.ts
+
+export interface EntidadeListItemDto {
+    id: number;
+    nome: string;
+    ativo: boolean;
+}
+
+export interface CreateEntidadeDto {
+    nome: string;
+    dataNascimento?: Date | null;
+}
+
+export interface UpdateEntidadeDto {
+    nome?: string;
+    ativo?: boolean;
+}
+```

@@ -1,0 +1,77 @@
+---
+description: Regras para componentes React, hooks e estado da camada de apresentação
+globs: src/ui/**,src/app/(private)/**/components/**,src/app/(private)/**/hooks/**,src/app/(public)/**/components/**
+---
+
+# Regras da Camada de Apresentação (UI)
+
+## Restrições absolutas
+
+- **Nenhuma regra de negócio** em componentes, hooks ou stores.
+- **Nunca** instancie repositories ou services diretamente — chame **Server Actions**.
+- **Nunca** importe de `@/modules/*/infra/` — essa camada não existe para a UI.
+- Imports de `@/modules/*/domain/` são permitidos **apenas para tipos** (`import type`).
+
+## Convenções de código
+
+### Componentes
+
+- Arquivos de componente: **PascalCase** (`ErrorBox.tsx`, `PrivateShell.tsx`, `PageContainer.tsx`).
+- Use `export function NomeComponente()` (named export, não default).
+- Props: declare com `type Props = { ... }` ou inline quando simples.
+- Prefira `React.ReactNode` ao invés de `JSX.Element` para tipagem de children.
+
+### Hooks
+
+- Hooks compartilhados ficam em `src/ui/hooks/`.
+- Hooks específicos de uma feature ficam co-localizados: `src/app/(private)/<feature>/hooks/`.
+- Prefixo `use` obrigatório (`useMembros`, `useEncontros`).
+- Hooks devem:
+  - Chamar Server Actions (de `@/app/actions/...`).
+  - Gerenciar `loading`, `erro`, `data` como estado local.
+  - Retornar um objeto com estado e funções de ação.
+
+### Tratamento de erros na UI
+
+- Ao chamar uma Server Action, envolva em `try/catch`:
+
+```typescript
+try {
+    const data = await listMembros();
+    setMembros(data);
+} catch (error) {
+    setErro(error instanceof Error ? error.message : "Erro ao carregar membros");
+}
+```
+
+- Use `<LoadingBox />` para estados de loading.
+- Use `<ErrorBox message={erro} />` para estados de erro.
+- Ambos ficam em `@/ui/components/feedback/`.
+
+### Client vs Server Components
+
+- Adicione `"use client"` **somente** quando o componente usa hooks, estado, event handlers ou browser APIs.
+- Layouts e páginas que apenas compõem outros componentes devem ser **Server Components**.
+- Componentes de feedback puro (sem estado) não precisam de `"use client"` — herdam do pai.
+
+### Stores (Redux / Zustand)
+
+- Local: `src/ui/stores/`.
+- Stores gerenciam estado de UI (sidebar aberta, usuário logado, tema).
+- **Nunca** substituem Use Cases ou Server Actions para lógica de negócio.
+
+### Imports
+
+- Use `@/` para imports cross-root (`@/ui/components/...`, `@/app/actions/...`).
+- Use `./` para imports dentro da mesma feature/pasta (`./components/Lista`, `./hooks/useMembros`).
+- Use `import type` quando o import é apenas para tipagem.
+
+## Componentes reutilizáveis disponíveis
+
+| Componente | Local | Uso |
+|-----------|-------|-----|
+| `LoadingBox` | `@/ui/components/feedback/LoadingBox` | Estado de carregamento |
+| `ErrorBox` | `@/ui/components/feedback/ErrorBox` | Exibição de erros |
+| `ErrorBoundary` | `@/ui/components/feedback/ErrorBoundary` | Captura de erros React |
+| `PageContainer` | `@/ui/components/pages/PageContainer` | Wrapper de página com título e proteção de rota |
+| `ProtectedRoute` | `@/ui/components/auth/ProtectedRoute` | Controle de acesso por perfil |

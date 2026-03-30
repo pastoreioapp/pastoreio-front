@@ -1,0 +1,143 @@
+---
+description: Regras para código na camada de infra (repositórios Supabase, mappers de persistência, tipos auxiliares)
+globs: src/modules/*/infra/**
+---
+
+# Regras do Infra
+
+## Responsabilidades
+
+- Acesso a banco (Supabase).
+- Integrações externas.
+- Mapeamento entre rows do banco (snake_case) e entidades de domínio (camelCase).
+
+## Convenções de código
+
+### Repositórios
+
+- Use **classes** com o sufixo `Repository` (`MembroRepository`, `EncontroRepository`).
+- Receba `SupabaseClient` via **constructor injection** (`constructor(private readonly supabase: SupabaseClient)`).
+- Declare o nome da tabela como **constante** no topo do arquivo: `const TABLE = "membros";`.
+- Métodos padrão: `findAll()`, `findById(id)`, `save(data)`, `update(id, data)`, `delete(id)`.
+
+### Tipos auxiliares de persistência
+
+- Tipos que representam rows do banco (`XRow`), payloads de insert/update (`XPayload`) e records de queries com joins (`XRecord`) ficam em arquivos dedicados quando há volume: `<entidade>.types.ts`.
+- Para repositórios simples, tipos inline no próprio arquivo do repository são aceitáveis.
+
+### Mappers de persistência
+
+- Funções de mapeamento row ↔ entidade ficam em `mapper.ts` ou `<entidade>.mapper.ts`.
+- Mappers de infra convertem **snake_case do banco** para **camelCase do domínio** e vice-versa.
+- Mappers são funções puras (sem side effects).
+
+### Tratamento de erros
+
+- Use o padrão `if (error) throw new Error(error.message)` após queries Supabase.
+- **Sempre** destruture `{ data, error }` do resultado do Supabase.
+- **Não** use `console.error` nos repositories — deixe o erro subir para quem chamou.
+- Para erros de "dado não encontrado", lance `new Error("Mensagem descritiva em português")`.
+
+### Nomenclatura de arquivos
+
+- Repositórios: `<entidade>.repository.ts` (`membro.repository.ts`).
+- Mappers: `mapper.ts` ou `<entidade>.mapper.ts`.
+- Tipos: `<entidade>.types.ts`.
+- Tudo em **kebab-case**.
+
+### Imports
+
+- Supabase: `import type { SupabaseClient } from "@supabase/supabase-js"`.
+- Domínio: imports relativos (`../domain/...`).
+- Shared: `@/shared/supabase/...` (apenas se precisar criar client aqui, o que é raro — normalmente o client vem injetado).
+
+## Template: Repository
+
+```typescript
+// src/modules/<feature>/infra/<entidade>.repository.ts
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Entidade } from "../domain/entidade";
+
+const TABLE = "entidades";
+
+export class EntidadeRepository {
+    constructor(private readonly supabase: SupabaseClient) {}
+
+    async findAll(): Promise<Entidade[]> {
+        const { data, error } = await this.supabase
+            .from(TABLE)
+            .select("*")
+            .eq("deletado", false)
+            .order("criado_em", { ascending: false });
+
+        if (error) throw new Error(error.message);
+        return (data ?? []).map(rowToEntidade);
+    }
+
+    async findById(id: number): Promise<Entidade> {
+        const { data, error } = await this.supabase
+            .from(TABLE)
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error(`Entidade com id ${id} não encontrada`);
+        return rowToEntidade(data);
+    }
+
+    async save(payload: Record<string, unknown>): Promise<Entidade> {
+        const { data, error } = await this.supabase
+            .from(TABLE)
+            .insert(payload)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return rowToEntidade(data);
+    }
+
+    async delete(id: number): Promise<void> {
+        const { error } = await this.supabase
+            .from(TABLE)
+            .update({ deletado: true })
+            .eq("id", id);
+
+        if (error) throw new Error(error.message);
+    }
+}
+
+function rowToEntidade(row: Record<string, unknown>): Entidade {
+    return {
+        id: Number(row.id),
+        nome: String(row.nome),
+        ativo: Boolean(row.ativo),
+        criadoEm: new Date(row.criado_em as string),
+        // ... demais campos com mapeamento snake_case → camelCase
+    };
+}
+```
+
+## Padrões Supabase do projeto
+
+### Client server-side (Server Actions, API Routes)
+
+```typescript
+import { createClient } from "@/shared/supabase/server";
+const supabase = await createClient(); // async — usa cookies()
+```
+
+### Client browser-side (hooks, providers)
+
+```typescript
+import { createClient } from "@/shared/supabase/client";
+const supabase = createClient(); // sync — singleton interno
+```
+
+### Regras
+
+- **Server Actions e repositories** sempre usam o client de `server.ts`.
+- **Hooks e providers React** sempre usam o client de `client.ts`.
+- **Nunca** crie o client no escopo do módulo (fora de funções/hooks) — risco de execução durante SSR.
+- O client do servidor é `async` (precisa de `await`). O client do browser é síncrono.

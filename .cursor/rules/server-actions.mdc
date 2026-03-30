@@ -1,0 +1,99 @@
+---
+description: Regras para Server Actions (adapters entre UI e backend)
+globs: src/app/actions/**
+---
+
+# Regras de Server Actions
+
+## Restrições absolutas
+
+- **Nenhuma regra de negócio** aqui. Actions são adapters finos.
+- Sempre chame um **Service** (use case) — nunca acesse repositórios ou Supabase diretamente.
+- Toda action deve começar com `"use server";` na primeira linha do arquivo.
+
+## Estrutura padrão
+
+Cada feature tem uma pasta com um `index.ts` que exporta todas as actions daquela feature.
+
+```
+src/app/actions/
+├── membros/
+│   └── index.ts
+├── encontros/
+│   └── index.ts
+└── celulas/
+    └── index.ts
+```
+
+## Convenções de código
+
+### Factory do Service
+
+- Crie uma função **privada** `async function getXService()` que:
+  1. Cria o client Supabase server-side: `const supabase = await createClient()`
+  2. Instancia o repository: `new XRepository(supabase)`
+  3. Retorna o service: `new XService(repo)`
+
+### Funções exportadas
+
+- Use `export async function` (não arrow functions).
+- Nomes em camelCase com verbo + entidade (`listMembros`, `createMembro`, `deleteMembro`).
+- Tipar o retorno explicitamente (`Promise<Membro[]>`, `Promise<MembroListItemDto>`).
+
+### Auditoria (criado_por / atualizado_por)
+
+- Quando necessário, crie um helper `getAuditUserId()` que obtém o `user.id` via `supabase.auth.getUser()`.
+- Passe o userId como parâmetro para o service, **não** acesse auth dentro do service.
+
+### Tratamento de erros
+
+- **Não** adicione try/catch nas actions — deixe os erros do service/repository propagarem naturalmente.
+- O Next.js trata a serialização de erros para o client.
+- A UI é responsável por capturar erros via try/catch ao chamar a action.
+
+### Imports
+
+- Use **sempre** o alias `@/` para imports:
+  - `@/modules/<feature>/application/<service>`
+  - `@/modules/<feature>/infra/<repository>`
+  - `@/shared/supabase/server`
+- **Nunca** use imports relativos em actions.
+
+## Template: Server Action
+
+```typescript
+// src/app/actions/<feature>/index.ts
+"use server";
+
+import type { Entidade } from "@/modules/<feature>/domain/entidade";
+import { EntidadeService } from "@/modules/<feature>/application/entidade.service";
+import { EntidadeRepository } from "@/modules/<feature>/infra/entidade.repository";
+import { createClient } from "@/shared/supabase/server";
+
+async function getService(): Promise<EntidadeService> {
+    const supabase = await createClient();
+    const repo = new EntidadeRepository(supabase);
+    return new EntidadeService(repo);
+}
+
+async function getAuditUserId(): Promise<string> {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    return data.user?.id ?? "";
+}
+
+export async function listEntidades(): Promise<Entidade[]> {
+    const service = await getService();
+    return service.list();
+}
+
+export async function createEntidade(dto: CreateEntidadeDto): Promise<Entidade> {
+    const [service, userId] = await Promise.all([getService(), getAuditUserId()]);
+    return service.create(dto, userId);
+}
+
+export async function deleteEntidade(id: number): Promise<void> {
+    const service = await getService();
+    return service.delete(id);
+}
+```

@@ -264,21 +264,220 @@ Infra → Domain (quando necessário)
 
 ---
 
-## 8. Diretrizes para IA (Cursor / LLM)
+## 8. Convenções de Nomenclatura
 
-Ao criar ou modificar código, a IA **deve**:
+### 8.1 Arquivos
 
-1. Respeitar esta estrutura
-2. Criar Use Cases antes de criar UI
-3. Nunca colocar regra de negócio em `app/` ou `ui/`
-4. Reutilizar Use Cases entre Server Actions e APIs
-5. Preferir simplicidade para um time misto de juniores e sêniors
-6. Usar interfaces apenas quando houver benefício claro de desacoplamento, teste ou múltiplas implementações
-7. Perguntar antes de violar qualquer regra aqui definida
+| Camada | Padrão | Exemplos |
+|--------|--------|----------|
+| Domain (entidades) | `<entidade>.ts` (kebab-case) | `membro.ts`, `papel-celula.ts`, `membro-celula.ts` |
+| Domain (tipos gerais) | `types.ts` | `types.ts` |
+| Application (services) | `<entidade>.service.ts` | `membro.service.ts`, `encontro.service.ts` |
+| Application (DTOs) | `dtos.ts` | `dtos.ts` |
+| Application (mappers) | `mapper.ts` | `mapper.ts` |
+| Infra (repositórios) | `<entidade>.repository.ts` | `membro.repository.ts`, `user-profile.repository.ts` |
+| Infra (tipos) | `<entidade>.types.ts` | `usuario.types.ts` |
+| Infra (mappers) | `mapper.ts` ou `<entidade>.mapper.ts` | `mapper.ts`, `membros-celula.mapper.ts` |
+| Server Actions | `index.ts` dentro de pasta da feature | `actions/membros/index.ts` |
+| Componentes React | **PascalCase** `.tsx` | `ErrorBox.tsx`, `PrivateShell.tsx` |
+| Hooks | **camelCase** com prefixo `use` | `useMembros.ts`, `useEncontros.ts` |
+
+### 8.2 Classes e Tipos
+
+| Artefato | Padrão | Exemplos |
+|----------|--------|----------|
+| Entidades | `interface` PascalCase | `Membro`, `Encontro`, `Celula` |
+| Enums | `enum` PascalCase | `PapelCelula`, `Perfil` |
+| Services | `class` PascalCase + `Service` | `MembroService`, `EncontroService` |
+| Repositories | `class` PascalCase + `Repository` | `MembroRepository`, `EncontroRepository` |
+| DTOs | `interface` PascalCase + `Dto` | `MembroListItemDto`, `CreateMembroDto` |
+| Props React | `type Props` (local) | `type Props = { title: string }` |
+
+### 8.3 Propriedades
+
+| Local | Convenção | Exemplo |
+|-------|-----------|---------|
+| Domínio e DTOs | **camelCase** em português | `criadoEm`, `dataNascimento`, `celulaId` |
+| Banco (Supabase rows) | **snake_case** | `criado_em`, `data_nascimento`, `celula_id` |
+| Rotas públicas | **kebab-case** em português | `/membros`, `/esqueci-senha`, `/redefinir-senha` |
+
+A conversão entre snake_case (banco) e camelCase (domínio) é responsabilidade exclusiva dos **mappers em `infra/`**.
+
+### 8.4 Imports
+
+| Contexto | Estilo | Exemplo |
+|----------|--------|---------|
+| Dentro da mesma feature | **Relativo** | `../domain/membro`, `./dtos` |
+| Cross-module / shared | **Alias `@/`** | `@/modules/celulas/domain/papel-celula` |
+| Server Actions | **Sempre `@/`** | `@/modules/secretaria/application/membro.service` |
+| Apenas tipos | **`import type`** | `import type { SupabaseClient } from "@supabase/supabase-js"` |
+
+### 8.5 Exports
+
+* Sempre **named exports** (nunca `export default`, exceto onde Next.js exige em `page.tsx` / `layout.tsx`).
 
 ---
 
-## 10. Regra Final
+## 9. Padrões de Tratamento de Erros
+
+### 9.1 Repositórios (Infra)
+
+* Sempre destruture `{ data, error }` do resultado do Supabase.
+* Lance `new Error(error.message)` se `error` existir.
+* Para dados não encontrados, lance `new Error("Mensagem descritiva em português")`.
+* **Não** use `console.error` — deixe o erro subir para quem chamou.
+
+```typescript
+const { data, error } = await this.supabase.from(TABLE).select("*");
+if (error) throw new Error(error.message);
+```
+
+### 9.2 Services (Application)
+
+* Podem lançar exceções de validação com `new Error("Mensagem descritiva")`.
+* Não capturam erros dos repositórios — deixam propagar.
+
+### 9.3 Server Actions
+
+* **Não** adicionam try/catch — erros do service/repository propagam naturalmente via Next.js.
+
+### 9.4 UI (Hooks e Componentes)
+
+* Hooks envolvem chamadas a Server Actions em `try/catch`.
+* Usam narrowing com `error instanceof Error ? error.message : "Mensagem padrão"`.
+* Armazenam erro em estado local (`setErro`).
+
+```typescript
+try {
+    const data = await listMembros();
+    setMembros(data);
+} catch (error) {
+    setErro(error instanceof Error ? error.message : "Erro ao carregar membros");
+}
+```
+
+---
+
+## 10. Padrões Supabase
+
+### 10.1 Criação de Client
+
+| Contexto | Import | Chamada |
+|----------|--------|---------|
+| Server (Actions, API Routes) | `@/shared/supabase/server` | `const supabase = await createClient()` (async) |
+| Client (Hooks, Providers) | `@/shared/supabase/client` | `const supabase = createClient()` (sync, singleton) |
+
+**Regras:**
+
+* **Nunca** crie o client no escopo do módulo (fora de funções/hooks) — risco de execução durante SSR.
+* O client do servidor precisa de `await` (usa `cookies()`). O client do browser é síncrono.
+* Repositories recebem `SupabaseClient` via constructor — **não** criam o client internamente.
+
+### 10.2 Queries
+
+* Declare o nome da tabela como constante: `const TABLE = "membros"`.
+* Use `.maybeSingle()` quando um resultado pode não existir.
+* Use `.single()` quando o resultado **deve** existir (insert/update com `.select()`).
+* Aplique `soft delete` com `.eq("deletado", false)` nas listagens.
+
+### 10.3 Autenticação
+
+* Use `supabase.auth.getUser()` (validação server-side) — **nunca** `getSession()` (pode ser spoofada via localStorage).
+* Para auditoria (`criado_por`, `atualizado_por`), obtenha o `user.id` na Server Action e passe como parâmetro ao service.
+
+---
+
+## 11. Testes
+
+### 11.1 Organização
+
+* Testes ficam co-localizados com o código que testam, na pasta `__tests__/` do mesmo nível.
+* Nomeie arquivos de teste: `<arquivo-original>.test.ts`.
+
+```text
+modules/secretaria/
+├── application/
+│   ├── membro.service.ts
+│   └── __tests__/
+│       └── membro.service.test.ts
+├── domain/
+│   ├── membro.ts
+│   └── __tests__/
+│       └── membro.test.ts
+└── infra/
+```
+
+### 11.2 Princípios
+
+* Código em `modules/*/domain/` e `modules/*/application/` deve ser **100% testável sem framework** (sem React, sem Next, sem Supabase real).
+* Para testar services: crie mocks manuais dos repositories (objetos com os mesmos métodos).
+* Para testar domínio: testes unitários puros, sem dependências externas.
+* Repositories (infra) são testados com testes de integração quando necessário.
+
+### 11.3 Padrão de teste de Service
+
+```typescript
+import { MembroService } from "../membro.service";
+
+const mockRepo = {
+    findAll: vi.fn(),
+    findById: vi.fn(),
+    save: vi.fn(),
+    delete: vi.fn(),
+};
+
+describe("MembroService", () => {
+    const service = new MembroService(mockRepo as any);
+
+    it("deve listar membros", async () => {
+        mockRepo.findAll.mockResolvedValue([{ id: 1, nome: "João" }]);
+        const result = await service.list();
+        expect(result).toHaveLength(1);
+        expect(mockRepo.findAll).toHaveBeenCalled();
+    });
+});
+```
+
+---
+
+## 12. Diretrizes para IA (Cursor / LLM)
+
+Ao criar ou modificar código, a IA **deve** seguir esta checklist:
+
+### Antes de gerar código
+
+- [ ] Identificar em qual camada o código deve ficar (`domain`, `application`, `infra`, `app/actions`, `ui`)
+- [ ] Verificar se já existe um módulo para a feature ou se é necessário criar um novo
+- [ ] Verificar se já existe um service/repository que pode ser reutilizado
+
+### Ao gerar código
+
+- [ ] Criar na ordem: Domain → Application (Service + DTOs) → Infra (Repository) → Server Action → UI
+- [ ] Seguir as convenções de nomenclatura da seção 8
+- [ ] Seguir o padrão de tratamento de erros da seção 9
+- [ ] Seguir os padrões Supabase da seção 10
+
+### Checklist de verificação pós-geração
+
+- [ ] O arquivo está na pasta correta segundo a estrutura da seção 2?
+- [ ] Nenhum import de React/Next/Supabase existe em `modules/*/domain/`?
+- [ ] Nenhum import de React/Next existe em `modules/*/application/`?
+- [ ] A Server Action **apenas** instancia e chama um Service?
+- [ ] A UI **não** instancia repositories ou services diretamente?
+- [ ] Propriedades de domínio estão em camelCase (não snake_case)?
+- [ ] Exports são **named** (não default, exceto `page.tsx`/`layout.tsx`)?
+- [ ] Imports cross-module usam `@/` e imports locais usam `./`?
+
+### Regras gerais
+
+1. Preferir simplicidade para um time misto de juniores e seniores
+2. Usar interfaces apenas quando houver benefício claro de desacoplamento
+3. Reutilizar Use Cases (Services) entre Server Actions e API Routes
+4. Perguntar antes de violar qualquer regra aqui definida
+
+---
+
+## 13. Regra Final
 
 > Se amanhã Next.js for removido,
 > o domínio deve continuar funcionando sem alterações.
