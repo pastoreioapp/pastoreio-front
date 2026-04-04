@@ -11,6 +11,15 @@ export function useEncontrosSelecionados(celulaId?: number | null) {
         setEncontrosSelecionado(null);
     }, [celulaId]);
 
+    /* Atualiza o estado da seleção quando a lista de encontros é atualizada */
+    useEffect(() => {
+        setEncontrosSelecionado((prev) => {
+            if (prev == null) return null;
+            const atualizado = encontros.find((e) => e.id === prev.id);
+            return atualizado ?? null;
+        });
+    }, [encontros]);
+
     function toggleEncontrosSelecionado(encontro: Encontro) {
         setEncontrosSelecionado((prev) =>
             prev?.id === encontro.id ? null : encontro
