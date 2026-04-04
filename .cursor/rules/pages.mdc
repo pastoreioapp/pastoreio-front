@@ -1,0 +1,80 @@
+---
+description: Regras para páginas e layouts do Next.js App Router
+globs: src/app/**/page.tsx,src/app/**/layout.tsx
+---
+
+# Regras de Páginas e Layouts (Next.js App Router)
+
+## Função das páginas
+
+Páginas são **adapters** do Next.js. Elas:
+- Compõem componentes de UI.
+- Delegam interatividade e carregamento de dados a componentes client e hooks quando necessário.
+- Não instanciam services, repositories ou clients de infraestrutura.
+- **Não** contêm regra de negócio.
+
+## Convenções
+
+### Server Components por padrão
+
+- Páginas e layouts devem ser **Server Components** sempre que possível.
+- Adicione `"use client"` somente se a página usa hooks, estado ou event handlers diretamente.
+- Prefira extrair a parte interativa para um componente client e manter a página server.
+
+### Metadata (SEO)
+
+- Em páginas Server Component, exporte `metadata` ou `generateMetadata` para título e descrição:
+
+```typescript
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Membros | Pastoreio",
+    description: "Gestão de membros da célula",
+};
+```
+
+- Em páginas Client Component, o `PageContainer` atualiza `document.title` automaticamente.
+
+### Estrutura de rotas
+
+```
+src/app/
+├── (private)/          # Rotas que exigem autenticação
+│   ├── dashboard/
+│   ├── membros/
+│   ├── encontros/
+│   └── ...
+├── (public)/           # Rotas públicas (login, cadastro)
+│   ├── login/
+│   ├── cadastro/
+│   └── ...
+├── actions/            # Server Actions
+├── api/                # API Routes
+└── layout.tsx          # Root layout (Server Component)
+```
+
+### Nomes de rotas
+
+- Use **kebab-case em português** para rotas: `/membros`, `/encontros`, `/esqueci-senha`, `/redefinir-senha`.
+- Pastas de componentes co-localizados dentro de rotas: `components/`, `hooks/`, `lib/`.
+
+### Padrão de página com dados
+
+```typescript
+import type { Metadata } from "next";
+import { MinhaFeatureScreen } from "./components/MinhaFeatureScreen";
+
+export const metadata: Metadata = {
+    title: "Minha Feature | Pastoreio",
+    description: "Descrição da minha feature",
+};
+
+export default function MinhaFeaturePage() {
+    return (
+        <MinhaFeatureScreen />
+    );
+}
+```
+
+- Quando a tela precisa de hooks, estado ou event handlers, prefira extrair uma `Screen` client em `components/` e manter `page.tsx` como Server Component.

@@ -1,0 +1,78 @@
+---
+description: Regras para código na camada de domínio (entidades, value objects, enums)
+globs: src/modules/*/domain/**
+---
+
+# Regras do Domain
+
+## Restrições absolutas
+
+- **Nenhum import** de React, Next.js, Supabase, ou qualquer framework/lib de infraestrutura.
+- **Nenhum acesso** a banco, HTTP, filesystem ou variáveis de ambiente.
+- O domínio deve compilar e rodar em qualquer runtime JS/TS puro.
+
+## Convenções de código
+
+### Entidades e tipos
+
+- Use `interface` para entidades e value objects.
+- Use `enum` para vocabulários fechados (papéis, perfis, status).
+- Propriedades devem usar **camelCase em português** (`criadoEm`, `celulaId`, `dataNascimento`).
+- **Nunca** use snake_case nas propriedades de domínio — o mapeamento de/para o banco é responsabilidade da camada `infra`.
+
+### Helpers de domínio
+
+- Funções de parsing/validação de enums ficam junto ao enum (`isPapelCelula`, `parsePapelCelula`).
+- Constantes derivadas de enums (arrays de valores válidos) ficam no mesmo arquivo.
+
+### Nomenclatura de arquivos
+
+- Arquivos: **kebab-case** com nome da entidade (`membro.ts`, `papel-celula.ts`, `membro-celula.ts`).
+- Quando um módulo tem poucos tipos, agrupe em `types.ts`.
+
+### Exports
+
+- Sempre **named exports** (nunca `export default`).
+- Use `export type` ou `export interface` — não exporte tipos dentro de `export { }`.
+
+### Imports entre domínios
+
+- Domínios de módulos diferentes **podem** se referenciar quando necessário (ex.: `controleacesso` importando `PapelCelula` de `celulas`).
+- Use **`import type`** quando o import é apenas para tipagem.
+- Use sempre o alias `@/modules/...` para imports cross-module.
+
+## Template: Entidade de domínio
+
+```typescript
+// src/modules/<feature>/domain/<entidade>.ts
+
+export interface Membro {
+    id: number;
+    userId: string;
+    dataNascimento: Date | null;
+    ativo: boolean;
+    criadoEm: Date;
+    criadoPor: string;
+    atualizadoEm: Date;
+    atualizadoPor: string;
+    deletado: boolean;
+}
+```
+
+## Template: Enum de domínio
+
+```typescript
+// src/modules/<feature>/domain/<enum>.ts
+
+export enum PapelCelula {
+    LIDER = "LIDER",
+    COLIDER = "COLIDER",
+    MEMBRO = "MEMBRO",
+}
+
+export const PAPEIS_CELULA = Object.values(PapelCelula);
+
+export function isPapelCelula(value: unknown): value is PapelCelula {
+    return typeof value === "string" && PAPEIS_CELULA.includes(value as PapelCelula);
+}
+```
