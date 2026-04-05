@@ -2,9 +2,10 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
 import { EtapaCard } from "./etapaCard";
-import { listaTrajetoria } from "./listaTrajetoria";
-import { IconInfoCircle, IconInfoCircleFilled, IconInfoOctagon } from "@tabler/icons-react";
-import { IconChartBar } from "@tabler/icons-react";
+import { useTrajetoriaMembro } from "../../hooks/useTrajetoriaMembro";
+import { IconInfoCircleFilled } from "@tabler/icons-react";
+import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
+import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 
 const STYLE_TAB = {
     fontSize: { xs: "14px", md: "16px" },
@@ -18,8 +19,9 @@ const STYLE_TAB = {
     },
 };
 
-export function EtapasTabs() {
+export function EtapasTabs({ membroId }: { membroId: number }) {
     const [tab, setTab] = useState("1");
+    const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
 
     return (
         <Box
@@ -59,28 +61,31 @@ export function EtapasTabs() {
                         paddingTop: 4,
                     }}
                 >
-                    <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
-                        <EtapaCard
-                            etapa={1}
-                            titulo="Pastoreio 1"
-                            itens={listaTrajetoria.pastoreio1}
-                        />
-                        <EtapaCard
-                            etapa={2}
-                            titulo="Pastoreio 2"
-                            itens={listaTrajetoria.pastoreio2}
-                        />
-                        <EtapaCard
-                            etapa={3}
-                            titulo="Discipulado"
-                            itens={listaTrajetoria.discipulado}
-                        />
-                        <EtapaCard
-                            etapa={4}
-                            titulo="Líder de Célula"
-                            itens={listaTrajetoria.lider}
-                        />
-                    </Box>
+                    {loading && <LoadingBox />}
+                    {erro && <ErrorBox message={erro} />}
+                    {!loading && !erro && trajetoria && (
+                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                            {trajetoria.grupos.map((grupo) => (
+                                <EtapaCard
+                                    key={grupo.id}
+                                    etapa={grupo.ordem}
+                                    titulo={grupo.nome}
+                                    itens={grupo.passos.map((p) => ({
+                                        label: p.nome,
+                                        concluido: p.concluido,
+                                    }))}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                    {!loading && !erro && !trajetoria && (
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhuma trajetória ativa encontrada.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
                 <TabPanel value="2">
                     <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">

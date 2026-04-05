@@ -181,7 +181,7 @@ export function Informacao({
                 </Box>
             </Box>
 
-            <EtapasTabs />
+            <EtapasTabs membroId={data.id} />
         </Box>
     );
 }
