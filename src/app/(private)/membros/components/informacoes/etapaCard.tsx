@@ -1,4 +1,4 @@
-import { CheckCircleOutline } from "@mui/icons-material";
+import { CheckCircle, CheckCircleOutline } from "@mui/icons-material";
 import { Avatar, Box, Checkbox, Paper, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -9,10 +9,10 @@ export function EtapaCard({
 }: {
     etapa: number;
     titulo: string;
-    itens: { label: string }[];
+    itens: { label: string; concluido: boolean }[];
 }) {
     const theme = useTheme();
-    const isConcluida = itens.every((item) => false);
+    const isConcluida = itens.length > 0 && itens.every((item) => item.concluido);
 
     return (
         <Paper
@@ -57,7 +57,7 @@ export function EtapaCard({
                 {itens.map((item, i) => (
                     <Box key={i} display="flex" alignItems="center">
                         <Checkbox
-                            checked={false}
+                            checked={item.concluido}
                             disabled
                             icon={
                                 <Box
@@ -70,9 +70,9 @@ export function EtapaCard({
                                 />
                             }
                             checkedIcon={
-                                <CheckCircleOutline
+                                <CheckCircle
                                     sx={{
-                                        fontSize: "1.125rem",
+                                        fontSize: "1.3rem",
                                         color: theme.palette.success.main,
                                     }}
                                 />
