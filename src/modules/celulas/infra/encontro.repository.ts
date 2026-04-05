@@ -48,9 +48,10 @@ export class EncontroRepository {
   }
 
   async create(dados: Encontro): Promise<Encontro> {
+    const { frequencia: _, ...row } = dados;
     const { data, error } = await this.supabase
       .from(TABLE)
-      .insert([dados])
+      .insert([row])
       .select()
       .single();
     
@@ -67,9 +68,10 @@ export class EncontroRepository {
   }
 
   async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
+    const { frequencia: _, ...row } = dados;
     const { data, error } = await this.supabase
       .from(TABLE)
-      .update(dados)
+      .update(row)
       .eq("id", id)
       .select()
       .single();
