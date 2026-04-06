@@ -1,5 +1,5 @@
 import type { Encontro } from "@/modules/celulas/domain/encontro";
-import { Box, Divider, ListItemButton, Typography } from "@mui/material";
+import { Box, ListItemButton, Typography } from "@mui/material";
 
 export function EncontroListItem({
     encontro,
@@ -24,37 +24,32 @@ export function EncontroListItem({
             selected={selected}
             sx={{
                 border: "1px solid #ECECEC",
-                bgcolor: selected ? "#DCE8E7" : "#fff",
+                bgcolor: selected ? "rgba(94, 121, 179, 0.1)" : "#fff",
                 borderRadius: "7px",
-                mb: "15px",
-                py: "15px",
-                px: "15.32px",
-                gap: "17px",
+                mb: 1.5,
+                py: 1.5,
+                px: 2,
+                gap: 2,
                 width: "100%",
                 maxWidth: { xs: "100%", md: "330px" },
-                height: "100px",
                 transition: "background-color 0.2s ease-in-out",
                 "&:hover": {
-                    backgroundColor: "#DCE8E7",
+                    backgroundColor: "rgba(94, 121, 179, 0.06)",
                 },
                 "&.Mui-selected": {
-                    bgcolor: "#DCE8E7",
+                    bgcolor: "rgba(94, 121, 179, 0.1)",
                     "&:hover": {
-                        bgcolor: "#DCE8E7",
+                        bgcolor: "rgba(94, 121, 179, 0.1)",
                     },
                 },
             }}
         >
             <Box flex={1}>
-                <Typography fontSize={16} sx={{ mb: 1}}>Tema: {encontro.tema}</Typography>
-                <Divider 
-                    sx={{ borderColor: "#C5C5C5", mt: "2px", mb: "4px" }}
-                />
-                <Box sx={{ display: "flex", justifyContent: "space-between" }} >
+                <Typography fontSize={16} sx={{ mb: 1 }}>Tema: {encontro.tema}</Typography>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box
                         sx={{
-                            bgcolor:"#5E79B3",
-                            mt: 1,
+                            bgcolor: "#5E79B3",
                             py: 0.3,
                             px: 1,
                             color: "#fff",
