@@ -1,6 +1,6 @@
 import type { MembroPasso } from "../domain/trajetoria";
 
-interface PassoRow {
+export interface PassoRow {
   id: number;
   nome: string;
   ordem: number | null;

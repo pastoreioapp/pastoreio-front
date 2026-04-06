@@ -1,4 +1,4 @@
-import { Box, Divider, Input, InputLabel, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 
 export function InformacoesGroup({
     titulo,
@@ -8,33 +8,47 @@ export function InformacoesGroup({
     campos: { label: string; valor: string | null }[];
 }) {
     return (
-        <Box
+        <Paper
+            variant="outlined"
             sx={{
+                borderRadius: 3,
+                p: 2.5,
+                bgcolor: "#FAFBFC",
                 width: "100%",
             }}
         >
-            <Box>
-                <Typography sx={{ color: "#C5C5C5", fontSize: "1rem", fontWeight: 500 }}>
-                    {titulo}
-                </Typography>
-                <Divider
-                    sx={{
-                        my: 2,
-                        borderColor: "#C5C5C5",
-                        width: "100%",
-                    }}
-                />
-            </Box>
+            <Typography
+                sx={{
+                    color: "text.secondary",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    mb: 2,
+                }}
+            >
+                {titulo}
+            </Typography>
             {campos.map((campo, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                    <InputLabel sx={{color: "#C5C5C5", fontSize: ".85rem", fontWeight: 800 }}>
+                <Box key={index} sx={{ mb: 1.5 }}>
+                    <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary", fontWeight: 600 }}
+                    >
                         {campo.label}
-                    </InputLabel>
-                    <Typography sx={{ fontSize: ".9rem", width: "100%", color: "#000", mt: 0.5 }}>
-                        {campo.valor ?? ""}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: ".9rem",
+                            width: "100%",
+                            color: campo.valor ? "#000" : "text.disabled",
+                            mt: 0.5,
+                        }}
+                    >
+                        {campo.valor || "—"}
                     </Typography>
                 </Box>
             ))}
-        </Box>
+        </Paper>
     );
 }

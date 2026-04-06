@@ -16,12 +16,12 @@ export function InformacaoHeader({
     return (
         <Box
             sx={{
-                mt: "32px",
-                mr: { xs: 0, md: 5 },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 flexShrink: 0,
+                minWidth: { md: 200 },
+                mt: { xs: "-40px", md: "-65px" },
             }}
         >
             <Avatar
@@ -29,11 +29,12 @@ export function InformacaoHeader({
                 sx={{
                     width: "130px",
                     height: "130px",
-                    fontSize: 48,
+                    fontSize: 32,
                     fontWeight: "bold",
                     backgroundColor: "#5E79B3",
                     color: "#fff",
-                    boxShadow: "inset 0 0 0 6px #91A3D8",
+                    border: "4px solid #fff",
+                    boxShadow: "inset 0 0 0 4px #91A3D8, 0 4px 12px rgba(0,0,0,0.12)",
                 }}
             >
                 {displayNome.charAt(0) || "?"}

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MembroPasso } from "../domain/trajetoria";
-import type { TrajetoriaComGruposRow, MembroPassoRow } from "./mapper";
+import type { TrajetoriaComGruposRow, MembroPassoRow, PassoRow } from "./mapper";
 import { rowToMembroPasso } from "./mapper";
 
 export class TrajetoriaRepository {
@@ -18,6 +18,8 @@ export class TrajetoriaRepository {
       `)
       .eq("ativa", true)
       .eq("deletado", false)
+      .eq("grupos_trajetoria.deletado", false)
+      .eq("grupos_trajetoria.passos.deletado", false)
       .order("ordem", { referencedTable: "grupos_trajetoria", ascending: true })
       .maybeSingle();
 
@@ -34,6 +36,19 @@ export class TrajetoriaRepository {
       }));
 
     return row;
+  }
+
+  async findPassosSoltos(trajetoriaId: number): Promise<PassoRow[]> {
+    const { data, error } = await this.supabase
+      .from("passos")
+      .select("id, nome, ordem")
+      .eq("trajetoria_id", trajetoriaId)
+      .is("grupo_id", null)
+      .eq("deletado", false)
+      .order("ordem", { ascending: true });
+
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PassoRow[];
   }
 
   async findPassosDoMembro(membroId: number): Promise<MembroPasso[]> {

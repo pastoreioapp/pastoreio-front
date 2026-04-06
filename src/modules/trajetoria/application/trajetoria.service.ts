@@ -9,7 +9,11 @@ export class TrajetoriaService {
     const trajetoria = await this.repo.findAtiva();
     if (!trajetoria) return null;
 
-    const passosDoMembro = await this.repo.findPassosDoMembro(membroId);
-    return toTrajetoriaDoMembroDto(trajetoria, passosDoMembro);
+    const [passosDoMembro, passosSoltos] = await Promise.all([
+      this.repo.findPassosDoMembro(membroId),
+      this.repo.findPassosSoltos(trajetoria.id),
+    ]);
+
+    return toTrajetoriaDoMembroDto(trajetoria, passosDoMembro, passosSoltos);
   }
 }

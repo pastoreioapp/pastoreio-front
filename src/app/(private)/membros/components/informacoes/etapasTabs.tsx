@@ -13,7 +13,7 @@ const STYLE_TAB = {
     width: { xs: "auto", md: "180px" },
     minWidth: "unset",
     padding: { xs: 1.5, md: 2.5 },
-    color: "#C5C5C5",
+    color: "text.secondary",
     "&.Mui-selected": {
         color: "#000",
     },
@@ -45,7 +45,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         onChange={(e, v) => setTab(v)}
                         TabIndicatorProps={{
                             sx: {
-                                backgroundColor: "#E7E7E7",
+                                backgroundColor: "#5E79B3",
                                 borderRadius: "1.5px",
                             },
                         }}
@@ -58,7 +58,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                 <TabPanel
                     value="1"
                     sx={{
-                        paddingTop: 4,
+                        paddingTop: 3,
                     }}
                 >
                     {loading && <LoadingBox />}
@@ -70,6 +70,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                                     key={grupo.id}
                                     etapa={grupo.ordem}
                                     titulo={grupo.nome}
+                                    exibirEtapa={trajetoria.grupos.length > 1}
                                     itens={grupo.passos.map((p) => ({
                                         label: p.nome,
                                         concluido: p.concluido,
@@ -79,7 +80,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         </Box>
                     )}
                     {!loading && !erro && !trajetoria && (
-                        <Box display="flex" justifyContent="center" alignItems="center">
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
                             <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
                                 <IconInfoCircleFilled size={24} />
                                 Nenhuma trajetória ativa encontrada.
@@ -88,7 +89,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                     )}
                 </TabPanel>
                 <TabPanel value="2">
-                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
+                    <Box display="flex" justifyContent="center" alignItems="center" py={6}>
                         <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
                             <IconInfoCircleFilled size={24} />
                             Funcionalidade disponível em breve!
@@ -96,7 +97,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                     </Box>
                 </TabPanel>
                 <TabPanel value="3">
-                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
+                    <Box display="flex" justifyContent="center" alignItems="center" py={6}>
                         <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
                             <IconInfoCircleFilled size={24} />
                             Funcionalidade disponível em breve!

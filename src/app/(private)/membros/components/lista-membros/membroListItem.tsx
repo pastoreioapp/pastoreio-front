@@ -3,7 +3,6 @@ import { getFuncaoCores, getFuncaoLabel } from "../../lib/getFuncaoLabel";
 import {
     Avatar,
     Box,
-    Divider,
     ListItemAvatar,
     ListItemButton,
     Typography,
@@ -24,23 +23,22 @@ export function MembroListItem({
             selected={selected}
             sx={{
                 border: "1px solid #ECECEC",
-                bgcolor: selected ? "#DCE8E7" : "#fff",
+                bgcolor: selected ? "rgba(94, 121, 179, 0.1)" : "#fff",
                 borderRadius: "7px",
-                mb: "15px",
-                py: "15px",
-                px: "15.32px",
+                mb: 1.5,
+                py: 1.5,
+                px: 2,
                 gap: "17px",
                 width: "100%",
                 maxWidth: { xs: "100%", md: "330px" },
-                height: "90px",
                 transition: "background-color 0.2s ease-in-out",
                 "&:hover": {
-                    backgroundColor: "#DCE8E7",
+                    backgroundColor: "rgba(94, 121, 179, 0.06)",
                 },
                 "&.Mui-selected": {
-                    bgcolor: "#DCE8E7",
+                    bgcolor: "rgba(94, 121, 179, 0.1)",
                     "&:hover": {
-                        bgcolor: "#DCE8E7",
+                        bgcolor: "rgba(94, 121, 179, 0.1)",
                     },
                 },
             }}
@@ -48,16 +46,13 @@ export function MembroListItem({
             <ListItemAvatar>
                 <Avatar
                     src={membro.avatarUrl || undefined}
-                    sx={{ width: 60, height: 60 }}
+                    sx={{ width: 60, height: 60, bgcolor: "#5E79B3", color: "#fff" }}
                 >
                     {membro.nome ? membro.nome.charAt(0).toUpperCase() : "?"}
                 </Avatar>
             </ListItemAvatar>
             <Box flex={1}>
                 <Typography fontSize={16}>{membro.nome?.split(" ").slice(0, 2).join(" ")}</Typography>
-                <Divider
-                    sx={{ borderColor: "#C5C5C5", mt: "2px", mb: "4px" }}
-                />
                 <Box
                     sx={{
                         ...getFuncaoCores(membro.funcao),

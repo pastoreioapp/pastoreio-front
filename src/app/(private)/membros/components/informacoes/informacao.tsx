@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, IconButton, Typography } from "@mui/material";
-import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
+import { IconArrowLeft, IconPencil, IconUserSearch } from "@tabler/icons-react";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
@@ -11,16 +11,19 @@ import { enqueueSnackbar } from "notistack";
 const MensagemNenhumMembroSelecionado = () => (
     <Box
         sx={{
-            border: "1px solid #F5F5F5",
+            border: "2px dashed #DEE3EA",
             width: "100%",
             height: "100%",
-            borderRadius: "10px",
+            borderRadius: 3,
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
+            gap: 2,
         }}
     >
-        <Typography sx={{ color: "#999", fontSize: "16px" }}>
+        <IconUserSearch size={48} stroke={1.5} color="#5A6A85" />
+        <Typography sx={{ color: "text.secondary", fontSize: "16px" }}>
             Selecione um membro para visualizar suas informações
         </Typography>
     </Box>
@@ -64,124 +67,111 @@ export function Informacao({
         },
     ];
 
+    const handleEditar = () =>
+        enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 });
+
     return (
         <Box
             sx={{
-                border: "1px solid #F5F5F5",
-                p: { xs: 3, md: 5 },
-                borderRadius: "10px",
+                borderRadius: 3,
+                overflow: "hidden",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.04)",
+                bgcolor: "#fff",
                 width: "100%",
                 height: "100%",
             }}
         >
-            {onBack && (
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+                sx={{
+                    height: { xs: 80, md: 100 },
+                    background: "linear-gradient(135deg, #4A6499 0%, #5E79B3 40%, #7B95CC 100%)",
+                    position: "relative",
+                }}
+            >
+                {onBack && (
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: 12,
+                            left: 12,
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
                         <IconButton
                             onClick={onBack}
                             sx={{
-                                color: "#5E79B3",
-                                "&:hover": { bgcolor: "rgba(94, 121, 179, 0.08)" },
+                                color: "#fff",
+                                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
                             }}
                         >
-                            <IconArrowLeft size={24} />
+                            <IconArrowLeft size={22} />
                         </IconButton>
                         <Typography
                             sx={{
-                                fontSize: "0.95rem",
+                                fontSize: "0.9rem",
                                 fontWeight: 600,
-                                color: "#5E79B3",
+                                color: "rgba(255,255,255,0.9)",
                                 cursor: "pointer",
                             }}
                             onClick={onBack}
                         >
-                            Voltar para lista
+                            Voltar
                         </Typography>
                     </Box>
-
-                    <Typography
-                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
-                        sx={{
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                            color: "#5E79B3",
-                            display: "flex",
-                            gap: 1,
-                            alignItems: "center",
-                            cursor: "pointer",
-                            transition: "color 0.2s, text-decoration 0.2s",
-                            "&:hover": {
-                                color: "#405687",
-                                textDecoration: "underline",
-                            },
-                        }}
-                    >
-                        <IconPencil size={20} />
-                        Editar
-                    </Typography>
-                </Box>
-            )}
-
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    justifyContent: "space-between",
-                    alignItems: { xs: "center", md: "flex-start" },
-                }}
-            >
-                <InformacaoHeader nome={data.nome} funcao={data.funcao} avatarUrl={data.avatarUrl} />
-
-                <Box sx={{
-                    display: "flex",
-                    mt: 4,
-                    flexDirection: { xs: "column", md: "row" },
-                    gap: { xs: 0, md: 5 },
-                    flex: { md: 1 },
-                    minWidth: 0,
-                    width: "100%",
-                }}>
-                    {grupos.map((grupo, i) => (
-                        <Box key={i} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
-                            <InformacoesGroup
-                                titulo={grupo.titulo}
-                                campos={grupo.campos}
-                            />
-                        </Box>
-                    ))}
-                </Box>
-
-                <Box
+                )}
+                <IconButton
+                    onClick={handleEditar}
                     sx={{
-                        display: { xs: "none", md: "flex" },
-                        justifyContent: "end",
-                        alignItems: "start",
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        color: "#fff",
+                        "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
                     }}
                 >
-                    <Typography
-                        onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
-                        sx={{
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                            color: "#5E79B3",
-                            display: "flex",
-                            gap: 1,
-                            alignItems: "center",
-                            cursor: "pointer",
-                            transition: "color 0.2s, text-decoration 0.2s",
-                            "&:hover": {
-                                color: "#405687",
-                                textDecoration: "underline",
-                            },
-                        }}
-                    >
-                        <IconPencil size={20} />
-                        Editar
-                    </Typography>
-                </Box>
+                    <IconPencil size={20} />
+                </IconButton>
             </Box>
 
-            <EtapasTabs membroId={data.id} />
+            <Box sx={{ px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 } }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", md: "row" },
+                        gap: { xs: 3, md: 4 },
+                        alignItems: { md: "flex-start" },
+                    }}
+                >
+                    <InformacaoHeader
+                        nome={data.nome}
+                        funcao={data.funcao}
+                        avatarUrl={data.avatarUrl}
+                    />
+
+                    <Box
+                        sx={{
+                            flex: 1,
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 2,
+                            pt: { md: 7 },
+                            pb: { md: 3 },
+                        }}
+                    >
+                        {grupos.map((grupo, i) => (
+                            <Box key={i} sx={{ flex: "1 1 220px", minWidth: 0 }}>
+                                <InformacoesGroup
+                                    titulo={grupo.titulo}
+                                    campos={grupo.campos}
+                                />
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+
+                <EtapasTabs membroId={data.id} />
+            </Box>
         </Box>
     );
 }

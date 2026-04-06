@@ -3,8 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
-import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
-import { IconPlus } from "@tabler/icons-react";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { Filtro } from "./components/lista-membros/filtro";
 import { useMembrosSelecionados } from "./hooks/useMembroSelecionado";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
@@ -44,49 +43,31 @@ function MembrosContent() {
             ) : erro ? (
                 <ErrorBox message={erro} />
             ) : (
-                <Box>
-                    <Box sx={{ display: "flex", justifyContent: "end" }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
-                            sx={{
-                                bgcolor: "#5E79B3",
-                                fontSize: 13,
-                                fontWeight: 600,
-                                display: "flex",
-                                gap: 1,
-                                color: "#fff",
-                            }}
-                        >
-                            <IconPlus width={16} /> Registrar membro
-                        </Button>
-                    </Box>
+                <Box sx={{
+                    display: "flex",
+                    pt: 2,
+                    gap: { xs: 3, md: 5 },
+                    flexDirection: { xs: "column", md: "row" },
+                }}>
+                    {mostrarLista && (
+                        <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+                            <Filtro
+                                data={membros}
+                                onSelect={toggleMembroSelecionado}
+                                membroSelecionado={membroSelecionado}
+                                onRegistrar={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
+                            />
+                        </Box>
+                    )}
 
-                    <Box sx={{
-                        display: "flex",
-                        pt: 5,
-                        gap: { xs: 3, md: 5 },
-                        flexDirection: { xs: "column", md: "row" },
-                    }}>
-                        {mostrarLista && (
-                            <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
-                                <Filtro
-                                    data={membros}
-                                    onSelect={toggleMembroSelecionado}
-                                    membroSelecionado={membroSelecionado}
-                                />
-                            </Box>
-                        )}
-
-                        {mostrarInfo && (
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Informacao
-                                    data={membroSelecionado || null}
-                                    onBack={isMobile ? deselectMembro : undefined}
-                                />
-                            </Box>
-                        )}
-                    </Box>
+                    {mostrarInfo && (
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Informacao
+                                data={membroSelecionado || null}
+                                onBack={isMobile ? deselectMembro : undefined}
+                            />
+                        </Box>
+                    )}
                 </Box>
             )}
         </PageContainer>
