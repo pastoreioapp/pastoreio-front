@@ -2,7 +2,9 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
 import { EtapaCard } from "./etapaCard";
+import { CursoCard } from "./cursoCard";
 import { useTrajetoriaMembro } from "../../hooks/useTrajetoriaMembro";
+import { useCursosDoMembro } from "../../hooks/useCursosDoMembro";
 import { IconInfoCircleFilled } from "@tabler/icons-react";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
@@ -22,6 +24,7 @@ const STYLE_TAB = {
 export function EtapasTabs({ membroId }: { membroId: number }) {
     const [tab, setTab] = useState("1");
     const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
+    const { cursos, loading: cursosLoading, erro: cursosErro } = useCursosDoMembro(membroId);
 
     return (
         <Box
@@ -88,13 +91,32 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         </Box>
                     )}
                 </TabPanel>
-                <TabPanel value="2">
-                    <Box display="flex" justifyContent="center" alignItems="center" py={6}>
-                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
-                            <IconInfoCircleFilled size={24} />
-                            Funcionalidade disponível em breve!
-                        </Typography>
-                    </Box>
+                <TabPanel value="2" sx={{ paddingTop: 3 }}>
+                    {cursosLoading && <LoadingBox />}
+                    {cursosErro && <ErrorBox message={cursosErro} />}
+                    {!cursosLoading && !cursosErro && cursos.length > 0 && (
+                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                            {cursos.map((curso) => (
+                                <CursoCard
+                                    key={curso.inscricaoId}
+                                    cursoNome={curso.cursoNome}
+                                    turmaNome={curso.turmaNome}
+                                    status={curso.status}
+                                    statusLabel={curso.statusLabel}
+                                    dataInicio={curso.dataInicio}
+                                    dataFim={curso.dataFim}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                    {!cursosLoading && !cursosErro && cursos.length === 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhum curso encontrado.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
                 <TabPanel value="3">
                     <Box display="flex" justifyContent="center" alignItems="center" py={6}>
