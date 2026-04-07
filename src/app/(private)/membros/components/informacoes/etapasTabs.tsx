@@ -3,8 +3,10 @@ import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
 import { EtapaCard } from "./etapaCard";
 import { CursoCard } from "./cursoCard";
+import { FrequenciaCalendario } from "./frequenciaCalendario";
 import { useTrajetoriaMembro } from "../../hooks/useTrajetoriaMembro";
 import { useCursosDoMembro } from "../../hooks/useCursosDoMembro";
+import { useFrequenciasMembro } from "../../hooks/useFrequenciasMembro";
 import { IconInfoCircleFilled } from "@tabler/icons-react";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
@@ -25,6 +27,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
     const [tab, setTab] = useState("1");
     const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
     const { cursos, loading: cursosLoading, erro: cursosErro } = useCursosDoMembro(membroId);
+    const { frequencias, loading: freqLoading, erro: freqErro } = useFrequenciasMembro(membroId);
 
     return (
         <Box
@@ -118,13 +121,20 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         </Box>
                     )}
                 </TabPanel>
-                <TabPanel value="3">
-                    <Box display="flex" justifyContent="center" alignItems="center" py={6}>
-                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
-                            <IconInfoCircleFilled size={24} />
-                            Funcionalidade disponível em breve!
-                        </Typography>
-                    </Box>
+                <TabPanel value="3" sx={{ paddingTop: 3, px: { xs: 0, md: 3 } }}>
+                    {freqLoading && <LoadingBox />}
+                    {freqErro && <ErrorBox message={freqErro} />}
+                    {!freqLoading && !freqErro && frequencias.length > 0 && (
+                        <FrequenciaCalendario frequencias={frequencias} />
+                    )}
+                    {!freqLoading && !freqErro && frequencias.length === 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhuma frequência registrada.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
             </TabContext>
         </Box>
