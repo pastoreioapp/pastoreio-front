@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, IconButton, Typography } from "@mui/material";
-import { IconArrowLeft, IconCalendarEvent, IconPencil } from "@tabler/icons-react";
+import { IconArrowLeft, IconPencil, IconTrash } from "@tabler/icons-react";
 import { InformacoesGroup } from "./informacoesGroup";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { EtapasTabs } from "./etapasTabs";
@@ -9,19 +9,16 @@ import { EtapasTabs } from "./etapasTabs";
 const MensagemNenhumEncontroSelecionado = () => (
     <Box
         sx={{
-            border: "2px dashed #DEE3EA",
+            border: "1px solid #F5F5F5",
             width: "100%",
             height: "100%",
-            borderRadius: 3,
+            borderRadius: "10px",
             display: "flex",
-            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            gap: 2,
         }}
     >
-        <IconCalendarEvent size={48} stroke={1.5} color="#5A6A85" />
-        <Typography sx={{ color: "text.secondary", fontSize: "16px" }}>
+        <Typography sx={{ color: "#999", fontSize: "16px" }}>
             Selecione um encontro para visualizar suas informações
         </Typography>
     </Box>
@@ -31,10 +28,12 @@ export function Informacao({
     data,
     onBack,
     onEditar,
+    onExcluir,
 }: {
     data: Encontro | null;
     onBack?: () => void;
     onEditar?: () => void;
+    onExcluir?: () => void;
 }) {
     if (!data) return <MensagemNenhumEncontroSelecionado />;
 
@@ -76,92 +75,189 @@ export function Informacao({
     return (
         <Box
             sx={{
-                borderRadius: 3,
-                overflow: "hidden",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.04)",
-                bgcolor: "#fff",
+                border: "1px solid #F5F5F5",
+                p: { xs: 3, md: 5 },
+                borderRadius: "10px",
                 width: "100%",
                 height: "100%",
             }}
         >
-            <Box
-                sx={{
-                    height: { xs: 50, md: 60 },
-                    background: "linear-gradient(135deg, #4A6499 0%, #5E79B3 40%, #7B95CC 100%)",
-                    position: "relative",
-                }}
-            >
-                {onBack && (
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: 10,
-                            left: 12,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                    >
+            {onBack && (
+                <Box sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
                         <IconButton
                             onClick={onBack}
                             sx={{
-                                color: "#fff",
-                                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                                color: "#5E79B3",
+                                "&:hover": { bgcolor: "rgba(94, 121, 179, 0.08)" },
                             }}
                         >
-                            <IconArrowLeft size={22} />
+                            <IconArrowLeft size={24} />
                         </IconButton>
                         <Typography
                             sx={{
-                                fontSize: "0.9rem",
+                                fontSize: "0.95rem",
                                 fontWeight: 600,
-                                color: "rgba(255,255,255,0.9)",
+                                color: "#5E79B3",
                                 cursor: "pointer",
                             }}
                             onClick={onBack}
                         >
-                            Voltar
+                            Voltar para lista
                         </Typography>
                     </Box>
-                )}
-                <IconButton
-                    onClick={onEditar}
-                    sx={{
-                        position: "absolute",
-                        top: 10,
-                        right: 12,
-                        color: "#fff",
-                        "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
-                    }}
-                >
-                    <IconPencil size={20} />
-                </IconButton>
-            </Box>
 
-            <Box sx={{ px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 } }}>
-                <Typography fontSize={20} fontWeight={500} sx={{ pt: 4, mb: 4 }}>
-                    Tema: {data.tema}
-                </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Typography
+                            onClick={onEditar}
+                            sx={{
+                                fontSize: "1rem",
+                                fontWeight: 600,
+                                color: "#5E79B3",
+                                display: "flex",
+                                gap: 1,
+                                alignItems: "center",
+                                cursor: "pointer",
+                                transition: "color 0.2s, text-decoration 0.2s",
+                                "&:hover": {
+                                    color: "#405687",
+                                    textDecoration: "underline",
+                                },
+                            }}
+                        >
+                            <IconPencil size={20} />
+                            Editar
+                        </Typography>
+                        {onExcluir && (
+                            <Typography
+                                onClick={onExcluir}
+                                sx={{
+                                    fontSize: "1rem",
+                                    fontWeight: 600,
+                                    color: "error.main",
+                                    display: "flex",
+                                    gap: 1,
+                                    alignItems: "center",
+                                    cursor: "pointer",
+                                    transition: "color 0.2s, text-decoration 0.2s",
+                                    "&:hover": {
+                                        color: "error.dark",
+                                        textDecoration: "underline",
+                                    },
+                                }}
+                            >
+                                <IconTrash size={20} />
+                                Excluir
+                            </Typography>
+                        )}
+                    </Box>
+                </Box>
+            )}
 
+            <Box
+                sx={{
+                    pt: "22px",
+                    pr: "22px",
+                    pl: { xs: "22px", md: "46px" },
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "11px",
+                    position: "relative",
+                }}
+            >
                 <Box
                     sx={{
                         display: "flex",
-                        flexWrap: "wrap",
-                        gap: 2,
-                        flexDirection: { xs: "column", md: "row" },
+                        flexDirection: "column",
                     }}
                 >
-                    {grupos.map((grupo, i) => (
-                        <Box key={i} sx={{ flex: "1 1 220px", minWidth: 0 }}>
-                            <InformacoesGroup
-                                titulo={grupo.titulo}
-                                campos={grupo.campos}
-                            />
-                        </Box>
-                    ))}
+                    <Box sx={{ my: 2 }}>
+                        <Typography fontSize={18} fontWeight={500}>
+                            Tema: {data.tema}
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{
+                        display: "flex",
+                        mt: 2,
+                        flexDirection: { xs: "column", md: "row" },
+                        gap: { xs: 0, md: 5 },
+                        flex: { md: 1 },
+                        minWidth: 0,
+                        width: "100%",
+                    }}>
+                        {grupos.map((grupo, i) => (
+                            <Box key={i} sx={{ flex: { md: 1 }, minWidth: 0, width: "100%" }}>
+                                <InformacoesGroup
+                                    titulo={grupo.titulo}
+                                    campos={grupo.campos}
+                                />
+                            </Box>
+                        ))}
+                    </Box>
                 </Box>
 
-                <EtapasTabs data={data.frequencia} />
+                <Box
+                    sx={{
+                        display: { xs: "none", md: "flex" },
+                        justifyContent: "end",
+                        alignItems: "center",
+                        gap: 2,
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                    }}
+                >
+                    <Typography
+                        onClick={onEditar}
+                        sx={{
+                            fontSize: "1rem",
+                            fontWeight: 600,
+                            color: "#5E79B3",
+                            display: "flex",
+                            gap: 1,
+                            alignItems: "center",
+                            cursor: "pointer",
+                            transition: "color 0.2s, text-decoration 0.2s",
+                            "&:hover": {
+                                color: "#405687",
+                                textDecoration: "underline",
+                            },
+                        }}
+                    >
+                        <IconPencil size={20} />
+                        Editar
+                    </Typography>
+                    {onExcluir && (
+                        <Typography
+                            onClick={onExcluir}
+                            sx={{
+                                fontSize: "1rem",
+                                fontWeight: 600,
+                                color: "error.main",
+                                display: "flex",
+                                gap: 1,
+                                alignItems: "center",
+                                cursor: "pointer",
+                                transition: "color 0.2s, text-decoration 0.2s",
+                                "&:hover": {
+                                    color: "error.dark",
+                                    textDecoration: "underline",
+                                },
+                            }}
+                        >
+                            <IconTrash size={20} />
+                            Excluir
+                        </Typography>
+                    )}
+                </Box>
             </Box>
+
+            <EtapasTabs data={data.frequencia} />
         </Box>
     );
 }

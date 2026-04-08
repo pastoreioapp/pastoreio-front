@@ -46,6 +46,41 @@ export async function updateEncontro(
   return service.update(id, dados);
 }
 
+/** Remove o registro em `encontros` (hard delete). Apaga `frequencias_celula` antes se a FK não tiver CASCADE. */
+export async function deletarEncontro(
+  encontroId: string,
+  celulaId: number
+): Promise<void> {
+  const supabase = await createClient();
+  const encIdNum = Number(encontroId);
+  if (!Number.isFinite(encIdNum)) {
+    throw new Error("ID do encontro inválido.");
+  }
+
+  const { data: existe, error: errSel } = await supabase
+    .from("encontros")
+    .select("id")
+    .eq("id", encontroId)
+    .eq("celula_id", celulaId)
+    .maybeSingle();
+
+  if (errSel) {
+    throw new Error(errSel.message);
+  }
+  if (!existe) {
+    throw new Error(
+      "Encontro não encontrado ou você não tem permissão para excluí-lo."
+    );
+  }
+
+  const freqRepo = new FrequenciaCelulaRepository(supabase);
+  await freqRepo.deleteHardByEncontroId(encIdNum);
+
+  const encRepo = new EncontroRepository(supabase);
+  const encService = new EncontroService(encRepo);
+  await encService.deleteByIdAndCelula(encontroId, celulaId);
+}
+
 /** Uma única action: mesmo cliente Supabase para encontro + frequência (evita inconsistência de sessão entre chamadas). */
 export async function salvarEncontroComFrequencias(payload: {
   celulaId: number;
