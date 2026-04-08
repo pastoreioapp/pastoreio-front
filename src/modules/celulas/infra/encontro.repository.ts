@@ -87,4 +87,24 @@ export class EncontroRepository {
     
     return data;
   }
+
+  /** Exclusão física do encontro. Chame antes `FrequenciaCelulaRepository.deleteHardByEncontroId` se a FK não tiver ON DELETE CASCADE. */
+  async deleteByIdAndCelula(id: string, celulaId: number): Promise<void> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .delete()
+      .eq("id", id)
+      .eq("celula_id", celulaId)
+      .select("id");
+
+    if (error) {
+      console.error("Erro ao excluir encontro:", error);
+      throw new Error(error.message);
+    }
+    if (!data?.length) {
+      throw new Error(
+        "Encontro não encontrado ou você não tem permissão para excluí-lo."
+      );
+    }
+  }
 }
