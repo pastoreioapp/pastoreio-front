@@ -1,7 +1,16 @@
 "use client";
 
 import PageContainer from "@/ui/components/pages/PageContainer";
-import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-encontro/filtro";
 import { useEncontrosSelecionados } from "./hooks/useEncontroSelecionado";
@@ -10,7 +19,10 @@ import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useState } from "react";
-import { salvarEncontroComFrequencias } from "@/app/actions/encontros";
+import {
+    deletarEncontro,
+    salvarEncontroComFrequencias,
+} from "@/app/actions/encontros";
 import { enqueueSnackbar } from "notistack";
 import { Encontro } from "@/modules/celulas/domain/encontro";
 import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
@@ -35,6 +47,8 @@ export default function Encontros() {
 
     const [modalAberto, setModalAberto] = useState(false);
     const [encontroEditando, setEncontroEditando] = useState<Encontro | null>(null);
+    const [dialogExcluirAberto, setDialogExcluirAberto] = useState(false);
+    const [excluindo, setExcluindo] = useState(false);
 
     const handleSalvarEncontro = async (payload: {
         dados: DadosEncontro;
@@ -81,6 +95,39 @@ export default function Encontros() {
     const handleFecharModal = () => {
         setModalAberto(false);
         setEncontroEditando(null);
+    };
+
+    const handleAbrirExcluir = () => {
+        if (!encontrosSelecionado?.id) return;
+        setDialogExcluirAberto(true);
+    };
+
+    const handleFecharDialogExcluir = () => {
+        if (excluindo) return;
+        setDialogExcluirAberto(false);
+    };
+
+    const handleConfirmarExcluir = async () => {
+        if (celulaId == null || !encontrosSelecionado?.id) return;
+        setExcluindo(true);
+        try {
+            await deletarEncontro(encontrosSelecionado.id, celulaId);
+            enqueueSnackbar("Encontro excluído com sucesso.", {
+                variant: "success",
+                autoHideDuration: 2000,
+            });
+            setDialogExcluirAberto(false);
+            deselectEncontro();
+            await refetch();
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Erro ao excluir o encontro.";
+            enqueueSnackbar(message, { variant: "error", autoHideDuration: 4000 });
+        } finally {
+            setExcluindo(false);
+        }
     };
 
     return (
@@ -135,6 +182,7 @@ export default function Encontros() {
                                         data={encontrosSelecionado || null}
                                         onBack={isMobile ? deselectEncontro : undefined}
                                         onEditar={handleEditarEncontro}
+                                        onExcluir={handleAbrirExcluir}
                                     />
                                 </Box>
                             )}
@@ -161,6 +209,37 @@ export default function Encontros() {
                         } : null}
                         encontroId={encontroEditando?.id || null}
                     />
+
+                    <Dialog
+                        open={dialogExcluirAberto}
+                        onClose={handleFecharDialogExcluir}
+                        aria-labelledby="dialog-excluir-encontro-titulo"
+                    >
+                        <DialogTitle id="dialog-excluir-encontro-titulo">
+                            Excluir encontro
+                        </DialogTitle>
+                        <DialogContent>
+                            Esta ação não pode ser desfeita. O encontro e as
+                            frequências vinculadas serão removidos permanentemente.
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, pb: 2 }}>
+                            <Button
+                                onClick={handleFecharDialogExcluir}
+                                disabled={excluindo}
+                                color="inherit"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={() => void handleConfirmarExcluir()}
+                                disabled={excluindo}
+                                color="error"
+                                variant="contained"
+                            >
+                                {excluindo ? "Excluindo…" : "Excluir"}
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </>
             )}
         </PageContainer>
