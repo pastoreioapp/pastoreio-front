@@ -15,4 +15,8 @@ export class EncontroService {
   async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
     return this.repo.update(id, dados);
   }
+
+  async deleteByIdAndCelula(id: string, celulaId: number): Promise<void> {
+    return this.repo.deleteByIdAndCelula(id, celulaId);
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, IconButton, Typography } from "@mui/material";
-import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
+import { IconArrowLeft, IconPencil, IconTrash } from "@tabler/icons-react";
 import { InformacoesGroup } from "./informacoesGroup";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { EtapasTabs } from "./etapasTabs";
@@ -28,10 +28,12 @@ export function Informacao({
     data,
     onBack,
     onEditar,
+    onExcluir,
 }: {
     data: Encontro | null;
     onBack?: () => void;
     onEditar?: () => void;
+    onExcluir?: () => void;
 }) {
     if (!data) return <MensagemNenhumEncontroSelecionado />;
 
@@ -109,26 +111,50 @@ export function Informacao({
                         </Typography>
                     </Box>
 
-                    <Typography
-                        onClick={onEditar}
-                        sx={{
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                            color: "#5E79B3",
-                            display: "flex",
-                            gap: 1,
-                            alignItems: "center",
-                            cursor: "pointer",
-                            transition: "color 0.2s, text-decoration 0.2s",
-                            "&:hover": {
-                                color: "#405687",
-                                textDecoration: "underline",
-                            },
-                        }}
-                    >
-                        <IconPencil size={20} />
-                        Editar
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Typography
+                            onClick={onEditar}
+                            sx={{
+                                fontSize: "1rem",
+                                fontWeight: 600,
+                                color: "#5E79B3",
+                                display: "flex",
+                                gap: 1,
+                                alignItems: "center",
+                                cursor: "pointer",
+                                transition: "color 0.2s, text-decoration 0.2s",
+                                "&:hover": {
+                                    color: "#405687",
+                                    textDecoration: "underline",
+                                },
+                            }}
+                        >
+                            <IconPencil size={20} />
+                            Editar
+                        </Typography>
+                        {onExcluir && (
+                            <Typography
+                                onClick={onExcluir}
+                                sx={{
+                                    fontSize: "1rem",
+                                    fontWeight: 600,
+                                    color: "error.main",
+                                    display: "flex",
+                                    gap: 1,
+                                    alignItems: "center",
+                                    cursor: "pointer",
+                                    transition: "color 0.2s, text-decoration 0.2s",
+                                    "&:hover": {
+                                        color: "error.dark",
+                                        textDecoration: "underline",
+                                    },
+                                }}
+                            >
+                                <IconTrash size={20} />
+                                Excluir
+                            </Typography>
+                        )}
+                    </Box>
                 </Box>
             )}
 
@@ -179,7 +205,8 @@ export function Informacao({
                     sx={{
                         display: { xs: "none", md: "flex" },
                         justifyContent: "end",
-                        alignItems: "start",
+                        alignItems: "center",
+                        gap: 2,
                         position: "absolute",
                         top: 0,
                         right: 0,
@@ -205,6 +232,28 @@ export function Informacao({
                         <IconPencil size={20} />
                         Editar
                     </Typography>
+                    {onExcluir && (
+                        <Typography
+                            onClick={onExcluir}
+                            sx={{
+                                fontSize: "1rem",
+                                fontWeight: 600,
+                                color: "error.main",
+                                display: "flex",
+                                gap: 1,
+                                alignItems: "center",
+                                cursor: "pointer",
+                                transition: "color 0.2s, text-decoration 0.2s",
+                                "&:hover": {
+                                    color: "error.dark",
+                                    textDecoration: "underline",
+                                },
+                            }}
+                        >
+                            <IconTrash size={20} />
+                            Excluir
+                        </Typography>
+                    )}
                 </Box>
             </Box>
 
