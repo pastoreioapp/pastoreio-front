@@ -88,13 +88,42 @@ export class EncontroRepository {
     return data;
   }
 
-  /** Exclusão física do encontro. Chame antes `FrequenciaCelulaRepository.deleteHardByEncontroId` se a FK não tiver ON DELETE CASCADE. */
-  async deleteByIdAndCelula(id: string, celulaId: number): Promise<void> {
+  /** Retorna true se existir encontro ativo (não deletado) com esse id e célula (respeita RLS). */
+  async existsByIdAndCelula(id: string, celulaId: number): Promise<boolean> {
     const { data, error } = await this.supabase
       .from(TABLE)
-      .delete()
+      .select("id")
       .eq("id", id)
       .eq("celula_id", celulaId)
+      .eq("deletado", false)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data != null;
+  }
+
+  /**
+   * Exclusão lógica do encontro. Chame antes `FrequenciaCelulaRepository.softDeleteByEncontroId`
+   * para manter frequências alinhadas ao mesmo critério.
+   */
+  async deleteByIdAndCelula(
+    id: string,
+    celulaId: number,
+    audit: { por: string }
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .update({
+        deletado: true,
+        atualizado_em: now,
+        atualizado_por: audit.por,
+      })
+      .eq("id", id)
+      .eq("celula_id", celulaId)
+      .eq("deletado", false)
       .select("id");
 
     if (error) {
