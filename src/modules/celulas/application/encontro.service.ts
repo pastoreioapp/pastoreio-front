@@ -1,8 +1,12 @@
 import type { Encontro } from "../domain/encontro";
 import { EncontroRepository } from "../infra/encontro.repository";
+import { FrequenciaCelulaRepository } from "../infra/frequencia-celula.repository";
 
 export class EncontroService {
-  constructor(private readonly repo: EncontroRepository) {}
+  constructor(
+    private readonly repo: EncontroRepository,
+    private readonly freqRepo: FrequenciaCelulaRepository
+  ) {}
 
   async list(celulaId: number): Promise<Encontro[]> {
     return this.repo.findByCelulaId(celulaId);
@@ -16,27 +20,28 @@ export class EncontroService {
     return this.repo.update(id, dados);
   }
 
+  /**
+   * Exclusão lógica do encontro após validar vínculo com a célula,
+   * inativar frequências do encontro e marcar o encontro como deletado.
+   */
   async deleteByIdAndCelula(
     id: string,
     celulaId: number,
     audit: { por: string }
   ): Promise<void> {
+    await this.assertEncontroExistsForCelula(id, celulaId);
+    await this.freqRepo.softDeleteByEncontroId(id, audit);
     return this.repo.deleteByIdAndCelula(id, celulaId, audit);
   }
 
   /**
-   * Valida o id numérico e confirma que o encontro existe para a célula
+   * Confirma que o encontro existe para a célula
    * (antes de apagar frequências ou o próprio encontro).
    */
   async assertEncontroExistsForCelula(
     encontroId: string,
     celulaId: number
   ): Promise<void> {
-    const encIdNum = Number(encontroId);
-    if (!Number.isFinite(encIdNum)) {
-      throw new Error("ID do encontro inválido.");
-    }
-
     const existe = await this.repo.existsByIdAndCelula(encontroId, celulaId);
     if (!existe) {
       throw new Error(

@@ -26,7 +26,7 @@ export class FrequenciaCelulaRepository {
 
   /** Marca todas as frequências ativas do encontro como excluídas logicamente. */
   async softDeleteByEncontroId(
-    encontroId: number,
+    encontroId: string,
     audit: { por: string }
   ): Promise<void> {
     const now = new Date().toISOString();
