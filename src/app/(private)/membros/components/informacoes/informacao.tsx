@@ -1,11 +1,15 @@
 "use client";
 
-import { Box, IconButton, Typography } from "@mui/material";
-import { IconArrowLeft, IconPencil, IconUserSearch } from "@tabler/icons-react";
+import { useState } from "react";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { IconArrowLeft, IconPencil, IconUserMinus, IconUserSearch } from "@tabler/icons-react";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
 import { EtapasTabs } from "./etapasTabs";
+import { ModalConfirmarDesvinculo } from "./ModalConfirmarDesvinculo";
+import { desvincularMembroDaCelula } from "@/app/actions/celulas";
 import { enqueueSnackbar } from "notistack";
 
 const MensagemNenhumMembroSelecionado = () => (
@@ -29,13 +33,22 @@ const MensagemNenhumMembroSelecionado = () => (
     </Box>
 );
 
+const FUNCOES_DESVINCULAVEIS = [
+    PapelCelula.MEMBRO,
+    PapelCelula.VISITANTE,
+] as const;
+
 export function Informacao({
     data,
     onBack,
+    onDesvincular,
 }: {
     data: MembroDaCelulaListItemDto | null;
     onBack?: () => void;
+    onDesvincular?: () => void;
 }) {
+    const [modalAberto, setModalAberto] = useState(false);
+    const [desvinculando, setDesvinculando] = useState(false);
 
     if (!data) return <MensagemNenhumMembroSelecionado />;
 
@@ -69,6 +82,26 @@ export function Informacao({
 
     const handleEditar = () =>
         enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 });
+
+    const podeDesvincular =
+        !!data.funcao && (FUNCOES_DESVINCULAVEIS as readonly PapelCelula[]).includes(data.funcao);
+
+    async function handleConfirmarDesvinculo() {
+        try {
+            setDesvinculando(true);
+            await desvincularMembroDaCelula(data.vinculoId);
+            setModalAberto(false);
+            enqueueSnackbar("Membro desvinculado com sucesso!", { variant: "success", autoHideDuration: 2000 });
+            onDesvincular?.();
+        } catch (error: unknown) {
+            enqueueSnackbar(
+                error instanceof Error ? error.message : "Erro ao desvincular membro",
+                { variant: "error", autoHideDuration: 3000 },
+            );
+        } finally {
+            setDesvinculando(false);
+        }
+    }
 
     return (
         <Box
@@ -120,18 +153,40 @@ export function Informacao({
                         </Typography>
                     </Box>
                 )}
-                <IconButton
-                    onClick={handleEditar}
+                <Box
                     sx={{
                         position: "absolute",
                         top: 12,
                         right: 12,
-                        color: "#fff",
-                        "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                        display: "flex",
+                        gap: 0.5,
                     }}
                 >
-                    <IconPencil size={20} />
-                </IconButton>
+                    {podeDesvincular && (
+                        <Tooltip title="Desvincular da célula">
+                            <IconButton
+                                onClick={() => setModalAberto(true)}
+                                sx={{
+                                    color: "#fff",
+                                    "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                                }}
+                            >
+                                <IconUserMinus size={20} />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Editar">
+                        <IconButton
+                            onClick={handleEditar}
+                            sx={{
+                                color: "#fff",
+                                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                            }}
+                        >
+                            <IconPencil size={20} />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
             </Box>
 
             <Box sx={{ px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 } }}>
@@ -172,6 +227,14 @@ export function Informacao({
 
                 <EtapasTabs membroId={data.id} />
             </Box>
+
+            <ModalConfirmarDesvinculo
+                open={modalAberto}
+                nomeDoMembro={data.nome ?? "este membro"}
+                loading={desvinculando}
+                onClose={() => setModalAberto(false)}
+                onConfirm={handleConfirmarDesvinculo}
+            />
         </Box>
     );
 }
