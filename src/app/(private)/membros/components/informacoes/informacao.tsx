@@ -87,6 +87,7 @@ export function Informacao({
         !!data.funcao && (FUNCOES_DESVINCULAVEIS as readonly PapelCelula[]).includes(data.funcao);
 
     async function handleConfirmarDesvinculo() {
+        if (!data) return;
         try {
             setDesvinculando(true);
             await desvincularMembroDaCelula(data.vinculoId);
