@@ -24,6 +24,28 @@ type FrequenciaRow = {
 export class FrequenciaCelulaRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
+  /** Marca todas as frequências ativas do encontro como excluídas logicamente. */
+  async softDeleteByEncontroId(
+    encontroId: string,
+    audit: { por: string }
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const { error } = await this.supabase
+      .from(TABLE)
+      .update({
+        deletado: true,
+        atualizado_em: now,
+        atualizado_por: audit.por,
+      })
+      .eq("encontro_id", encontroId)
+      .eq("deletado", false);
+
+    if (error) {
+      console.error("Erro ao inativar frequências do encontro:", error);
+      throw new Error(pgErrorMessage(error));
+    }
+  }
+
   async syncForEncontro(
     encontroId: number,
     linhas: FrequenciaSyncLinha[],

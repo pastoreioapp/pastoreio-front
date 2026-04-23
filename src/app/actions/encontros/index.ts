@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
 import { EncontroService } from "@/modules/celulas/application/encontro.service";
@@ -22,10 +23,17 @@ export type DadosEncontroForm = {
   observacoes?: string;
 };
 
-async function getEncontroService(): Promise<EncontroService> {
-  const supabase = await createClient();
-  const repo = new EncontroRepository(supabase);
-  return new EncontroService(repo);
+function createEncontroService(supabase: SupabaseClient): EncontroService {
+  const encRepo = new EncontroRepository(supabase);
+  const freqRepo = new FrequenciaCelulaRepository(supabase);
+  return new EncontroService(encRepo, freqRepo);
+}
+
+/** Quando `supabase` é passado, reutiliza o mesmo cliente (auth + repositórios na mesma sessão). */
+async function getEncontroService(
+  supabase?: SupabaseClient
+): Promise<EncontroService> {
+  return createEncontroService(supabase ?? (await createClient()));
 }
 
 export async function listEncontros(celulaId: number): Promise<Encontro[]> {
@@ -46,6 +54,21 @@ export async function updateEncontro(
   return service.update(id, dados);
 }
 
+/** Inativa `frequencias_celula` e o próprio encontro por exclusão lógica (`deletado`). */
+export async function deletarEncontro(
+  encontroId: string,
+  celulaId: number
+): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const por = user?.email ?? "UNKNOWN";
+
+  const service = await getEncontroService(supabase);
+  await service.deleteByIdAndCelula(encontroId, celulaId, { por });
+}
+
 /** Uma única action: mesmo cliente Supabase para encontro + frequência (evita inconsistência de sessão entre chamadas). */
 export async function salvarEncontroComFrequencias(payload: {
   celulaId: number;
@@ -59,8 +82,7 @@ export async function salvarEncontroComFrequencias(payload: {
   } = await supabase.auth.getUser();
   const email = user?.email ?? "UNKNOWN";
 
-  const encRepo = new EncontroRepository(supabase);
-  const encService = new EncontroService(encRepo);
+  const encService = await getEncontroService(supabase);
 
   const horarioSql = `${payload.dados.horario}:00`;
 
