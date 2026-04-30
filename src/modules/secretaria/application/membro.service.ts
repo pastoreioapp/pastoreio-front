@@ -20,7 +20,7 @@ export class MembroService {
     const now = new Date().toISOString();
     const membro: Membro = {
       id: 0,
-      userId: dto.userId,
+      userId: dto.userId ?? null,
       nome: dto.nome ?? null,
       email: dto.email ?? null,
       telefone: dto.telefone ?? null,

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, Button, useMediaQuery, useTheme } from "@mui/material";
@@ -11,8 +11,8 @@ import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
-import { enqueueSnackbar } from "notistack";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
+import { RegisterMembro } from "./components/registro-membros/registerMembro";
 
 function MembrosContent() {
     const theme = useTheme();
@@ -22,6 +22,8 @@ function MembrosContent() {
     const celulaId = loggedUser?.celulaId;
     const membroIdParam = searchParams.get("membroId");
     const membroIdInicial = membroIdParam ? Number(membroIdParam) : null;
+    const [isOpenRegister, setIsOpenRegister] = useState(false);
+    
     const {
         membros,
         membroSelecionado,
@@ -29,16 +31,34 @@ function MembrosContent() {
         deselectMembro,
         loading,
         erro,
+        refetch
     } = useMembrosSelecionados(
         celulaId,
-        Number.isFinite(membroIdInicial) ? membroIdInicial : null
+        Number.isFinite(membroIdInicial) ? membroIdInicial : null,
     );
 
     const mostrarLista = !isMobile || !membroSelecionado;
     const mostrarInfo = !isMobile || !!membroSelecionado;
 
+    const handleClickRegister = () => {
+        setIsOpenRegister(true);
+    };
+
+    const handleCloseRegister = () => {
+        setIsOpenRegister(false);
+    };
+
+    const handleRegisterSuccess = () => {
+        setIsOpenRegister(false);
+        refetch();
+    };
+
     return (
-        <PageContainer title="Membros" description="Página Membros" allowedRoles={LIDER_AUXILIAR_ROLES}>
+        <PageContainer
+            title="Membros"
+            description="Página Membros"
+            allowedRoles={LIDER_AUXILIAR_ROLES}
+        >
             {loading ? (
                 <LoadingBox />
             ) : erro ? (
@@ -48,7 +68,7 @@ function MembrosContent() {
                     <Box sx={{ display: "flex", justifyContent: "end" }}>
                         <Button
                             variant="contained"
-                            onClick={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
+                            onClick={handleClickRegister}
                             sx={{
                                 bgcolor: "#5E79B3",
                                 fontSize: 13,
@@ -62,14 +82,30 @@ function MembrosContent() {
                         </Button>
                     </Box>
 
-                    <Box sx={{
-                        display: "flex",
-                        pt: 5,
-                        gap: { xs: 3, md: 5 },
-                        flexDirection: { xs: "column", md: "row" },
-                    }}>
+                    {isOpenRegister && (
+                        <RegisterMembro 
+                            open={isOpenRegister} 
+                            onClose={handleCloseRegister} 
+                            onSuccess={handleRegisterSuccess}
+                            celulaId={celulaId}
+                        />
+                    )}
+
+                    <Box
+                        sx={{
+                            display: "flex",
+                            pt: 5,
+                            gap: { xs: 3, md: 5 },
+                            flexDirection: { xs: "column", md: "row" },
+                        }}
+                    >
                         {mostrarLista && (
-                            <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+                            <Box
+                                sx={{
+                                    width: { xs: "100%", md: 348 },
+                                    flexShrink: 0,
+                                }}
+                            >
                                 <Filtro
                                     data={membros}
                                     onSelect={toggleMembroSelecionado}
@@ -82,7 +118,9 @@ function MembrosContent() {
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                                 <Informacao
                                     data={membroSelecionado || null}
-                                    onBack={isMobile ? deselectMembro : undefined}
+                                    onBack={
+                                        isMobile ? deselectMembro : undefined
+                                    }
                                 />
                             </Box>
                         )}

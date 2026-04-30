@@ -1,6 +1,6 @@
 export interface MembroListItemDto {
   id: number;
-  userId: string;
+  userId: string | null;
   nome: string | null;
   email: string | null;
   telefone: string | null;
@@ -18,7 +18,7 @@ export interface MembroListItemDto {
 
 export interface MembroDetailDto {
   id: number;
-  userId: string;
+  userId: string | null;
   nome: string | null;
   email: string | null;
   telefone: string | null;
@@ -39,7 +39,7 @@ export interface MembroDetailDto {
 }
 
 export interface CreateMembroDto {
-  userId: string;
+  userId?: string | null;
   nome?: string | null;
   email?: string | null;
   telefone?: string | null;

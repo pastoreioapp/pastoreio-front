@@ -3,7 +3,7 @@ import type { Membro } from "../domain/membro";
 export function rowToMembro(row: Record<string, unknown>): Membro {
   return {
     id: Number(row.id),
-    userId: String(row.user_id ?? ""),
+    userId: row.user_id != null ? String(row.user_id) : null,
     nome: row.nome != null ? String(row.nome) : null,
     email: row.email != null ? String(row.email) : null,
     telefone: row.telefone != null ? String(row.telefone) : null,
@@ -27,7 +27,7 @@ export function rowToMembro(row: Record<string, unknown>): Membro {
 
 export function membroToRow(m: Partial<Membro>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
-  if (m.userId != null) row.user_id = m.userId;
+  if (m.userId !== undefined) row.user_id = m.userId ?? null;
   if (m.nome !== undefined) row.nome = m.nome ?? null;
   if (m.email !== undefined) row.email = m.email ?? null;
   if (m.telefone !== undefined) row.telefone = m.telefone ?? null;

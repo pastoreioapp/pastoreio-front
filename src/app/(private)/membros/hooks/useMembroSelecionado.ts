@@ -7,7 +7,8 @@ export function useMembrosSelecionados(
     celulaId?: number | null,
     membroIdInicial?: number | null
 ) {
-    const { membros, loading, erro } = useMembros(celulaId);
+    const { membros, loading, erro, refetch } = useMembros(celulaId);
+    
     const membrosVisiveis = useMemo(
         () => membros.filter((membro) => membro.funcao !== PapelCelula.LIDER_CELULA),
         [membros]
@@ -58,5 +59,6 @@ export function useMembrosSelecionados(
         deselectMembro,
         loading,
         erro,
+        refetch,
     };
 }

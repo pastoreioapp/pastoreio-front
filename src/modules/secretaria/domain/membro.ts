@@ -1,6 +1,6 @@
 export interface Membro {
   id: number;
-  userId: string;
+  userId: string | null;
   nome: string | null;
   email: string | null;
   telefone: string | null;
