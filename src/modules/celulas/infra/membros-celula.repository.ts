@@ -22,6 +22,7 @@ export class MembrosCelulaRepository {
       .select("id, celula_id, membro_id, papel_celula, data_entrada, deletado, membros(*)")
       .eq("celula_id", celulaId)
       .eq("deletado", false)
+      .is("data_saida", null)
       .order("papel_celula", { ascending: true });
 
     if (error) throw error;
@@ -43,6 +44,7 @@ export class MembrosCelulaRepository {
       .select("celula_id, papel_celula")
       .eq("membro_id", membroId)
       .eq("deletado", false)
+      .is("data_saida", null)
       .in("papel_celula", [...allowedRoles])
       .order("id", { ascending: true })
       .limit(1)
@@ -62,5 +64,54 @@ export class MembrosCelulaRepository {
       celulaId: Number(data.celula_id),
       papelCelula,
     };
+  }
+
+  async findMembrosByCelulaIdNaData(
+    celulaId: number,
+    data: string,
+  ): Promise<MembroDaCelulaListItemDto[]> {
+    const { data: rows, error } = await this.supabase
+      .from(TABLE)
+      .select("id, celula_id, membro_id, papel_celula, data_entrada, deletado, membros(*)")
+      .eq("celula_id", celulaId)
+      .eq("deletado", false)
+      .or(`data_saida.is.null,data_saida.gte.${data}`)
+      .order("papel_celula", { ascending: true });
+
+    if (error) throw new Error(error.message);
+
+    return ((rows ?? []) as unknown as Parameters<typeof rowToMembroDaCelulaListItemDto>[0][])
+      .filter((row) => row.membros && !row.membros.deletado)
+      .map(rowToMembroDaCelulaListItemDto);
+  }
+
+  async findVinculoById(
+    vinculoId: number,
+  ): Promise<{ id: number; dataSaida: string | null } | null> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("id, data_saida")
+      .eq("id", vinculoId)
+      .eq("deletado", false)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    return { id: data.id, dataSaida: data.data_saida };
+  }
+
+  async desvincular(vinculoId: number, desvinculadoPor: string): Promise<void> {
+    const now = new Date().toISOString();
+    const { error } = await this.supabase
+      .from(TABLE)
+      .update({
+        data_saida: now.split("T")[0],
+        desvinculado_por: desvinculadoPor,
+        atualizado_em: now,
+        atualizado_por: desvinculadoPor,
+      })
+      .eq("id", vinculoId);
+
+    if (error) throw new Error(error.message);
   }
 }

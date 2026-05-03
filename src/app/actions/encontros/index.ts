@@ -129,7 +129,7 @@ export async function salvarEncontroComFrequencias(payload: {
   }
 
   const membroRepo = new MembrosCelulaRepository(supabase);
-  const membros = await membroRepo.findMembrosByCelulaId(payload.celulaId);
+  const membros = await membroRepo.findMembrosByCelulaIdNaData(payload.celulaId, payload.dados.data);
   const permitidos = new Set(membros.map((m) => Number(m.id)));
 
   for (const l of payload.frequencias) {
@@ -165,8 +165,16 @@ export async function syncFrequenciasParaEncontro(
     throw new Error("ID do encontro inválido.");
   }
 
+  const { data: encontroRow, error: errEncontro } = await supabase
+    .from("encontros")
+    .select("data")
+    .eq("id", encIdStr)
+    .single();
+  if (errEncontro) throw new Error(errEncontro.message);
+  const dataEncontro: string = encontroRow.data;
+
   const membroRepo = new MembrosCelulaRepository(supabase);
-  const membros = await membroRepo.findMembrosByCelulaId(celulaId);
+  const membros = await membroRepo.findMembrosByCelulaIdNaData(celulaId, dataEncontro);
   const permitidos = new Set(membros.map((m) => Number(m.id)));
 
   for (const l of linhas) {
