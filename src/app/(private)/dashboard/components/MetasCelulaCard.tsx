@@ -139,23 +139,44 @@ export function MetasCelulaCard({ metas, periodo = "Mês atual" }: Props) {
                 />
             </Box>
 
-            <Box
-                component="ul"
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2.5,
-                    m: 0,
-                    p: 0,
-                    listStyle: "none",
-                }}
-            >
-                {metas.map((meta) => (
-                    <Box component="li" key={meta.id} sx={{ listStyle: "none" }}>
-                        <MetaItem meta={meta} />
-                    </Box>
-                ))}
-            </Box>
+            {metas.length === 0 ? (
+                <Box
+                    sx={{
+                        border: "2px dashed #DEE3EA",
+                        borderRadius: 3,
+                        py: 3,
+                        px: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1.5,
+                        textAlign: "center",
+                    }}
+                >
+                    <Typography sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
+                        Nenhuma meta cadastrada.
+                    </Typography>
+                </Box>
+            ) : (
+                <Box
+                    component="ul"
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2.5,
+                        m: 0,
+                        p: 0,
+                        listStyle: "none",
+                    }}
+                >
+                    {metas.map((meta) => (
+                        <Box component="li" key={meta.id} sx={{ listStyle: "none" }}>
+                            <MetaItem meta={meta} />
+                        </Box>
+                    ))}
+                </Box>
+            )}
         </Box>
     );
 }

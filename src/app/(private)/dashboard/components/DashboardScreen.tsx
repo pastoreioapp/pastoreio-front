@@ -1,79 +1,22 @@
 "use client";
 
+import { useMemo, useRef } from "react";
 import { Box } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "./DashboardHeader";
 import { SaudeCelulaCard } from "./SaudeCelulaCard";
 import { AcoesRapidasCard } from "./AcoesRapidasCard";
-import { MetasCelulaCard, type MetaCelula } from "./MetasCelulaCard";
+import { MetasCelulaCard } from "./MetasCelulaCard";
 import { MembrosAtencaoCard } from "./MembrosAtencaoCard";
-import type { MembroAtencao } from "./MembroAtencaoItem";
-import { PulsoSemanaCard, type PulsoSemana } from "./PulsoSemanaCard";
-
-const MEMBROS_ATENCAO_MOCK: MembroAtencao[] = [
-    {
-        id: "1",
-        nome: "Ana Silva",
-        severidade: "critico",
-        diasSemContato: 41,
-        motivos: [
-            "3 faltas não justificadas seguidas",
-            "Última ação registrada há 41 dias",
-        ],
-    },
-    {
-        id: "2",
-        nome: "Carlos Souza",
-        severidade: "alerta",
-        diasSemContato: 20,
-        motivos: [
-            "3 faltas não justificadas seguidas",
-            "Última ação registrada há 20 dias",
-        ],
-    },
-    {
-        id: "3",
-        nome: "Marina Costa",
-        severidade: "observacao",
-        diasSemContato: 12,
-        motivos: [
-            "2 faltas não justificadas seguidas",
-            "Última ação registrada há 12 dias",
-        ],
-    },
-];
-
-const METAS_MOCK: MetaCelula[] = [
-    {
-        id: "oferta",
-        titulo: "Oferta",
-        valorAtual: 500,
-        valorMeta: 1000,
-        formato: "moeda",
-    },
-    {
-        id: "vidas",
-        titulo: "Vidas ganhas para Cristo",
-        valorAtual: 9,
-        valorMeta: 10,
-        unidade: "vidas",
-    },
-    {
-        id: "casas",
-        titulo: "Casas de PAZ",
-        valorAtual: 4,
-        valorMeta: 5,
-        unidade: "casas",
-    },
-];
-
-const PULSO_MOCK: PulsoSemana = {
-    presencas: 18,
-    justificados: 2,
-    faltas: 3,
-    tendencia: { direcao: "queda", label: "queda leve" },
-    historicoFrequencia: [16, 19, 22, 21, 18],
-};
+import { PulsoSemanaCard } from "./PulsoSemanaCard";
+import { useDashboardCelula } from "../hooks/useDashboardCelula";
+import { usePulsoSemana } from "../hooks/usePulsoSemana";
+import { useMembrosEmAtencao } from "../hooks/useMembrosEmAtencao";
+import { useMetasCelula } from "../hooks/useMetasCelula";
+import { useSaudeCelula } from "../hooks/useSaudeCelula";
+import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
+import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 
 const emBreve = () =>
     enqueueSnackbar("Funcionalidade disponível em breve!", {
@@ -82,9 +25,71 @@ const emBreve = () =>
     });
 
 export function DashboardScreen() {
+    const router = useRouter();
+    const { celulaId, ready, semCelula } = useDashboardCelula();
+
+    const { pulso, loading: loadingPulso, erro: erroPulso } = usePulsoSemana(celulaId);
+    const { membros, loading: loadingAtencao, erro: erroAtencao } = useMembrosEmAtencao(celulaId);
+    const { metas, loading: loadingMetas, erro: erroMetas } = useMetasCelula(celulaId);
+    const { saude, loading: loadingSaude, erro: erroSaude } = useSaudeCelula(celulaId);
+
+    const timestampRef = useRef<Date | null>(null);
+    const atualizadoEm = useMemo(() => {
+        const algumCarregou = !loadingPulso || !loadingAtencao || !loadingMetas || !loadingSaude;
+        if (algumCarregou && timestampRef.current == null) {
+            timestampRef.current = new Date();
+        }
+        return timestampRef.current;
+    }, [loadingPulso, loadingAtencao, loadingMetas, loadingSaude]);
+
+    if (!ready) return <LoadingBox />;
+
+    if (semCelula) {
+        return (
+            <ErrorBox message="Nenhuma célula vinculada foi encontrada para o usuário logado." />
+        );
+    }
+
+    const handleLancarFrequencia = () => {
+        // TODO: implementar uma feature que ao acessar a rota de encontros com o parãmmetro de lançar a frequência, abrir modal de lançar frequência para a célula daquela semana, se já estiver criada, ou abrir o modal de criar encontro da semana caso não exista.
+        router.push("/encontros?novo=true");
+    };
+
+    // TODO: Decisão de produto pendente — fluxo de visitante
+    const handleRegistrarVisitante = () => emBreve();
+
+    // TODO: Decisão de produto pendente — fluxo de cadastro de membro
+    const handleCadastrarMembro = () => emBreve();
+
+    const handleVerFicha = (id: string) => {
+        router.push(`/membros?membroId=${id}`);
+    };
+
+    const handleEnviarMensagem = (id: string) => {
+        const membro = membros.find((m) => m.id === id);
+        if (membro?.telefone) {
+            const telefoneE164 = membro.telefone.replace(/\D/g, "");
+            window.open(`https://wa.me/55${telefoneE164}`, "_blank");
+        } else {
+            enqueueSnackbar("Telefone não cadastrado para este membro.", {
+                variant: "warning",
+                autoHideDuration: 2000,
+            });
+        }
+    };
+
+    // TODO: Requer Server Action tocando acompanhamento_pastoral_membros — decisão de produto pendente
+    const handleRegistrarPastoreio = () => emBreve();
+
+    // TODO: Requer Server Action tocando acompanhamento_pastoral_membros — decisão de produto pendente
+    const handleMarcarAcompanhado = () => emBreve();
+
+    // TODO: Requer tabela dashboard_dispensas + persistência (membroId, dataLimite) — decisão de produto pendente
+    const handleAdiar = () => emBreve();
+
     return (
-        <Box sx={{ pb: { xs: 3, md: 4 } }}>
-            <DashboardHeader />
+        <Box>
+            <DashboardHeader atualizadoEm={atualizadoEm} />
 
             <Box
                 sx={{
@@ -98,55 +103,87 @@ export function DashboardScreen() {
                     gridTemplateAreas: {
                         xs: `
                             "atencao"
-                            "acoes"
+                            "coluna1"
                             "pulso"
-                            "metas"
-                            "saude"
                         `,
                         md: `
-                            "saude atencao atencao"
-                            "acoes metas pulso"
+                            "coluna1 atencao atencao"
+                            "coluna1 pulso pulso"
                         `,
                     },
                 }}
             >
-                <Box sx={{ gridArea: "saude" }}>
-                    <SaudeCelulaCard
-                        titulo="Saúde da célula"
-                        mensagem="Sua célula está florescendo, parabéns!"
-                        versiculo={
-                            "\u201CAquele que permanece em Mim e Eu nele, esse dá muito fruto...\u201D João 15:5"
-                        }
-                        score={85}
-                        onVerDetalhes={emBreve}
+                <Box
+                    sx={{
+                        gridArea: "coluna1",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: { xs: 2, md: 3 },
+                        minWidth: 0,
+                    }}
+                >
+                    {loadingSaude ? (
+                        <LoadingBox />
+                    ) : erroSaude ? (
+                        <ErrorBox message={erroSaude} />
+                    ) : saude ? (
+                        <SaudeCelulaCard
+                            titulo="Saúde da célula"
+                            mensagem={saude.mensagem}
+                            versiculo={saude.versiculo}
+                            classe={saude.classe}
+                            score={saude.score}
+                            onVerDetalhes={emBreve}
+                        />
+                    ) : null}
+
+                    <Box sx={{ flex: 1, minHeight: 0, display: "flex" }}>
+                        {loadingMetas ? (
+                            <LoadingBox />
+                        ) : erroMetas ? (
+                            <ErrorBox message={erroMetas} />
+                        ) : (
+                            <Box sx={{ width: "100%" }}>
+                                <MetasCelulaCard metas={metas} />
+                            </Box>
+                        )}
+                    </Box>
+
+                    <AcoesRapidasCard
+                        onLancarFrequencia={handleLancarFrequencia}
+                        onRegistrarVisitante={handleRegistrarVisitante}
+                        onCadastrarMembro={handleCadastrarMembro}
                     />
                 </Box>
 
                 <Box sx={{ gridArea: "atencao" }}>
-                    <MembrosAtencaoCard
-                        membros={MEMBROS_ATENCAO_MOCK}
-                        onVerFicha={emBreve}
-                        onEnviarMensagem={emBreve}
-                        onRegistrarPastoreio={emBreve}
-                        onMarcarAcompanhado={emBreve}
-                        onAdiar={emBreve}
-                    />
-                </Box>
-
-                <Box sx={{ gridArea: "acoes" }}>
-                    <AcoesRapidasCard
-                        onLancarFrequencia={emBreve}
-                        onRegistrarVisitante={emBreve}
-                        onCadastrarMembro={emBreve}
-                    />
-                </Box>
-
-                <Box sx={{ gridArea: "metas" }}>
-                    <MetasCelulaCard metas={METAS_MOCK} />
+                    {loadingAtencao ? (
+                        <LoadingBox />
+                    ) : erroAtencao ? (
+                        <ErrorBox message={erroAtencao} />
+                    ) : (
+                        <MembrosAtencaoCard
+                            membros={membros}
+                            onVerFicha={handleVerFicha}
+                            onEnviarMensagem={handleEnviarMensagem}
+                            onRegistrarPastoreio={handleRegistrarPastoreio}
+                            onMarcarAcompanhado={handleMarcarAcompanhado}
+                            onAdiar={handleAdiar}
+                        />
+                    )}
                 </Box>
 
                 <Box sx={{ gridArea: "pulso" }}>
-                    <PulsoSemanaCard pulso={PULSO_MOCK} onVerDetalhes={emBreve} />
+                    {loadingPulso ? (
+                        <LoadingBox />
+                    ) : erroPulso ? (
+                        <ErrorBox message={erroPulso} />
+                    ) : pulso ? (
+                        <PulsoSemanaCard
+                            pulso={pulso}
+                            onVerDetalhes={emBreve}
+                        />
+                    ) : null}
                 </Box>
             </Box>
         </Box>

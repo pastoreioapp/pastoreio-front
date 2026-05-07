@@ -30,6 +30,7 @@ function mapEncontros(data: EncontroRow[] | null): Encontro[] {
 export class EncontroRepository {
   constructor(private readonly supabase: SupabaseClient) {}
 
+  // TODO: avaliar implementar paginação [PERFORMANCE]
   async findByCelulaId(celulaId: number): Promise<Encontro[]> {
     const { data, error } = await this.supabase
       .from(TABLE)

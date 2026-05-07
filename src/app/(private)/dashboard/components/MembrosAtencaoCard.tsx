@@ -100,7 +100,22 @@ export function MembrosAtencaoCard({
                         gap: 2,
                         m: 0,
                         p: 0,
+                        pr: { xs: 0, md: 0.5 },
                         listStyle: "none",
+                        maxHeight: { xs: 336, md: 448 },
+                   
+                        overflowY: "auto",
+                        overscrollBehavior: "contain",
+                        "&::-webkit-scrollbar": {
+                            width: 6,
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                            backgroundColor: "rgba(0,0,0,0.18)",
+                            borderRadius: 3,
+                        },
+                        "&::-webkit-scrollbar-thumb:hover": {
+                            backgroundColor: "rgba(0,0,0,0.28)",
+                        },
                     }}
                 >
                     {ordenados.map((membro, i) => (

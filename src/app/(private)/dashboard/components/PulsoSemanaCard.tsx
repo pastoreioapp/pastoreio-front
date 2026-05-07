@@ -6,6 +6,11 @@ import { BRAND, BRAND_HOVER, CARD_STYLE, DANGER, SUCCESS, FOCUS_OUTLINE } from "
 
 export type TendenciaDirecao = "subida" | "queda" | "estavel";
 
+export type HistoricoEncontro = {
+    data: string;
+    presencas: number;
+};
+
 export type PulsoSemana = {
     presencas: number;
     justificados: number;
@@ -14,7 +19,7 @@ export type PulsoSemana = {
         direcao: TendenciaDirecao;
         label: string;
     };
-    historicoFrequencia: number[];
+    historico: HistoricoEncontro[];
 };
 
 type Props = {
@@ -34,7 +39,28 @@ const TENDENCIA_BG: Record<TendenciaDirecao, string> = {
     estavel: "rgba(92, 95, 104, 0.08)",
 };
 
-const LABELS_SEMANA = ["S-4", "S-3", "S-2", "S-1", "Atual"];
+// Converte "YYYY-MM-DD" em "dd/mm" sem depender do fuso horário do navegador.
+function formatarDataCurta(data: string): string {
+    const partes = data.slice(0, 10).split("-");
+    if (partes.length !== 3) return data;
+    const [, mes, dia] = partes;
+    return `${dia}/${mes}`;
+}
+
+// "dd 'de' MMMM" para uso no tooltip, em português.
+const MESES_EXTENSO = [
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+function formatarDataExtensa(data: string): string {
+    const partes = data.slice(0, 10).split("-");
+    if (partes.length !== 3) return data;
+    const [, mes, dia] = partes;
+    const indiceMes = Number(mes) - 1;
+    const nomeMes = MESES_EXTENSO[indiceMes] ?? mes;
+    return `${Number(dia)} de ${nomeMes}`;
+}
 
 function TendenciaIcon({ direcao }: { direcao: TendenciaDirecao }) {
     const cor = TENDENCIA_CORES[direcao];
@@ -43,12 +69,16 @@ function TendenciaIcon({ direcao }: { direcao: TendenciaDirecao }) {
     return null;
 }
 
-function MiniChart({ valores }: { valores: number[] }) {
+function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
+    const valores = historico.map((h) => h.presencas);
     const maximo = Math.max(...valores, 1);
     const media = valores.reduce((s, v) => s + v, 0) / valores.length;
     const mediaPct = (media / maximo) * 100;
 
-    const ariaLabel = `Tendência de frequência das últimas ${valores.length} semanas, valores ${valores.join(", ")}`;
+    const descricaoBarras = historico
+        .map((h) => `${formatarDataExtensa(h.data)}: ${h.presencas} presenças`)
+        .join("; ");
+    const ariaLabel = `Presenças nos últimos ${historico.length} encontros — ${descricaoBarras}`;
 
     return (
         <Box
@@ -62,19 +92,19 @@ function MiniChart({ valores }: { valores: number[] }) {
                     alignItems: "flex-end",
                     justifyContent: "space-between",
                     gap: 0.75,
-                    height: 56,
+                    height: 100,
                     position: "relative",
                     zIndex: 1,
                 }}
             >
-                {valores.map((valor, i) => {
-                    const altura = Math.max((valor / maximo) * 100, 8);
-                    const eUltimo = i === valores.length - 1;
-                    const label = LABELS_SEMANA[LABELS_SEMANA.length - valores.length + i] ?? `S${i + 1}`;
+                {historico.map((item, i) => {
+                    const altura = Math.max((item.presencas / maximo) * 100, 8);
+                    const eUltimo = i === historico.length - 1;
+                    const titulo = `Encontro de ${formatarDataExtensa(item.data)} — ${item.presencas} ${item.presencas === 1 ? "presença" : "presenças"}`;
                     return (
                         <Tooltip
-                            key={i}
-                            title={`${label}: ${valor} presenças`}
+                            key={`${item.data}-${i}`}
+                            title={titulo}
                             arrow
                             placement="top"
                         >
@@ -109,31 +139,60 @@ function MiniChart({ valores }: { valores: number[] }) {
                 }}
             />
 
-            {/* labels de semana */}
+            {/* datas dos encontros */}
             <Box
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
-                    mt: 0.5,
+                    alignItems: "flex-start",
+                    mt: 0.75,
                     gap: 0.75,
                 }}
             >
-                {valores.map((_, i) => {
-                    const label = LABELS_SEMANA[LABELS_SEMANA.length - valores.length + i] ?? `S${i + 1}`;
-                    const eUltimo = i === valores.length - 1;
+                {historico.map((item, i) => {
+                    const eUltimo = i === historico.length - 1;
                     return (
-                        <Typography
-                            key={i}
+                        <Box
+                            key={`label-${item.data}-${i}`}
                             sx={{
                                 flex: 1,
-                                textAlign: "center",
-                                fontSize: "0.6rem",
-                                fontWeight: eUltimo ? 700 : 400,
-                                color: eUltimo ? BRAND : "text.secondary",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 0.25,
                             }}
                         >
-                            {label}
-                        </Typography>
+                            <Typography
+                                sx={{
+                                    textAlign: "center",
+                                    fontSize: "0.65rem",
+                                    fontWeight: eUltimo ? 700 : 500,
+                                    color: eUltimo ? BRAND : "text.secondary",
+                                    lineHeight: 1.4,
+                                }}
+                            >
+                                {formatarDataCurta(item.data)}
+                            </Typography>
+                            {eUltimo && (
+                                <Box
+                                    sx={{
+                                        bgcolor: BRAND,
+                                        color: "#fff",
+                                        fontSize: "0.55rem",
+                                        fontWeight: 700,
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.04em",
+                                        px: 0.75,
+                                        py: 0.125,
+                                        borderRadius: 1,
+                                        lineHeight: 1.4,
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    Esta semana
+                                </Box>
+                            )}
+                        </Box>
                     );
                 })}
             </Box>
@@ -145,21 +204,35 @@ function KpiTile({ label, valor }: { label: string; valor: number }) {
     return (
         <Box
             sx={{
-                flex: 1,
-                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
                 bgcolor: "#F8F9FB",
                 borderRadius: 2,
-                py: 1.5,
-                px: 1,
+                px: 1.25,
+                py: 0.75,
+                minHeight: 36,
             }}
         >
             <Typography
-                sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#2F323A" }}
+                sx={{
+                    fontSize: "1.05rem",
+                    fontWeight: 700,
+                    color: "#2F323A",
+                    lineHeight: 1.1,
+                    minWidth: 22,
+                    textAlign: "right",
+                }}
             >
                 {valor}
             </Typography>
             <Typography
-                sx={{ fontSize: "0.7rem", color: "#5C5F68", mt: 0.25 }}
+                sx={{
+                    fontSize: "0.7rem",
+                    color: "#5C5F68",
+                    lineHeight: 1.2,
+                    flex: 1,
+                }}
             >
                 {label}
             </Typography>
@@ -168,9 +241,62 @@ function KpiTile({ label, valor }: { label: string; valor: number }) {
 }
 
 export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
+    const headerId = "pulso-semana-titulo";
+
+    if (pulso.historico.length === 0) {
+        return (
+            <Box
+                component="section"
+                aria-labelledby={headerId}
+                sx={{
+                    ...CARD_STYLE,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                    textAlign: "center",
+                }}
+            >
+                <Typography
+                    id={headerId}
+                    component="h2"
+                    sx={{
+                        fontSize: { xs: "1.05rem", md: "1.2rem" },
+                        fontWeight: 600,
+                        color: "#2F323A",
+                    }}
+                >
+                    Desempenho da semana
+                </Typography>
+                <Typography sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
+                    Sem encontros registrados ainda
+                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={onVerDetalhes}
+                    sx={{
+                        textTransform: "none",
+                        bgcolor: BRAND,
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "0.8rem",
+                        px: 2,
+                        py: 1.25,
+                        borderRadius: 2,
+                        "&:hover": { bgcolor: BRAND_HOVER },
+                        ...FOCUS_OUTLINE,
+                    }}
+                >
+                    Lançar primeiro encontro
+                </Button>
+            </Box>
+        );
+    }
+
     const corTendencia = TENDENCIA_CORES[pulso.tendencia.direcao];
     const bgTendencia = TENDENCIA_BG[pulso.tendencia.direcao];
-    const headerId = "pulso-semana-titulo";
 
     return (
         <Box
@@ -224,44 +350,75 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                 />
             </Box>
 
-            <Box>
-                <Typography
-                    sx={{ fontSize: "0.8rem", color: "#5C5F68" }}
-                >
-                    Tendência de frequência
-                </Typography>
-                <MiniChart valores={pulso.historicoFrequencia} />
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1 }}>
-                <KpiTile label="Presenças" valor={pulso.presencas} />
-                <KpiTile label="Justificados" valor={pulso.justificados} />
-                <KpiTile label="Faltas" valor={pulso.faltas} />
-            </Box>
-
-            <Button
-                variant="contained"
-                onClick={onVerDetalhes}
+            <Box
                 sx={{
-                    textTransform: "none",
-                    bgcolor: BRAND,
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: "0.8rem",
-                    px: 2,
-                    py: 1.25,
-                    borderRadius: 2,
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                    mt: "auto",
-                    "&:hover": {
-                        bgcolor: BRAND_HOVER,
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                    },
-                    ...FOCUS_OUTLINE,
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: { xs: 2.5, md: 3 },
+                    alignItems: { xs: "stretch", md: "flex-start" },
+                    flex: 1,
+                    minHeight: 0,
                 }}
             >
-                Ver detalhes do encontro
-            </Button>
+                {/* gráfico */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: "0.8rem", color: "#5C5F68" }}>
+                        Presenças nos últimos encontros
+                    </Typography>
+                    <MiniChart historico={pulso.historico} />
+                </Box>
+
+                {/* coluna com KPIs e botão */}
+                <Box
+                    sx={{
+                        width: { xs: "100%", md: 200 },
+                        flexShrink: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                    }}
+                >
+                    <Tooltip title="Pessoas presentes no último encontro" arrow placement="left">
+                        <Box>
+                            <KpiTile label="Presentes" valor={pulso.presencas} />
+                        </Box>
+                    </Tooltip>
+                    <Tooltip title="Faltas com justificativa" arrow placement="left">
+                        <Box>
+                            <KpiTile label="Faltas justificadas" valor={pulso.justificados} />
+                        </Box>
+                    </Tooltip>
+                    <Tooltip title="Faltas sem justificativa" arrow placement="left">
+                        <Box>
+                            <KpiTile label="Faltas" valor={pulso.faltas} />
+                        </Box>
+                    </Tooltip>
+
+                    <Button
+                        variant="contained"
+                        onClick={onVerDetalhes}
+                        sx={{
+                            textTransform: "none",
+                            bgcolor: BRAND,
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: "0.8rem",
+                            px: 2,
+                            py: 1,
+                            borderRadius: 2,
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                            mt: { xs: 0.5, md: "auto" },
+                            "&:hover": {
+                                bgcolor: BRAND_HOVER,
+                                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                            },
+                            ...FOCUS_OUTLINE,
+                        }}
+                    >
+                        Ver detalhes
+                    </Button>
+                </Box>
+            </Box>
         </Box>
     );
 }

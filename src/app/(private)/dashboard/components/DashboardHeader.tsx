@@ -3,6 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import { IconRefresh } from "@tabler/icons-react";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
+import { useTempoRelativo } from "../hooks/useTempoRelativo";
 
 function getSaudacao(): string {
     const hora = new Date().getHours();
@@ -20,11 +21,16 @@ function getDataExtenso(): string {
     });
 }
 
-export function DashboardHeader() {
+type Props = {
+    atualizadoEm?: Date | null;
+};
+
+export function DashboardHeader({ atualizadoEm = null }: Props) {
     const { loggedUser } = useAppAuthentication();
     const primeiroNome = loggedUser?.nome ?? "";
     const saudacao = getSaudacao();
     const data = getDataExtenso();
+    const textoAtualizado = useTempoRelativo(atualizadoEm);
 
     return (
         <Box
@@ -73,7 +79,7 @@ export function DashboardHeader() {
             >
                 <IconRefresh size={14} stroke={1.8} />
                 <Typography sx={{ fontSize: "0.75rem" }}>
-                    Atualizado há poucos minutos
+                    {textoAtualizado}
                 </Typography>
             </Box>
         </Box>

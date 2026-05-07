@@ -89,6 +89,7 @@ export function MembroAtencaoItem({
                 bgcolor: "rgba(243, 243, 250, 0.3)",
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: { xs: "stretch", sm: "stretch" },
+                flexShrink: 0,
                 position: "relative",
                 overflow: "hidden",
                 listStyle: "none",
