@@ -2,7 +2,7 @@
 
 import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
-import { BRAND, BRAND_HOVER, CARD_STYLE, DANGER, SUCCESS, FOCUS_OUTLINE } from "../lib/tokens";
+import { BRAND, BRAND_HOVER, CARD_STYLE, DANGER, SUCCESS, WARNING, FOCUS_OUTLINE } from "../lib/tokens";
 
 export type TendenciaDirecao = "subida" | "queda" | "estavel";
 
@@ -84,7 +84,7 @@ function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
         <Box
             role="img"
             aria-label={ariaLabel}
-            sx={{ position: "relative", mt: 1 }}
+            sx={{ position: "relative", mt: 1, pt: "18px" }}
         >
             <Box
                 sx={{
@@ -92,7 +92,7 @@ function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
                     alignItems: "flex-end",
                     justifyContent: "space-between",
                     gap: 0.75,
-                    height: 100,
+                    height: 150,
                     position: "relative",
                     zIndex: 1,
                 }}
@@ -102,42 +102,70 @@ function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
                     const eUltimo = i === historico.length - 1;
                     const titulo = `Encontro de ${formatarDataExtensa(item.data)} — ${item.presencas} ${item.presencas === 1 ? "presença" : "presenças"}`;
                     return (
-                        <Tooltip
-                            key={`${item.data}-${i}`}
-                            title={titulo}
-                            arrow
-                            placement="top"
+                        <Box
+                            key={`coluna-${item.data}-${i}`}
+                            sx={{
+                                flex: 1,
+                                height: "100%",
+                                position: "relative",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "flex-end",
+                            }}
                         >
-                            <Box
+                            <Typography
                                 sx={{
-                                    flex: 1,
-                                    height: `${altura}%`,
-                                    borderRadius: "3px 3px 0 0",
-                                    bgcolor: eUltimo
-                                        ? BRAND
-                                        : "rgba(94, 121, 179, 0.25)",
-                                    transition: "background-color 0.2s ease",
-                                    cursor: "default",
+                                    position: "absolute",
+                                    bottom: `${altura}%`,
+                                    left: 0,
+                                    right: 0,
+                                    textAlign: "center",
+                                    fontSize: "0.7rem",
+                                    fontWeight: eUltimo ? 700 : 600,
+                                    color: eUltimo ? BRAND : "#2F323A",
+                                    lineHeight: 1,
+                                    mb: "3px",
+                                    pointerEvents: "none",
                                 }}
-                            />
-                        </Tooltip>
+                            >
+                                {item.presencas}
+                            </Typography>
+                            <Tooltip
+                                title={titulo}
+                                arrow
+                                placement="top"
+                            >
+                                <Box
+                                    sx={{
+                                        width: "100%",
+                                        height: `${altura}%`,
+                                        borderRadius: "3px 3px 0 0",
+                                        bgcolor: eUltimo
+                                            ? BRAND
+                                            : "rgba(94, 121, 179, 0.25)",
+                                        transition: "background-color 0.2s ease",
+                                        cursor: "default",
+                                    }}
+                                />
+                            </Tooltip>
+                        </Box>
                     );
                 })}
-            </Box>
 
-            {/* linha de média */}
-            <Box
-                sx={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    bottom: `${mediaPct}%`,
-                    height: 0,
-                    borderBottom: "1.5px dashed rgba(94, 121, 179, 0.35)",
-                    zIndex: 0,
-                    pointerEvents: "none",
-                }}
-            />
+                {/* linha de média */}
+                <Box
+                    sx={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: `${mediaPct}%`,
+                        height: 0,
+                        borderBottom: "1.5px dashed rgba(94, 121, 179, 0.35)",
+                        zIndex: 0,
+                        pointerEvents: "none",
+                    }}
+                />
+            </Box>
 
             {/* datas dos encontros */}
             <Box
@@ -200,7 +228,7 @@ function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
     );
 }
 
-function KpiTile({ label, valor }: { label: string; valor: number }) {
+function KpiTile({ label, valor, accent }: { label: string; valor: number; accent: string }) {
     return (
         <Box
             sx={{
@@ -209,18 +237,35 @@ function KpiTile({ label, valor }: { label: string; valor: number }) {
                 gap: 1.25,
                 bgcolor: "#F8F9FB",
                 borderRadius: 2,
-                px: 1.25,
-                py: 0.75,
-                minHeight: 36,
+                pl: 1.5,
+                pr: 1.5,
+                py: 1,
+                minHeight: 48,
+                position: "relative",
+                overflow: "hidden",
+                transition: "background-color 0.2s ease",
+                "&:hover": {
+                    bgcolor: "#F1F4F9",
+                },
+                "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    left: 0,
+                    top: 8,
+                    bottom: 8,
+                    width: 3,
+                    borderRadius: "0 3px 3px 0",
+                    bgcolor: accent,
+                },
             }}
         >
             <Typography
                 sx={{
-                    fontSize: "1.05rem",
+                    fontSize: "1.25rem",
                     fontWeight: 700,
                     color: "#2F323A",
                     lineHeight: 1.1,
-                    minWidth: 22,
+                    minWidth: 26,
                     textAlign: "right",
                 }}
             >
@@ -228,10 +273,11 @@ function KpiTile({ label, valor }: { label: string; valor: number }) {
             </Typography>
             <Typography
                 sx={{
-                    fontSize: "0.7rem",
+                    fontSize: "0.72rem",
                     color: "#5C5F68",
-                    lineHeight: 1.2,
+                    lineHeight: 1.25,
                     flex: 1,
+                    fontWeight: 500,
                 }}
             >
                 {label}
@@ -345,7 +391,7 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                         bgcolor: bgTendencia,
                         color: corTendencia,
                         borderRadius: 1.5,
-                        "& .MuiChip-icon": { ml: 0.5 },
+                        "& .tabler-icon": { ml: 0.5 },
                     }}
                 />
             </Box>
@@ -375,22 +421,22 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                         flexShrink: 0,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 1,
+                        gap: 1.25,
                     }}
                 >
                     <Tooltip title="Pessoas presentes no último encontro" arrow placement="left">
                         <Box>
-                            <KpiTile label="Presentes" valor={pulso.presencas} />
+                            <KpiTile label="Presentes" valor={pulso.presencas} accent={SUCCESS} />
                         </Box>
                     </Tooltip>
                     <Tooltip title="Faltas com justificativa" arrow placement="left">
                         <Box>
-                            <KpiTile label="Faltas justificadas" valor={pulso.justificados} />
+                            <KpiTile label="Faltas justificadas" valor={pulso.justificados} accent={WARNING} />
                         </Box>
                     </Tooltip>
                     <Tooltip title="Faltas sem justificativa" arrow placement="left">
                         <Box>
-                            <KpiTile label="Faltas" valor={pulso.faltas} />
+                            <KpiTile label="Faltas" valor={pulso.faltas} accent={DANGER} />
                         </Box>
                     </Tooltip>
 
@@ -404,7 +450,7 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                             fontWeight: 700,
                             fontSize: "0.8rem",
                             px: 2,
-                            py: 1,
+                            py: 1.25,
                             borderRadius: 2,
                             boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
                             mt: { xs: 0.5, md: "auto" },
@@ -415,7 +461,7 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                             ...FOCUS_OUTLINE,
                         }}
                     >
-                        Ver detalhes
+                        Ver detalhes do encontro
                     </Button>
                 </Box>
             </Box>

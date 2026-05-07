@@ -41,13 +41,13 @@ export function AcoesRapidasCard({
                 <Button
                     variant="contained"
                     onClick={onLancarFrequencia}
-                    startIcon={<IconCalendarCheck size={20} />}
+                    startIcon={<IconCalendarCheck size={17} />}
                     sx={{
                         textTransform: "none",
                         bgcolor: BRAND,
                         color: "#fff",
                         fontWeight: 700,
-                        fontSize: "0.9rem",
+                        fontSize: "0.8rem",
                         py: 1.5,
                         borderRadius: 2,
                         boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
@@ -63,14 +63,14 @@ export function AcoesRapidasCard({
                 <Button
                     variant="outlined"
                     onClick={onRegistrarVisitante}
-                    startIcon={<IconUserPlus size={20} />}
+                    startIcon={<IconUserPlus size={17} />}
                     sx={{
                         textTransform: "none",
                         bgcolor: "#fff",
                         color: BRAND,
                         borderColor: "rgba(94, 121, 179, 0.25)",
                         fontWeight: 700,
-                        fontSize: "0.9rem",
+                        fontSize: "0.8rem",
                         py: 1.5,
                         borderRadius: 2,
                         "&:hover": {
@@ -85,12 +85,12 @@ export function AcoesRapidasCard({
                 <Button
                     variant="text"
                     onClick={onCadastrarMembro}
-                    startIcon={<IconUserUp size={18} />}
+                    startIcon={<IconUserUp size={17} />}
                     sx={{
                         textTransform: "none",
                         color: BRAND,
                         fontWeight: 600,
-                        fontSize: "0.8rem",
+                        fontSize: "0.7rem",
                         py: 1,
                         "&:hover": {
                             bgcolor: "rgba(94, 121, 179, 0.06)",

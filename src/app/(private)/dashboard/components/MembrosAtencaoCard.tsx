@@ -102,7 +102,7 @@ export function MembrosAtencaoCard({
                         p: 0,
                         pr: { xs: 0, md: 0.5 },
                         listStyle: "none",
-                        maxHeight: { xs: 336, md: 448 },
+                        maxHeight: { xs: 336, md: 420 },
                    
                         overflowY: "auto",
                         overscrollBehavior: "contain",
