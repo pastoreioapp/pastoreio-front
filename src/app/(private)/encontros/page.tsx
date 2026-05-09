@@ -191,51 +191,33 @@ export default function Encontros() {
                 <ErrorBox message={erro} />
             ) : (
                 <>
-                    <Box>
-                        <Box sx={{ display: "flex", justifyContent: "end" }}>
-                            <Button
-                                variant="contained"
-                                onClick={() => setModalAberto(true)}
-                                sx={{
-                                    bgcolor: "primary.main",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    display: "flex",
-                                    gap: 1,
-                                    color: "common.white",
-                                }}
-                            >
-                                <IconPlus width={16} /> Registrar encontro
-                            </Button>
-                        </Box>
+                    <Box sx={{
+                        display: "flex",
+                        pt: 2,
+                        gap: { xs: 3, md: 5 },
+                        flexDirection: { xs: "column", md: "row" },
+                    }}>
+                        {(!isMobile || !encontrosSelecionado) && (
+                            <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+                                <Filtro
+                                    data={encontros}
+                                    onSelect={toggleEncontrosSelecionado}
+                                    encontroSelecionado={encontrosSelecionado}
+                                    onRegistrar={() => setModalAberto(true)}
+                                />
+                            </Box>
+                        )}
 
-                        <Box sx={{
-                            display: "flex",
-                            pt: 5,
-                            gap: { xs: 3, md: 5 },
-                            flexDirection: { xs: "column", md: "row" },
-                        }}>
-                            {(!isMobile || !encontrosSelecionado) && (
-                                <Box sx={{ width: { xs: "100%", md: 348 } }}>
-                                    <Filtro
-                                        data={encontros}
-                                        onSelect={toggleEncontrosSelecionado}
-                                        encontroSelecionado={encontrosSelecionado}
-                                    />
-                                </Box>
-                            )}
-
-                            {(!isMobile || !!encontrosSelecionado) && (
-                                <Box flex={1} sx={{ pl: { xs: 0, md: "33px" }, pr: { xs: 0, md: "17px" } }}>
-                                    <Informacao
-                                        data={encontrosSelecionado || null}
-                                        onBack={isMobile ? deselectEncontro : undefined}
-                                        onEditar={handleEditarEncontro}
-                                        onExcluir={handleAbrirExcluir}
-                                    />
-                                </Box>
-                            )}
-                        </Box>
+                        {(!isMobile || !!encontrosSelecionado) && (
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Informacao
+                                    data={encontrosSelecionado || null}
+                                    onBack={isMobile ? deselectEncontro : undefined}
+                                    onEditar={handleEditarEncontro}
+                                    onExcluir={handleAbrirExcluir}
+                                />
+                            </Box>
+                        )}
                     </Box>
 
                     <ModalCadastroEncontro
