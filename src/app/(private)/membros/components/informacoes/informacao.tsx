@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { IconArrowLeft, IconPencil, IconUserMinus, IconUserSearch } from "@tabler/icons-react";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import { formatarDataCompleta } from "@/ui/utils/datas";
 import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
@@ -58,7 +59,7 @@ export function Informacao({
             campos: [
                 { label: "Telefone", valor: data.telefone },
                 { label: "Email", valor: data.email },
-                { label: "Nascimento", valor: data.dataNascimento },
+                { label: "Nascimento", valor: data.dataNascimento ? formatarDataCompleta(data.dataNascimento) : null },
                 { label: "Endereço", valor: data.endereco },
             ],
         },

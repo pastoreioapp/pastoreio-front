@@ -219,7 +219,7 @@ export default function UserProfileDialog({
             } catch (error: unknown) {
                 const message =
                     error instanceof Error ? error.message : "Erro ao salvar os dados. Tente novamente.";
-                showSnackbar("Erro ao salvar os dados. Tente novamente.", "error");
+                showSnackbar(message, "error");
             } finally {
                 setIsSaving(false);
             }
@@ -542,7 +542,7 @@ export default function UserProfileDialog({
                                     handleChange(
                                         "nascimento",
                                         date && date.isValid()
-                                            ? date.toDate().toISOString()
+                                            ? date.format("YYYY-MM-DD")
                                             : "",
                                     )
                                 }

@@ -129,6 +129,7 @@ export async function salvarEncontroComFrequencias(payload: {
   }
 
   const membroRepo = new MembrosCelulaRepository(supabase);
+  // TODO: deve chamar service do membros celula
   const membros = await membroRepo.findMembrosByCelulaIdNaData(payload.celulaId, payload.dados.data);
   const permitidos = new Set(membros.map((m) => Number(m.id)));
 
@@ -174,6 +175,7 @@ export async function syncFrequenciasParaEncontro(
   const dataEncontro: string = encontroRow.data;
 
   const membroRepo = new MembrosCelulaRepository(supabase);
+  // TODO: deve chamar service do membros celula
   const membros = await membroRepo.findMembrosByCelulaIdNaData(celulaId, dataEncontro);
   const permitidos = new Set(membros.map((m) => Number(m.id)));
 

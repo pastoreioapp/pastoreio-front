@@ -1,5 +1,6 @@
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import { Box, ListItemButton, Typography } from "@mui/material";
+import { formatarDataCompleta } from "@/ui/utils/datas";
 
 export function EncontroListItem({
     encontro,
@@ -10,11 +11,7 @@ export function EncontroListItem({
     selected: boolean;
     onClick: () => void;
 }) {
-    const dataFormatada = new Date(encontro.data).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+    const dataFormatada = formatarDataCompleta(encontro.data);
 
     const numeroParticipantes = encontro.frequencia?.filter(frequencia => frequencia.presente).length;
 
