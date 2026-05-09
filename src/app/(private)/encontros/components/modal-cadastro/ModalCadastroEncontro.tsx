@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import { enqueueSnackbar } from "notistack";
-import { listMembrosDaCelula } from "@/app/actions/celulas";
+import { listMembrosDaCelula, listMembrosDaCelulaParaData } from "@/app/actions/celulas";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
 import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
@@ -126,7 +126,6 @@ export function ModalCadastroEncontro({
             setMembros([]);
             setFrequenciaForm({});
             setErroMembros(null);
-            return;
         }
 
         setActiveStep(stepInicial);
@@ -202,7 +201,7 @@ export function ModalCadastroEncontro({
         setDados((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleProximo = () => {
+    const handleProximo = async () => {
         marcarTodosCamposObrigatoriosComoTocados();
 
         if (possuiCamposObrigatoriosInvalidos()) {
@@ -221,7 +220,21 @@ export function ModalCadastroEncontro({
             return;
         }
 
-        setActiveStep(1);
+        try {
+            setLoadingMembros(true);
+            setErroMembros(null);
+            setActiveStep(1);
+            const list = await listMembrosDaCelulaParaData(celulaId, dados.data);
+            setMembros(list);
+            setFrequenciaForm(buildFrequenciaFormInicial(list, frequenciasRef.current));
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : "Erro ao carregar membros da célula.";
+            setErroMembros(msg);
+            setMembros([]);
+            setFrequenciaForm({});
+        } finally {
+            setLoadingMembros(false);
+        }
     };
 
     const handleSubmit = async () => {

@@ -26,6 +26,7 @@ function MembrosContent() {
         membroSelecionado,
         toggleMembroSelecionado,
         deselectMembro,
+        refetch,
         loading,
         erro,
     } = useMembrosSelecionados(
@@ -65,6 +66,7 @@ function MembrosContent() {
                             <Informacao
                                 data={membroSelecionado || null}
                                 onBack={isMobile ? deselectMembro : undefined}
+                                onDesvincular={refetch}
                             />
                         </Box>
                     )}

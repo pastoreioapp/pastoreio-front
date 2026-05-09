@@ -6,6 +6,8 @@ export interface MembroCelula {
   membroId: number;
   papelCelula: PapelCelula | null;
   dataEntrada: string | null;
+  dataSaida: string | null;
+  desvinculadoPor: string | null;
   criadoEm: string;
   criadoPor: string;
   atualizadoEm: string | null;

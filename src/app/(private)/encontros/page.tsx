@@ -1,7 +1,17 @@
 "use client";
 
 import PageContainer from "@/ui/components/pages/PageContainer";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
+import { IconPlus } from "@tabler/icons-react";
 import { Filtro } from "./components/lista-encontro/filtro";
 import { useEncontrosSelecionados } from "./hooks/useEncontroSelecionado";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
@@ -10,7 +20,10 @@ import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { salvarEncontroComFrequencias } from "@/app/actions/encontros";
+import {
+    deletarEncontro,
+    salvarEncontroComFrequencias,
+} from "@/app/actions/encontros";
 import { enqueueSnackbar } from "notistack";
 import { Encontro } from "@/modules/celulas/domain/encontro";
 import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
@@ -39,6 +52,8 @@ export default function Encontros() {
 
     const [modalAberto, setModalAberto] = useState(false);
     const [encontroEditando, setEncontroEditando] = useState<Encontro | null>(null);
+    const [dialogExcluirAberto, setDialogExcluirAberto] = useState(false);
+    const [excluindo, setExcluindo] = useState(false);
     const [stepInicialModal, setStepInicialModal] = useState<0 | 1>(0);
     const lancarFrequenciaProcessadoRef = useRef(false);
     const verUltimoProcessadoRef = useRef(false);
@@ -131,6 +146,39 @@ export default function Encontros() {
         setStepInicialModal(0);
     };
 
+    const handleAbrirExcluir = () => {
+        if (!encontrosSelecionado?.id) return;
+        setDialogExcluirAberto(true);
+    };
+
+    const handleFecharDialogExcluir = () => {
+        if (excluindo) return;
+        setDialogExcluirAberto(false);
+    };
+
+    const handleConfirmarExcluir = async () => {
+        if (celulaId == null || !encontrosSelecionado?.id) return;
+        setExcluindo(true);
+        try {
+            await deletarEncontro(encontrosSelecionado.id, celulaId);
+            enqueueSnackbar("Encontro excluído com sucesso.", {
+                variant: "success",
+                autoHideDuration: 2000,
+            });
+            setDialogExcluirAberto(false);
+            deselectEncontro();
+            await refetch();
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Erro ao excluir o encontro.";
+            enqueueSnackbar(message, { variant: "error", autoHideDuration: 4000 });
+        } finally {
+            setExcluindo(false);
+        }
+    };
+
     return (
         <PageContainer
             title="Encontros"
@@ -143,32 +191,51 @@ export default function Encontros() {
                 <ErrorBox message={erro} />
             ) : (
                 <>
-                    <Box sx={{
-                        display: "flex",
-                        pt: 2,
-                        gap: { xs: 3, md: 5 },
-                        flexDirection: { xs: "column", md: "row" },
-                    }}>
-                        {(!isMobile || !encontrosSelecionado) && (
-                            <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
-                                <Filtro
-                                    data={encontros}
-                                    onSelect={toggleEncontrosSelecionado}
-                                    encontroSelecionado={encontrosSelecionado}
-                                    onRegistrar={() => setModalAberto(true)}
-                                />
-                            </Box>
-                        )}
+                    <Box>
+                        <Box sx={{ display: "flex", justifyContent: "end" }}>
+                            <Button
+                                variant="contained"
+                                onClick={() => setModalAberto(true)}
+                                sx={{
+                                    bgcolor: "primary.main",
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    gap: 1,
+                                    color: "common.white",
+                                }}
+                            >
+                                <IconPlus width={16} /> Registrar encontro
+                            </Button>
+                        </Box>
 
-                        {(!isMobile || !!encontrosSelecionado) && (
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Informacao
-                                    data={encontrosSelecionado || null}
-                                    onBack={isMobile ? deselectEncontro : undefined}
-                                    onEditar={handleEditarEncontro}
-                                />
-                            </Box>
-                        )}
+                        <Box sx={{
+                            display: "flex",
+                            pt: 5,
+                            gap: { xs: 3, md: 5 },
+                            flexDirection: { xs: "column", md: "row" },
+                        }}>
+                            {(!isMobile || !encontrosSelecionado) && (
+                                <Box sx={{ width: { xs: "100%", md: 348 } }}>
+                                    <Filtro
+                                        data={encontros}
+                                        onSelect={toggleEncontrosSelecionado}
+                                        encontroSelecionado={encontrosSelecionado}
+                                    />
+                                </Box>
+                            )}
+
+                            {(!isMobile || !!encontrosSelecionado) && (
+                                <Box flex={1} sx={{ pl: { xs: 0, md: "33px" }, pr: { xs: 0, md: "17px" } }}>
+                                    <Informacao
+                                        data={encontrosSelecionado || null}
+                                        onBack={isMobile ? deselectEncontro : undefined}
+                                        onEditar={handleEditarEncontro}
+                                        onExcluir={handleAbrirExcluir}
+                                    />
+                                </Box>
+                            )}
+                        </Box>
                     </Box>
 
                     <ModalCadastroEncontro
@@ -192,6 +259,37 @@ export default function Encontros() {
                         } : null}
                         encontroId={encontroEditando?.id || null}
                     />
+
+                    <Dialog
+                        open={dialogExcluirAberto}
+                        onClose={handleFecharDialogExcluir}
+                        aria-labelledby="dialog-excluir-encontro-titulo"
+                    >
+                        <DialogTitle id="dialog-excluir-encontro-titulo">
+                            Excluir encontro
+                        </DialogTitle>
+                        <DialogContent>
+                            Esta ação não pode ser desfeita. O encontro e as
+                            frequências vinculadas serão removidos permanentemente.
+                        </DialogContent>
+                        <DialogActions sx={{ px: 3, pb: 2 }}>
+                            <Button
+                                onClick={handleFecharDialogExcluir}
+                                disabled={excluindo}
+                                color="inherit"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={() => void handleConfirmarExcluir()}
+                                disabled={excluindo}
+                                color="error"
+                                variant="contained"
+                            >
+                                {excluindo ? "Excluindo…" : "Excluir"}
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </>
             )}
         </PageContainer>
