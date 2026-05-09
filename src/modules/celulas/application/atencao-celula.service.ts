@@ -5,9 +5,9 @@ import { MembrosCelulaRepository } from "../infra/membros-celula.repository";
 import type { AcompanhamentoPastoralRepository } from "../infra/acompanhamento-pastoral.repository";
 
 const REGRAS = {
-    critico: { faltasConsecutivas: 3, diasSemPastoreio: 35 },
-    alerta: { faltasConsecutivas: 2, diasSemPastoreio: 21 },
-    observacao: { faltasConsecutivas: 1, diasSemPastoreio: 14 },
+    critico: { faltasConsecutivas: 4, diasSemPastoreio: 90 },
+    alerta: { faltasConsecutivas: 3, diasSemPastoreio: 60 },
+    observacao: { faltasConsecutivas: 2, diasSemPastoreio: 30 },
     janelaEncontros: 6,
 };
 

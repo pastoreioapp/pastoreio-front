@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const CELULA_METAS_TABLE = "celula_metas";
+const FUSO_BRASIL = "America/Sao_Paulo";
 
 export interface MetaComValor {
     metaId: number;
@@ -9,11 +10,21 @@ export interface MetaComValor {
     valorAlcancado: number;
 }
 
+// Retorna a data de hoje no fuso de São Paulo no formato "YYYY-MM-DD" (independente do fuso do servidor).
+function hojeNoFusoBrasil(): string {
+    return new Intl.DateTimeFormat("en-CA", {
+        timeZone: FUSO_BRASIL,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date());
+}
+
 export class MetasCelulaRepository {
     constructor(private readonly supabase: SupabaseClient) {}
 
     async findByCelulaIdNoPeriodoAtual(celulaId: number): Promise<MetaComValor[]> {
-        const hoje = new Date().toISOString().split("T")[0];
+        const hoje = hojeNoFusoBrasil();
 
         const { data, error } = await this.supabase
             .from(CELULA_METAS_TABLE)

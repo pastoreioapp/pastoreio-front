@@ -5,26 +5,6 @@ export const REGRAS_ATENCAO = {
     janelaEncontros: 6,
 };
 
-export const TENDENCIA_LABELS: Record<string, string> = {
-    "subida-forte": "subida forte",
-    "subida-leve": "subida leve",
-    "estavel": "estável",
-    "queda-leve": "queda leve",
-    "queda-forte": "queda forte",
-};
-
-export function calcularLabelTendencia(deltaPct: number): {
-    direcao: "subida" | "queda" | "estavel";
-    label: string;
-    deltaPct: number;
-} {
-    if (deltaPct >= 15) return { direcao: "subida", label: TENDENCIA_LABELS["subida-forte"], deltaPct };
-    if (deltaPct >= 5) return { direcao: "subida", label: TENDENCIA_LABELS["subida-leve"], deltaPct };
-    if (deltaPct <= -15) return { direcao: "queda", label: TENDENCIA_LABELS["queda-forte"], deltaPct };
-    if (deltaPct <= -5) return { direcao: "queda", label: TENDENCIA_LABELS["queda-leve"], deltaPct };
-    return { direcao: "estavel", label: TENDENCIA_LABELS["estavel"], deltaPct };
-}
-
 export const PESOS_SAUDE = {
     presenca: 0.5,
     pastoreio: 0.3,

@@ -55,9 +55,6 @@ export function DashboardScreen() {
         router.push("/encontros?novo=true");
     };
 
-    // TODO: Decisão de produto pendente — fluxo de visitante
-    const handleRegistrarVisitante = () => emBreve();
-
     // TODO: Decisão de produto pendente — fluxo de cadastro de membro
     const handleCadastrarMembro = () => emBreve();
 
@@ -151,8 +148,7 @@ export function DashboardScreen() {
 
                     <AcoesRapidasCard
                         onLancarFrequencia={handleLancarFrequencia}
-                        onRegistrarVisitante={handleRegistrarVisitante}
-                        onCadastrarMembro={handleCadastrarMembro}
+                        onRegistrarVisitante={handleCadastrarMembro}
                     />
                 </Box>
 

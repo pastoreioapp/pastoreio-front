@@ -1,15 +1,11 @@
-import type { PulsoSemanaResult } from "./dashboard-dtos";
+import type { PulsoSemanaResult, Tendencia } from "./dashboard-dtos";
 import { EncontroRepository } from "../infra/encontro.repository";
 
 const QTD_ENCONTROS_HISTORICO = 5;
 
-function calcularTendencia(historicoPresencas: number[]): {
-    direcao: "subida" | "queda" | "estavel";
-    label: string;
-    deltaPct: number;
-} {
+function calcularTendencia(historicoPresencas: number[]): Tendencia {
     if (historicoPresencas.length < 3) {
-        return { direcao: "estavel", label: "estável", deltaPct: 0 };
+        return { direcao: "estavel", intensidade: "neutra", deltaPct: 0 };
     }
 
     const recentes = historicoPresencas.slice(-2);
@@ -20,17 +16,17 @@ function calcularTendencia(historicoPresencas: number[]): {
 
     if (mediaAnteriores === 0) {
         return mediaRecentes > 0
-            ? { direcao: "subida", label: "subida forte", deltaPct: 100 }
-            : { direcao: "estavel", label: "estável", deltaPct: 0 };
+            ? { direcao: "subida", intensidade: "forte", deltaPct: 100 }
+            : { direcao: "estavel", intensidade: "neutra", deltaPct: 0 };
     }
 
     const deltaPct = Math.round(((mediaRecentes - mediaAnteriores) / mediaAnteriores) * 100);
 
-    if (deltaPct >= 15) return { direcao: "subida", label: "subida forte", deltaPct };
-    if (deltaPct >= 5) return { direcao: "subida", label: "subida leve", deltaPct };
-    if (deltaPct <= -15) return { direcao: "queda", label: "queda forte", deltaPct };
-    if (deltaPct <= -5) return { direcao: "queda", label: "queda leve", deltaPct };
-    return { direcao: "estavel", label: "estável", deltaPct };
+    if (deltaPct >= 15) return { direcao: "subida", intensidade: "forte", deltaPct };
+    if (deltaPct >= 5) return { direcao: "subida", intensidade: "leve", deltaPct };
+    if (deltaPct <= -15) return { direcao: "queda", intensidade: "forte", deltaPct };
+    if (deltaPct <= -5) return { direcao: "queda", intensidade: "leve", deltaPct };
+    return { direcao: "estavel", intensidade: "neutra", deltaPct };
 }
 
 export class PulsoCelulaService {
@@ -44,8 +40,7 @@ export class PulsoCelulaService {
                 presencas: 0,
                 justificados: 0,
                 faltas: 0,
-                // TODO: usar enum para direcao e label
-                tendencia: { direcao: "estavel", label: "estável", deltaPct: 0 },
+                tendencia: { direcao: "estavel", intensidade: "neutra", deltaPct: 0 },
                 historico: [],
                 ultimoEncontroData: null,
             };
@@ -61,10 +56,6 @@ export class PulsoCelulaService {
         const presencas = freqsUltimo.filter((f) => f.presente).length;
         const justificados = freqsUltimo.filter((f) => !f.presente && f.justificado).length;
         const faltas = freqsUltimo.filter((f) => !f.presente && !f.justificado).length;
-        console.log("freqsUltimo", freqsUltimo);
-        console.log("presencas", presencas);
-        console.log("justificados", justificados);
-        console.log("faltas", faltas);
 
         const historico = ordenados.map((enc) => ({
             data: enc.data,

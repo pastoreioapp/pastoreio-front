@@ -51,6 +51,7 @@ interface ModalCadastroEncontroProps {
     encontroId?: string | null;
     celulaId?: number | null;
     frequenciasExistentes?: Encontro["frequencia"];
+    stepInicial?: 0 | 1;
 }
 
 export interface DadosEncontro {
@@ -89,6 +90,7 @@ export function ModalCadastroEncontro({
     encontroId,
     celulaId,
     frequenciasExistentes,
+    stepInicial = 0,
 }: ModalCadastroEncontroProps) {
     type CampoObrigatorio = "tema" | "data" | "horario" | "local" | "anfitriao" | "preletor";
 
@@ -127,6 +129,8 @@ export function ModalCadastroEncontro({
             return;
         }
 
+        setActiveStep(stepInicial);
+
         if (celulaId == null) {
             setMembros([]);
             setFrequenciaForm({});
@@ -161,7 +165,7 @@ export function ModalCadastroEncontro({
         return () => {
             cancelled = true;
         };
-    }, [open, celulaId, encontroId]);
+    }, [open, celulaId, encontroId, stepInicial]);
 
     const getCampoObrigatorioErro = (campo: CampoObrigatorio) => {
         if (!camposTocados[campo]) {

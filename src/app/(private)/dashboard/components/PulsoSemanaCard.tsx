@@ -2,28 +2,16 @@
 
 import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import type {
+    PulsoSemanaResult,
+    TendenciaDirecao,
+} from "@/modules/celulas/application/dashboard-dtos";
 import { BRAND, BRAND_HOVER, CARD_STYLE, DANGER, SUCCESS, WARNING, FOCUS_OUTLINE } from "../lib/tokens";
-
-export type TendenciaDirecao = "subida" | "queda" | "estavel";
-
-export type HistoricoEncontro = {
-    data: string;
-    presencas: number;
-};
-
-export type PulsoSemana = {
-    presencas: number;
-    justificados: number;
-    faltas: number;
-    tendencia: {
-        direcao: TendenciaDirecao;
-        label: string;
-    };
-    historico: HistoricoEncontro[];
-};
+import { rotularTendencia } from "../lib/tendencia-labels";
+import { MiniChart } from "./MiniChart";
 
 type Props = {
-    pulso: PulsoSemana;
+    pulso: PulsoSemanaResult;
     onVerDetalhes?: () => void;
 };
 
@@ -39,193 +27,11 @@ const TENDENCIA_BG: Record<TendenciaDirecao, string> = {
     estavel: "rgba(92, 95, 104, 0.08)",
 };
 
-// Converte "YYYY-MM-DD" em "dd/mm" sem depender do fuso horário do navegador.
-function formatarDataCurta(data: string): string {
-    const partes = data.slice(0, 10).split("-");
-    if (partes.length !== 3) return data;
-    const [, mes, dia] = partes;
-    return `${dia}/${mes}`;
-}
-
-// "dd 'de' MMMM" para uso no tooltip, em português.
-const MESES_EXTENSO = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
-];
-
-function formatarDataExtensa(data: string): string {
-    const partes = data.slice(0, 10).split("-");
-    if (partes.length !== 3) return data;
-    const [, mes, dia] = partes;
-    const indiceMes = Number(mes) - 1;
-    const nomeMes = MESES_EXTENSO[indiceMes] ?? mes;
-    return `${Number(dia)} de ${nomeMes}`;
-}
-
 function TendenciaIcon({ direcao }: { direcao: TendenciaDirecao }) {
     const cor = TENDENCIA_CORES[direcao];
     if (direcao === "subida") return <IconTrendingUp size={14} color={cor} stroke={2.4} />;
     if (direcao === "queda") return <IconTrendingDown size={14} color={cor} stroke={2.4} />;
     return null;
-}
-
-function MiniChart({ historico }: { historico: HistoricoEncontro[] }) {
-    const valores = historico.map((h) => h.presencas);
-    const maximo = Math.max(...valores, 1);
-    const media = valores.reduce((s, v) => s + v, 0) / valores.length;
-    const mediaPct = (media / maximo) * 100;
-
-    const descricaoBarras = historico
-        .map((h) => `${formatarDataExtensa(h.data)}: ${h.presencas} presenças`)
-        .join("; ");
-    const ariaLabel = `Presenças nos últimos ${historico.length} encontros — ${descricaoBarras}`;
-
-    return (
-        <Box
-            role="img"
-            aria-label={ariaLabel}
-            sx={{ position: "relative", mt: 1, pt: "18px" }}
-        >
-            <Box
-                sx={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    justifyContent: "space-between",
-                    gap: 0.75,
-                    height: 150,
-                    position: "relative",
-                    zIndex: 1,
-                }}
-            >
-                {historico.map((item, i) => {
-                    const altura = Math.max((item.presencas / maximo) * 100, 8);
-                    const eUltimo = i === historico.length - 1;
-                    const titulo = `Encontro de ${formatarDataExtensa(item.data)} — ${item.presencas} ${item.presencas === 1 ? "presença" : "presenças"}`;
-                    return (
-                        <Box
-                            key={`coluna-${item.data}-${i}`}
-                            sx={{
-                                flex: 1,
-                                height: "100%",
-                                position: "relative",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "flex-end",
-                            }}
-                        >
-                            <Typography
-                                sx={{
-                                    position: "absolute",
-                                    bottom: `${altura}%`,
-                                    left: 0,
-                                    right: 0,
-                                    textAlign: "center",
-                                    fontSize: "0.7rem",
-                                    fontWeight: eUltimo ? 700 : 600,
-                                    color: eUltimo ? BRAND : "#2F323A",
-                                    lineHeight: 1,
-                                    mb: "3px",
-                                    pointerEvents: "none",
-                                }}
-                            >
-                                {item.presencas}
-                            </Typography>
-                            <Tooltip
-                                title={titulo}
-                                arrow
-                                placement="top"
-                            >
-                                <Box
-                                    sx={{
-                                        width: "100%",
-                                        height: `${altura}%`,
-                                        borderRadius: "3px 3px 0 0",
-                                        bgcolor: eUltimo
-                                            ? BRAND
-                                            : "rgba(94, 121, 179, 0.25)",
-                                        transition: "background-color 0.2s ease",
-                                        cursor: "default",
-                                    }}
-                                />
-                            </Tooltip>
-                        </Box>
-                    );
-                })}
-
-                {/* linha de média */}
-                <Box
-                    sx={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        bottom: `${mediaPct}%`,
-                        height: 0,
-                        borderBottom: "1.5px dashed rgba(94, 121, 179, 0.35)",
-                        zIndex: 0,
-                        pointerEvents: "none",
-                    }}
-                />
-            </Box>
-
-            {/* datas dos encontros */}
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    mt: 0.75,
-                    gap: 0.75,
-                }}
-            >
-                {historico.map((item, i) => {
-                    const eUltimo = i === historico.length - 1;
-                    return (
-                        <Box
-                            key={`label-${item.data}-${i}`}
-                            sx={{
-                                flex: 1,
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: 0.25,
-                            }}
-                        >
-                            <Typography
-                                sx={{
-                                    textAlign: "center",
-                                    fontSize: "0.65rem",
-                                    fontWeight: eUltimo ? 700 : 500,
-                                    color: eUltimo ? BRAND : "text.secondary",
-                                    lineHeight: 1.4,
-                                }}
-                            >
-                                {formatarDataCurta(item.data)}
-                            </Typography>
-                            {eUltimo && (
-                                <Box
-                                    sx={{
-                                        bgcolor: BRAND,
-                                        color: "#fff",
-                                        fontSize: "0.55rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.04em",
-                                        px: 0.75,
-                                        py: 0.125,
-                                        borderRadius: 1,
-                                        lineHeight: 1.4,
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    Esta semana
-                                </Box>
-                            )}
-                        </Box>
-                    );
-                })}
-            </Box>
-        </Box>
-    );
 }
 
 function KpiTile({ label, valor, accent }: { label: string; valor: number; accent: string }) {
@@ -382,7 +188,7 @@ export function PulsoSemanaCard({ pulso, onVerDetalhes }: Props) {
                 </Typography>
                 <Chip
                     icon={<TendenciaIcon direcao={pulso.tendencia.direcao} />}
-                    label={pulso.tendencia.label}
+                    label={rotularTendencia(pulso.tendencia)}
                     size="small"
                     sx={{
                         height: 24,

@@ -4,6 +4,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { IconArrowLeft, IconCalendarEvent, IconPencil } from "@tabler/icons-react";
 import { InformacoesGroup } from "./informacoesGroup";
 import type { Encontro } from "@/modules/celulas/domain/encontro";
+import { formatarDataCompleta } from "@/ui/utils/datas";
 import { EtapasTabs } from "./etapasTabs";
 
 const MensagemNenhumEncontroSelecionado = () => (
@@ -52,13 +53,9 @@ export function Informacao({
         {
             titulo: "Dados do Encontro",
             campos: [
-                { 
+                {
                     label: "Data",
-                    valor: new Date(data.data).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                    }),
+                    valor: formatarDataCompleta(data.data),
                 },
                 { label: "Local", valor: data.local },
             ],
