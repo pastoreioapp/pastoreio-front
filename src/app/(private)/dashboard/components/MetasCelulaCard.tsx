@@ -13,11 +13,6 @@ export type MetaCelula = {
     formato?: "moeda" | "numero";
 };
 
-type Props = {
-    metas: MetaCelula[];
-    periodo?: string;
-};
-
 function getCorMeta(progresso: number): string {
     if (progresso >= 80) return SUCCESS;
     if (progresso >= 50) return WARNING;
@@ -91,7 +86,7 @@ function MetaItem({ meta }: { meta: MetaCelula }) {
     );
 }
 
-export function MetasCelulaCard({ metas, periodo = "Mês atual" }: Props) {
+export function MetasCelulaCard({ metas }: {metas: MetaCelula[]}) {
     const headerId = "metas-celula-titulo";
 
     return (
@@ -125,18 +120,6 @@ export function MetasCelulaCard({ metas, periodo = "Mês atual" }: Props) {
                 >
                     Metas da célula
                 </Typography>
-                <Chip
-                    label={periodo}
-                    size="small"
-                    sx={{
-                        height: 22,
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        bgcolor: "rgba(94, 121, 179, 0.1)",
-                        color: "#5E79B3",
-                        borderRadius: 1.5,
-                    }}
-                />
             </Box>
 
             {metas.length === 0 ? (

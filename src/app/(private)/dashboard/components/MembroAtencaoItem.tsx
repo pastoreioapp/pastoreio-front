@@ -14,6 +14,7 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    IconAlertCircle,
     IconAlertTriangle,
     IconCheck,
     IconClockPause,
@@ -22,6 +23,7 @@ import {
     IconNotebook,
     IconUser,
 } from "@tabler/icons-react";
+import type { ReactElement } from "react";
 import { BRAND, BRAND_HOVER, DANGER, WARNING, FOCUS_OUTLINE } from "../lib/tokens";
 
 export type Severidade = "critico" | "alerta" | "observacao";
@@ -55,6 +57,12 @@ const SEVERIDADE_LABEL: Record<Severidade, string> = {
     critico: "Crítico",
     alerta: "Alerta",
     observacao: "Observação",
+};
+
+const SEVERIDADE_ICONE: Record<Severidade, ReactElement> = {
+    critico: <IconAlertTriangle size={12} />,
+    alerta: <IconAlertCircle size={12} />,
+    observacao: <IconAlertCircle size={12} />,
 };
 
 const STAGGER_DELAY_MS = 50;
@@ -127,7 +135,7 @@ export function MembroAtencaoItem({
                         bgcolor: BRAND,
                         color: "#fff",
                         fontWeight: 600,
-                        fontSize: "0.95rem",
+                        fontSize: "1rem",
                         flexShrink: 0,
                     }}
                 >
@@ -139,7 +147,7 @@ export function MembroAtencaoItem({
                         <Typography
                             component="span"
                             sx={{
-                                fontSize: "1rem",
+                                fontSize: "1.05rem",
                                 fontWeight: 700,
                                 color: "#2F323A",
                             }}
@@ -147,15 +155,18 @@ export function MembroAtencaoItem({
                             {membro.nome}
                         </Typography>
                         <Chip
+                            icon={SEVERIDADE_ICONE[membro.severidade]}
                             label={SEVERIDADE_LABEL[membro.severidade]}
                             size="small"
                             sx={{
-                                height: 20,
-                                fontSize: "0.65rem",
+                                height: 24,
+                                fontSize: "0.72rem",
                                 fontWeight: 700,
+                                letterSpacing: "0.02em",
                                 bgcolor: `${corSeveridade}14`,
                                 color: corSeveridade,
                                 borderRadius: 1,
+                                "& .MuiChip-icon": { color: corSeveridade, ml: 0.5 },
                                 "& .MuiChip-label": { px: 0.75 },
                             }}
                         />
@@ -174,7 +185,7 @@ export function MembroAtencaoItem({
                             <Typography
                                 key={i}
                                 component="li"
-                                sx={{ fontSize: "0.8rem", color: "#5C5F68" }}
+                                sx={{ fontSize: "0.9rem", color: "#3F4350" }}
                             >
                                 {motivo}
                             </Typography>
@@ -188,27 +199,29 @@ export function MembroAtencaoItem({
                     display: "flex",
                     gap: 1,
                     flexShrink: 0,
-                    alignItems: "center",
-                    flexDirection: { xs: "row", sm: "row" },
-                    justifyContent: { xs: "flex-end", sm: "flex-start" },
+                    alignItems: { xs: "stretch", sm: "center" },
+                    flexDirection: { xs: "column", sm: "row" },
+                    justifyContent: { xs: "flex-start", sm: "flex-start" },
+                    width: { xs: "100%", sm: "auto" },
                 }}
             >
                 <Button
                     variant="contained"
                     onClick={() => onEnviarMensagem?.(membro.id)}
-                    startIcon={<IconMessageCircle size={16} />}
+                    startIcon={<IconMessageCircle size={18} />}
                     aria-label={`Enviar mensagem para ${membro.nome}`}
                     sx={{
                         textTransform: "none",
                         bgcolor: BRAND,
                         color: "#fff",
                         fontWeight: 600,
-                        fontSize: "0.8rem",
+                        fontSize: "0.9rem",
                         px: 1.5,
                         py: 0.75,
                         borderRadius: 2,
                         boxShadow: "none",
                         whiteSpace: "nowrap",
+                        width: { xs: "100%", sm: "auto" },
                         "&:hover": { bgcolor: BRAND_HOVER, boxShadow: "none" },
                         ...FOCUS_OUTLINE,
                     }}
@@ -216,29 +229,61 @@ export function MembroAtencaoItem({
                     Enviar mensagem
                 </Button>
                 <Button
-                    variant="text"
-                    onClick={() => onVerFicha?.(membro.id)}
-                    aria-label={`Ver ficha de ${membro.nome}`}
+                    variant="contained"
+                    onClick={() => onRegistrarPastoreio?.(membro.id)}
+                    startIcon={<IconNotebook size={18} />}
+                    aria-label={`Registrar pastoreio para ${membro.nome}`}
                     sx={{
                         textTransform: "none",
-                        color: BRAND,
+                        bgcolor: BRAND,
+                        color: "#fff",
                         fontWeight: 600,
-                        fontSize: "0.8rem",
-                        px: 1,
+                        fontSize: "0.9rem",
+                        px: 1.5,
+                        py: 0.75,
+                        borderRadius: 2,
+                        boxShadow: "none",
                         whiteSpace: "nowrap",
+                        width: { xs: "100%", sm: "auto" },
+                        "&:hover": { bgcolor: BRAND_HOVER, boxShadow: "none" },
                         ...FOCUS_OUTLINE,
                     }}
                 >
-                    Ver ficha
+                    Registrar pastoreio
                 </Button>
-                <IconButton
-                    size="small"
-                    onClick={(e) => setMenuAnchor(e.currentTarget)}
-                    aria-label={`Mais ações para ${membro.nome}`}
-                    sx={{ color: "#5C5F68", ...FOCUS_OUTLINE }}
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "center",
+                        justifyContent: { xs: "flex-end", sm: "flex-start" },
+                    }}
                 >
-                    <IconDots size={18} />
-                </IconButton>
+                    <Button
+                        variant="text"
+                        onClick={() => onVerFicha?.(membro.id)}
+                        aria-label={`Ver ficha de ${membro.nome}`}
+                        sx={{
+                            textTransform: "none",
+                            color: BRAND,
+                            fontWeight: 600,
+                            fontSize: "0.85rem",
+                            px: 1,
+                            whiteSpace: "nowrap",
+                            ...FOCUS_OUTLINE,
+                        }}
+                    >
+                        Ver ficha
+                    </Button>
+                    <IconButton
+                        size="small"
+                        onClick={(e) => setMenuAnchor(e.currentTarget)}
+                        aria-label={`Mais ações para ${membro.nome}`}
+                        sx={{ color: "#5C5F68", ...FOCUS_OUTLINE }}
+                    >
+                        <IconDots size={18} />
+                    </IconButton>
+                </Box>
                 <Menu
                     anchorEl={menuAnchor}
                     open={Boolean(menuAnchor)}
@@ -251,15 +296,6 @@ export function MembroAtencaoItem({
                         },
                     }}
                 >
-                    <MenuItem
-                        onClick={() => {
-                            onRegistrarPastoreio?.(membro.id);
-                            setMenuAnchor(null);
-                        }}
-                    >
-                        <ListItemIcon><IconNotebook size={18} /></ListItemIcon>
-                        <ListItemText>Registrar pastoreio</ListItemText>
-                    </MenuItem>
                     <MenuItem
                         onClick={() => {
                             onMarcarAcompanhado?.(membro.id);
@@ -302,7 +338,8 @@ export function MembroAtencaoEmpty() {
         >
             <IconAlertTriangle size={40} stroke={1.5} color="#5A6A85" />
             <Typography sx={{ color: "text.secondary", fontSize: "0.95rem" }}>
-                Nenhum membro precisa de atenção no momento.
+                Não há membros destacados para atenção neste momento.
+           
             </Typography>
         </Box>
     );

@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "./DashboardHeader";
 import { SaudeCelulaCard } from "./SaudeCelulaCard";
-import { AcoesRapidasCard } from "./AcoesRapidasCard";
+import { SaudeCelulaDetalhesModal } from "./SaudeCelulaDetalhesModal";
 import { MetasCelulaCard } from "./MetasCelulaCard";
 import { MembrosAtencaoCard } from "./MembrosAtencaoCard";
 import { PulsoSemanaCard } from "./PulsoSemanaCard";
@@ -33,14 +33,10 @@ export function DashboardScreen() {
     const { metas, loading: loadingMetas, erro: erroMetas } = useMetasCelula(celulaId);
     const { saude, loading: loadingSaude, erro: erroSaude } = useSaudeCelula(celulaId);
 
-    const timestampRef = useRef<Date | null>(null);
-    const atualizadoEm = useMemo(() => {
-        const algumCarregou = !loadingPulso || !loadingAtencao || !loadingMetas || !loadingSaude;
-        if (algumCarregou && timestampRef.current == null) {
-            timestampRef.current = new Date();
-        }
-        return timestampRef.current;
-    }, [loadingPulso, loadingAtencao, loadingMetas, loadingSaude]);
+    const [detalhesSaudeAberto, setDetalhesSaudeAberto] = useState(false);
+
+    const detalhesSaudeCarregando =
+        loadingPulso || loadingMetas || loadingAtencao || !pulso;
 
     if (!ready) return <LoadingBox />;
 
@@ -51,11 +47,14 @@ export function DashboardScreen() {
     }
 
     const handleLancarFrequencia = () => {
-        // TODO: implementar uma feature que ao acessar a rota de encontros com o parãmmetro de lançar a frequência, abrir modal de lançar frequência para a célula daquela semana, se já estiver criada, ou abrir o modal de criar encontro da semana caso não exista.
-        router.push("/encontros?novo=true");
+        router.push("/encontros?lancarFrequencia=true");
     };
 
-    // TODO: Decisão de produto pendente — fluxo de cadastro de membro
+    const handleVerDetalhesPulso = () => {
+        router.push("/encontros?verUltimo=true");
+    };
+
+    // TODO: levar para modal de cadastro quando implementado
     const handleCadastrarMembro = () => emBreve();
 
     const handleVerFicha = (id: string) => {
@@ -77,16 +76,17 @@ export function DashboardScreen() {
 
     // TODO: Requer Server Action tocando acompanhamento_pastoral_membros — decisão de produto pendente
     const handleRegistrarPastoreio = () => emBreve();
-
     // TODO: Requer Server Action tocando acompanhamento_pastoral_membros — decisão de produto pendente
     const handleMarcarAcompanhado = () => emBreve();
-
     // TODO: Requer tabela dashboard_dispensas + persistência (membroId, dataLimite) — decisão de produto pendente
     const handleAdiar = () => emBreve();
 
     return (
         <Box>
-            <DashboardHeader atualizadoEm={atualizadoEm} />
+            <DashboardHeader
+                onLancarFrequencia={handleLancarFrequencia}
+                onRegistrarMembro={handleCadastrarMembro}
+            />
 
             <Box
                 sx={{
@@ -99,8 +99,8 @@ export function DashboardScreen() {
                     gridTemplateRows: { md: "auto auto" },
                     gridTemplateAreas: {
                         xs: `
-                            "atencao"
                             "coluna1"
+                            "atencao"
                             "pulso"
                         `,
                         md: `
@@ -129,8 +129,8 @@ export function DashboardScreen() {
                             mensagem={saude.mensagem}
                             versiculo={saude.versiculo}
                             classe={saude.classe}
-                            score={saude.score}
-                            onVerDetalhes={emBreve}
+                            detalhesLoading={detalhesSaudeCarregando}
+                            onVerDetalhes={() => setDetalhesSaudeAberto(true)}
                         />
                     ) : null}
 
@@ -140,16 +140,11 @@ export function DashboardScreen() {
                         ) : erroMetas ? (
                             <ErrorBox message={erroMetas} />
                         ) : (
-                            <Box sx={{ width: "100%" }}>
+                            <Box sx={{ width: "100%", mt: 2 }}>
                                 <MetasCelulaCard metas={metas} />
                             </Box>
                         )}
                     </Box>
-
-                    <AcoesRapidasCard
-                        onLancarFrequencia={handleLancarFrequencia}
-                        onRegistrarVisitante={handleCadastrarMembro}
-                    />
                 </Box>
 
                 <Box sx={{ gridArea: "atencao" }}>
@@ -177,11 +172,22 @@ export function DashboardScreen() {
                     ) : pulso ? (
                         <PulsoSemanaCard
                             pulso={pulso}
-                            onVerDetalhes={emBreve}
+                            onVerDetalhes={handleVerDetalhesPulso}
                         />
                     ) : null}
                 </Box>
             </Box>
+
+            {saude && pulso && (
+                <SaudeCelulaDetalhesModal
+                    open={detalhesSaudeAberto}
+                    onClose={() => setDetalhesSaudeAberto(false)}
+                    saude={saude}
+                    pulso={pulso}
+                    membrosAtencao={membros}
+                    metas={metas}
+                />
+            )}
         </Box>
     );
 }

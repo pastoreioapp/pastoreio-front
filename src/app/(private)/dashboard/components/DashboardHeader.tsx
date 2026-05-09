@@ -1,9 +1,9 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import { IconRefresh } from "@tabler/icons-react";
+import { Box, Button, Typography } from "@mui/material";
+import { IconCalendarCheck, IconUserPlus } from "@tabler/icons-react";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
-import { useTempoRelativo } from "../hooks/useTempoRelativo";
+import { BRAND, BRAND_HOVER, FOCUS_OUTLINE } from "../lib/tokens";
 
 function getSaudacao(): string {
     const hora = new Date().getHours();
@@ -22,15 +22,37 @@ function getDataExtenso(): string {
 }
 
 type Props = {
-    atualizadoEm?: Date | null;
+    onLancarFrequencia?: () => void;
+    onRegistrarMembro?: () => void;
 };
 
-export function DashboardHeader({ atualizadoEm = null }: Props) {
+export function DashboardHeader({
+    onLancarFrequencia,
+    onRegistrarMembro,
+}: Props) {
     const { loggedUser } = useAppAuthentication();
     const primeiroNome = loggedUser?.nome ?? "";
     const saudacao = getSaudacao();
     const data = getDataExtenso();
-    const textoAtualizado = useTempoRelativo(atualizadoEm);
+
+    const buttonBaseSx = {
+        textTransform: "none" as const,
+        fontWeight: 700,
+        fontSize: "0.85rem",
+        py: 0.85,
+        px: 2,
+        borderRadius: 2,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        flex: { xs: 1, sm: "0 0 auto" },
+        whiteSpace: "normal" as const,
+        lineHeight: 1.2,
+        textAlign: "center" as const,
+        minWidth: 0,
+        "& .MuiButton-startIcon": {
+            alignSelf: "center",
+        },
+        ...FOCUS_OUTLINE,
+    };
 
     return (
         <Box
@@ -38,9 +60,9 @@ export function DashboardHeader({ atualizadoEm = null }: Props) {
             sx={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: { xs: "flex-start", sm: "center" },
+                alignItems: { xs: "stretch", sm: "center" },
                 flexDirection: { xs: "column", sm: "row" },
-                gap: 1,
+                gap: { xs: 2, sm: 1 },
                 mb: 3,
             }}
         >
@@ -72,15 +94,45 @@ export function DashboardHeader({ atualizadoEm = null }: Props) {
                 sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 0.5,
-                    color: "text.secondary",
+                    gap: 1,
                     flexShrink: 0,
+                    width: { xs: "100%", sm: "auto" },
                 }}
             >
-                <IconRefresh size={14} stroke={1.8} />
-                <Typography sx={{ fontSize: "0.75rem" }}>
-                    {textoAtualizado}
-                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={onLancarFrequencia}
+                    startIcon={<IconCalendarCheck size={16} />}
+                    sx={{
+                        ...buttonBaseSx,
+                        bgcolor: BRAND,
+                        color: "#fff",
+                        "&:hover": {
+                            bgcolor: BRAND_HOVER,
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                        },
+                    }}
+                >
+                    Lançar frequência
+                </Button>
+                <Button
+                    variant="outlined"
+                    onClick={onRegistrarMembro}
+                    aria-label="Registrar membro ou visitante"
+                    startIcon={<IconUserPlus size={16} />}
+                    sx={{
+                        ...buttonBaseSx,
+                        bgcolor: "#fff",
+                        color: BRAND,
+                        borderColor: "rgba(94, 121, 179, 0.25)",
+                        "&:hover": {
+                            borderColor: BRAND,
+                            bgcolor: "rgba(94, 121, 179, 0.06)",
+                        },
+                    }}
+                >
+                    Novo membro
+                </Button>
             </Box>
         </Box>
     );

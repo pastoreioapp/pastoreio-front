@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { IconArrowRight } from "@tabler/icons-react";
 import type { SaudeCelulaResult } from "@/modules/celulas/application/saude-dtos";
 import { FOCUS_OUTLINE } from "../lib/tokens";
@@ -9,8 +9,8 @@ type Props = {
     mensagem: string;
     versiculo: string;
     classe: SaudeCelulaResult["classe"];
-    score?: number;
     onVerDetalhes?: () => void;
+    detalhesLoading?: boolean;
 };
 
 export function SaudeCelulaCard({
@@ -18,8 +18,8 @@ export function SaudeCelulaCard({
     mensagem,
     versiculo,
     classe,
-    score,
     onVerDetalhes,
+    detalhesLoading = false,
 }: Props) {
     const headerId = "saude-celula-titulo";
     const tokens = SAUDE_VARIANTES[variantePorClasse(classe)];
@@ -48,32 +48,6 @@ export function SaudeCelulaCard({
                 },
             }}
         >
-            {score != null && (
-                <Box
-                    sx={{
-                        position: "absolute",
-                        top: { xs: 12, md: 16 },
-                        right: { xs: 12, md: 16 },
-                        bgcolor: tokens.chipBg,
-                        backdropFilter: "blur(4px)",
-                        borderRadius: 2,
-                        px: 1.5,
-                        py: 0.5,
-                        zIndex: 2,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            letterSpacing: "0.04em",
-                        }}
-                    >
-                        Score {score}/100
-                    </Typography>
-                </Box>
-            )}
-
             <Box
                 component="img"
                 src={tokens.icone.src}
@@ -152,7 +126,23 @@ export function SaudeCelulaCard({
 
                 <Button
                     onClick={onVerDetalhes}
-                    endIcon={<IconArrowRight size={16} stroke={2.2} />}
+                    disabled={detalhesLoading}
+                    aria-label={
+                        detalhesLoading
+                            ? "Carregando dados da saúde da célula"
+                            : "Ver detalhes da saúde da célula"
+                    }
+                    endIcon={
+                        detalhesLoading ? (
+                            <CircularProgress
+                                size={14}
+                                thickness={5}
+                                sx={{ color: tokens.linkColor }}
+                            />
+                        ) : (
+                            <IconArrowRight size={16} stroke={2.2} />
+                        )
+                    }
                     sx={{
                         alignSelf: "flex-start",
                         color: tokens.linkColor,
@@ -165,10 +155,16 @@ export function SaudeCelulaCard({
                             bgcolor: "transparent",
                             opacity: 0.85,
                         },
+                        "&.Mui-disabled": {
+                            color: tokens.linkColor,
+                            opacity: 0.7,
+                            cursor: "wait",
+                            pointerEvents: "auto",
+                        },
                         ...FOCUS_OUTLINE,
                     }}
                 >
-                    Ver detalhes
+                    {detalhesLoading ? "Carregando detalhes…" : "Ver detalhes"}
                 </Button>
             </Box>
         </Box>
