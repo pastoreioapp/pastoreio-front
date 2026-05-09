@@ -18,7 +18,7 @@ import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
     deletarEncontro,
@@ -31,7 +31,7 @@ import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
 import { estaNaSemanaAtual } from "@/ui/utils/datas";
 
-export default function Encontros() {
+function EncontrosContent() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const { loggedUser } = useAppAuthentication();
@@ -275,5 +275,13 @@ export default function Encontros() {
                 </>
             )}
         </PageContainer>
+    );
+}
+
+export default function Encontros() {
+    return (
+        <Suspense fallback={<LoadingBox />}>
+            <EncontrosContent />
+        </Suspense>
     );
 }
