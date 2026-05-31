@@ -1,15 +1,15 @@
 export enum StatusMultiplicacao {
-  PLANEJADA = "PLANEJADA",
-  EM_ANDAMENTO = "EM_ANDAMENTO",
-  CONCLUIDA = "CONCLUIDA",
-  CANCELADA = "CANCELADA",
+  EM_PLANEJAMENTO = "Em planejamento",
+  EM_ANALISE = "Em análise",
+  AUTORIZADA = "Autorizada",
+  FINALIZADA = "Finalizada",
 }
 
 export const STATUS_MULTIPLICACAO = [
-  StatusMultiplicacao.PLANEJADA,
-  StatusMultiplicacao.EM_ANDAMENTO,
-  StatusMultiplicacao.CONCLUIDA,
-  StatusMultiplicacao.CANCELADA,
+  StatusMultiplicacao.EM_PLANEJAMENTO,
+  StatusMultiplicacao.EM_ANALISE,
+  StatusMultiplicacao.AUTORIZADA,
+  StatusMultiplicacao.FINALIZADA,
 ] as const;
 
 export function isStatusMultiplicacao(
@@ -22,11 +22,20 @@ export function parseStatusMultiplicacao(
   value: unknown,
 ): StatusMultiplicacao {
   if (typeof value !== "string") {
-    return StatusMultiplicacao.PLANEJADA;
+    return StatusMultiplicacao.EM_PLANEJAMENTO;
   }
 
-  const normalized = value.trim().toUpperCase();
-  return isStatusMultiplicacao(normalized)
-    ? normalized
-    : StatusMultiplicacao.PLANEJADA;
+  const normalized = value.trim();
+  if (isStatusMultiplicacao(normalized)) {
+    return normalized;
+  }
+
+  const legacyStatus: Record<string, StatusMultiplicacao> = {
+    PLANEJADA: StatusMultiplicacao.EM_PLANEJAMENTO,
+    EM_ANDAMENTO: StatusMultiplicacao.EM_ANALISE,
+    CONCLUIDA: StatusMultiplicacao.FINALIZADA,
+    CANCELADA: StatusMultiplicacao.EM_PLANEJAMENTO,
+  };
+
+  return legacyStatus[normalized.toUpperCase()] ?? StatusMultiplicacao.EM_PLANEJAMENTO;
 }

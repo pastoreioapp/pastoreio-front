@@ -17,6 +17,10 @@ export interface CreateMultiplicacaoDto {
   membros: CreateMultiplicacaoMembroDto[];
 }
 
+export interface UpdateMultiplicacaoDto extends CreateMultiplicacaoDto {
+  id: number;
+}
+
 export interface MultiplicacaoMembroListItemDto {
   id: number;
   membroId: number;
@@ -31,6 +35,7 @@ export interface MultiplicacaoListItemDto {
   celulaOrigemId: number;
   celulaDestinoId: number | null;
   celulaDestinoNome: string | null;
+  nomeCelulaDestino: string | null;
   liderMembroId: number | null;
   liderNome: string | null;
   dataMultiplicacao: string | null;

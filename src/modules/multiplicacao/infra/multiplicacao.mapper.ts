@@ -31,6 +31,7 @@ export function rowToMultiplicacaoListItemDto(
     celulaOrigemId: row.celula_origem_id,
     celulaDestinoId: row.celula_destino_id,
     celulaDestinoNome: row.celula_destino?.nome ?? null,
+    nomeCelulaDestino: row.nome_celula_destino ?? row.celula_destino?.nome ?? null,
     liderMembroId: row.lider_membro_id,
     liderNome:
       membros.find((membro) => membro.membroId === row.lider_membro_id)?.nome ?? null,

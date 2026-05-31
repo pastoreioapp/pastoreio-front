@@ -6,6 +6,8 @@ import type {
   CreateMultiplicacaoMembroPayload,
   CreateMultiplicacaoPayload,
   MultiplicacaoRow,
+  UpdateMultiplicacaoPayload,
+  UpdateMultiplicacaoStatusPayload,
 } from "./multiplicacao.types";
 
 const CELULAS_TABLE = "celulas";
@@ -153,13 +155,65 @@ export class MultiplicacaoRepository {
     if (error) throw new Error(error.message);
   }
 
+  async updateMultiplicacao(
+    multiplicacaoId: number,
+    celulaOrigemId: number,
+    payload: UpdateMultiplicacaoPayload,
+  ): Promise<void> {
+    const { data, error } = await this.supabase
+      .from(MULTIPLICACAO_TABLE)
+      .update(payload)
+      .eq("id", multiplicacaoId)
+      .eq("celula_origem_id", celulaOrigemId)
+      .eq("deletado", false)
+      .select("id");
+
+    if (error) throw new Error(error.message);
+    if (!data?.length) {
+      throw new Error("Multiplicacao nao encontrada para esta celula.");
+    }
+  }
+
+  async replaceMultiplicacaoMembros(
+    multiplicacaoId: number,
+    payload: CreateMultiplicacaoMembroPayload[],
+    auditUserId: string,
+  ): Promise<void> {
+    await this.softDeleteMultiplicacaoMembros(multiplicacaoId, auditUserId);
+    await this.createMultiplicacaoMembros(payload);
+  }
+
+  async updateStatus(
+    multiplicacaoId: number,
+    celulaOrigemId: number,
+    payload: UpdateMultiplicacaoStatusPayload,
+  ): Promise<void> {
+    const { data, error } = await this.supabase
+      .from(MULTIPLICACAO_TABLE)
+      .update(payload)
+      .eq("id", multiplicacaoId)
+      .eq("celula_origem_id", celulaOrigemId)
+      .eq("deletado", false)
+      .select("id");
+
+    if (error) throw new Error(error.message);
+    if (!data?.length) {
+      throw new Error("Multiplicacao nao encontrada para esta celula.");
+    }
+  }
+
   async findDestinoByIdAndCelulaOrigemId(
     multiplicacaoId: number,
     celulaOrigemId: number,
-  ): Promise<{ id: number; celulaDestinoId: number | null } | null> {
+  ): Promise<{
+    id: number;
+    celulaDestinoId: number | null;
+    nomeCelulaDestino: string | null;
+    statusMultiplicacao: string | null;
+  } | null> {
     const { data, error } = await this.supabase
       .from(MULTIPLICACAO_TABLE)
-      .select("id, celula_destino_id")
+      .select("id, celula_destino_id, nome_celula_destino, status_multiplicacao")
       .eq("id", multiplicacaoId)
       .eq("celula_origem_id", celulaOrigemId)
       .eq("deletado", false)
@@ -172,6 +226,8 @@ export class MultiplicacaoRepository {
       id: Number(data.id),
       celulaDestinoId:
         data.celula_destino_id == null ? null : Number(data.celula_destino_id),
+      nomeCelulaDestino: data.nome_celula_destino ?? null,
+      statusMultiplicacao: data.status_multiplicacao ?? null,
     };
   }
 

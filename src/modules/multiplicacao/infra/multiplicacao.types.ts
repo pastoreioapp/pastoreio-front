@@ -2,6 +2,7 @@ export type MultiplicacaoRow = {
   id: number;
   celula_origem_id: number;
   celula_destino_id: number | null;
+  nome_celula_destino: string | null;
   lider_membro_id: number | null;
   data_multiplicacao: string | null;
   status_multiplicacao: string | null;
@@ -45,6 +46,7 @@ export type CreateCelulaPayload = {
 export type CreateMultiplicacaoPayload = {
   celula_origem_id: number;
   celula_destino_id: number | null;
+  nome_celula_destino: string;
   lider_membro_id: number;
   data_multiplicacao: string | null;
   status_multiplicacao: string;
@@ -52,6 +54,22 @@ export type CreateMultiplicacaoPayload = {
   deletado: boolean;
   criado_em: string;
   criado_por: string;
+};
+
+export type UpdateMultiplicacaoPayload = {
+  nome_celula_destino: string;
+  lider_membro_id: number;
+  data_multiplicacao: string | null;
+  observacoes: string | null;
+  atualizado_em: string;
+  atualizado_por: string;
+};
+
+export type UpdateMultiplicacaoStatusPayload = {
+  status_multiplicacao: string;
+  atualizado_em: string;
+  atualizado_por: string;
+  celula_destino_id?: number;
 };
 
 export type CreateMultiplicacaoMembroPayload = {

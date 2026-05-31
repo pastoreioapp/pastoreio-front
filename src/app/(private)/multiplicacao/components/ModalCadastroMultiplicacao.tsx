@@ -26,7 +26,10 @@ import { IconX } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { enqueueSnackbar } from "notistack";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
-import type { CreateMultiplicacaoDto } from "@/modules/multiplicacao/application/dtos";
+import type {
+  CreateMultiplicacaoDto,
+  MultiplicacaoListItemDto,
+} from "@/modules/multiplicacao/application/dtos";
 
 type Props = {
   open: boolean;
@@ -34,6 +37,7 @@ type Props = {
   onSave: (payload: CreateMultiplicacaoDto) => Promise<void>;
   celulaId?: number | null;
   membros: MembroDaCelulaListItemDto[];
+  multiplicacao?: MultiplicacaoListItemDto | null;
 };
 
 const inputSx = {
@@ -53,6 +57,7 @@ export function ModalCadastroMultiplicacao({
   onSave,
   celulaId,
   membros,
+  multiplicacao,
 }: Props) {
   const [nomeCelulaDestino, setNomeCelulaDestino] = useState("");
   const [liderMembroId, setLiderMembroId] = useState("");
@@ -71,8 +76,23 @@ export function ModalCadastroMultiplicacao({
       setBusca("");
       setSelecionados(new Set());
       setSalvando(false);
+      return;
     }
-  }, [open]);
+
+    if (multiplicacao) {
+      setNomeCelulaDestino(multiplicacao.nomeCelulaDestino ?? "");
+      setLiderMembroId(
+        multiplicacao.liderMembroId == null ? "" : String(multiplicacao.liderMembroId),
+      );
+      setDataMultiplicacao(multiplicacao.dataMultiplicacao ?? "");
+      setObservacoes(multiplicacao.observacoes ?? "");
+      setBusca("");
+      setSelecionados(
+        new Set(multiplicacao.membros.map((membro) => membro.membroId)),
+      );
+      setSalvando(false);
+    }
+  }, [multiplicacao, open]);
 
   const membrosVisiveis = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -184,7 +204,7 @@ export function ModalCadastroMultiplicacao({
       >
         <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontSize: "1.1rem", fontWeight: 800 }}>
-            Nova multiplicacao
+            {multiplicacao ? "Editar multiplicacao" : "Nova multiplicacao"}
           </Typography>
           <Typography sx={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.82)" }}>
             {totalSelecionados} selecionados, {totalPermanecem} permanecem na celula atual
@@ -379,7 +399,11 @@ export function ModalCadastroMultiplicacao({
             px: 3,
           }}
         >
-          {salvando ? "Salvando..." : "Registrar multiplicacao"}
+          {salvando
+            ? "Salvando..."
+            : multiplicacao
+              ? "Salvar alteracoes"
+              : "Registrar multiplicacao"}
         </Button>
       </DialogActions>
     </Dialog>

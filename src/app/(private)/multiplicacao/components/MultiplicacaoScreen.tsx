@@ -21,24 +21,33 @@ import { enqueueSnackbar } from "notistack";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
-import type { CreateMultiplicacaoDto } from "@/modules/multiplicacao/application/dtos";
-import type { StatusMultiplicacao } from "@/modules/multiplicacao/domain/status-multiplicacao";
-import { createMultiplicacao, deleteMultiplicacao } from "@/app/actions/multiplicacao";
+import type {
+  CreateMultiplicacaoDto,
+  MultiplicacaoListItemDto,
+} from "@/modules/multiplicacao/application/dtos";
+import { StatusMultiplicacao } from "@/modules/multiplicacao/domain/status-multiplicacao";
+import {
+  createMultiplicacao,
+  deleteMultiplicacao,
+  finalizarMultiplicacao,
+  solicitarAnaliseMultiplicacao,
+  updateMultiplicacao,
+} from "@/app/actions/multiplicacao";
 import { useMultiplicacao } from "../hooks/useMultiplicacao";
 import { ModalCadastroMultiplicacao } from "./ModalCadastroMultiplicacao";
 
 const STATUS_LABEL: Record<StatusMultiplicacao, string> = {
-  PLANEJADA: "Planejada",
-  EM_ANDAMENTO: "Em andamento",
-  CONCLUIDA: "Concluida",
-  CANCELADA: "Cancelada",
+  [StatusMultiplicacao.EM_PLANEJAMENTO]: "Em planejamento",
+  [StatusMultiplicacao.EM_ANALISE]: "Em análise",
+  [StatusMultiplicacao.AUTORIZADA]: "Autorizada",
+  [StatusMultiplicacao.FINALIZADA]: "Finalizada",
 };
 
 const STATUS_COLOR: Record<StatusMultiplicacao, "default" | "info" | "success" | "error"> = {
-  PLANEJADA: "default",
-  EM_ANDAMENTO: "info",
-  CONCLUIDA: "success",
-  CANCELADA: "error",
+  [StatusMultiplicacao.EM_PLANEJAMENTO]: "default",
+  [StatusMultiplicacao.EM_ANALISE]: "info",
+  [StatusMultiplicacao.AUTORIZADA]: "success",
+  [StatusMultiplicacao.FINALIZADA]: "success",
 };
 
 export function MultiplicacaoScreen() {
@@ -47,28 +56,85 @@ export function MultiplicacaoScreen() {
   const { membros, multiplicacoes, loading, erro, refetch } =
     useMultiplicacao(celulaId);
   const [modalAberto, setModalAberto] = useState(false);
+  const [multiplicacaoEditando, setMultiplicacaoEditando] =
+    useState<MultiplicacaoListItemDto | null>(null);
   const [multiplicacaoExcluindoId, setMultiplicacaoExcluindoId] = useState<
     number | null
   >(null);
   const [excluindo, setExcluindo] = useState(false);
+  const [processandoId, setProcessandoId] = useState<number | null>(null);
 
   const handleSave = async (payload: CreateMultiplicacaoDto) => {
-    const result = await createMultiplicacao(payload);
+    try {
+      if (multiplicacaoEditando) {
+        await updateMultiplicacao({ ...payload, id: multiplicacaoEditando.id });
+      } else {
+        await createMultiplicacao(payload);
+      }
 
-    if (!result.ok) {
-      enqueueSnackbar(result.error, {
-        variant: "error",
-        autoHideDuration: 4000,
-      });
-      return;
+      enqueueSnackbar(
+        multiplicacaoEditando
+          ? "Multiplicacao atualizada com sucesso."
+          : "Multiplicacao registrada com sucesso.",
+        {
+          variant: "success",
+          autoHideDuration: 2500,
+        },
+      );
+      setModalAberto(false);
+      setMultiplicacaoEditando(null);
+      refetch();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nao foi possivel salvar a multiplicacao.";
+      enqueueSnackbar(message, { variant: "error", autoHideDuration: 4000 });
     }
+  };
 
-    enqueueSnackbar("Multiplicacao registrada com sucesso.", {
-      variant: "success",
-      autoHideDuration: 2500,
-    });
-    setModalAberto(false);
-    refetch();
+  const handleSolicitarAnalise = async (multiplicacaoId: number) => {
+    if (celulaId == null) return;
+
+    try {
+      setProcessandoId(multiplicacaoId);
+      await solicitarAnaliseMultiplicacao(multiplicacaoId, celulaId);
+      enqueueSnackbar("Multiplicacao enviada para analise.", {
+        variant: "success",
+        autoHideDuration: 2500,
+      });
+      refetch();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nao foi possivel solicitar analise.";
+      enqueueSnackbar(message, { variant: "error", autoHideDuration: 4000 });
+    } finally {
+      setProcessandoId(null);
+    }
+  };
+
+  const handleFinalizar = async (multiplicacaoId: number) => {
+    if (celulaId == null) return;
+
+    try {
+      setProcessandoId(multiplicacaoId);
+      await finalizarMultiplicacao(multiplicacaoId, celulaId);
+      enqueueSnackbar("Multiplicacao finalizada e nova celula criada.", {
+        variant: "success",
+        autoHideDuration: 2500,
+      });
+      refetch();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nao foi possivel finalizar a multiplicacao.";
+      enqueueSnackbar(message, { variant: "error", autoHideDuration: 4000 });
+    } finally {
+      setProcessandoId(null);
+    }
   };
 
   const handleConfirmarExcluir = async () => {
@@ -125,7 +191,10 @@ export function MultiplicacaoScreen() {
         <Button
           variant="contained"
           startIcon={<IconPlus size={18} />}
-          onClick={() => setModalAberto(true)}
+          onClick={() => {
+            setMultiplicacaoEditando(null);
+            setModalAberto(true);
+          }}
           disabled={membros.length === 0 || celulaId == null}
           sx={{
             bgcolor: "#5E79B3",
@@ -206,6 +275,7 @@ export function MultiplicacaoScreen() {
                     <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
                       <Typography sx={{ fontWeight: 800, color: "#111827" }}>
                         {multiplicacao.celulaDestinoNome ??
+                          multiplicacao.nomeCelulaDestino ??
                           "Nova celula planejada"}
                       </Typography>
                       <Chip
@@ -224,7 +294,7 @@ export function MultiplicacaoScreen() {
 
                   <Box sx={{ minWidth: { md: 220 } }}>
                     <Typography sx={{ fontSize: "0.8rem", color: "text.secondary", mb: 0.75 }}>
-                      {multiplicacao.totalMembros} vao para a nova celula, {membrosRestantes} permanecem
+                      {multiplicacao.totalMembros} vão para a nova célula, {membrosRestantes} permanecem
                     </Typography>
                     <LinearProgress
                       variant="determinate"
@@ -236,21 +306,76 @@ export function MultiplicacaoScreen() {
                         "& .MuiLinearProgress-bar": { bgcolor: "#5E79B3" },
                       }}
                     />
-                    <Button
-                      color="error"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<IconTrash size={16} />}
-                      onClick={() => setMultiplicacaoExcluindoId(multiplicacao.id)}
-                      sx={{
-                        mt: 1.5,
-                        borderRadius: 2,
-                        fontWeight: 700,
-                        textTransform: "none",
-                      }}
-                    >
-                      Excluir
-                    </Button>
+                    <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 1.5 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        disabled={
+                          multiplicacao.statusMultiplicacao !==
+                          StatusMultiplicacao.EM_PLANEJAMENTO
+                        }
+                        onClick={() => {
+                          setMultiplicacaoEditando(multiplicacao);
+                          setModalAberto(true);
+                        }}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 700,
+                          textTransform: "none",
+                        }}
+                      >
+                        Editar
+                      </Button>
+                      {multiplicacao.statusMultiplicacao ===
+                        StatusMultiplicacao.EM_PLANEJAMENTO && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={processandoId === multiplicacao.id}
+                          onClick={() => void handleSolicitarAnalise(multiplicacao.id)}
+                          sx={{
+                            bgcolor: "#5E79B3",
+                            "&:hover": { bgcolor: "#4A6499" },
+                            borderRadius: 2,
+                            fontWeight: 700,
+                            textTransform: "none",
+                          }}
+                        >
+                          Solicitar análise
+                        </Button>
+                      )}
+                      {multiplicacao.statusMultiplicacao ===
+                        StatusMultiplicacao.AUTORIZADA && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          disabled={processandoId === multiplicacao.id}
+                          onClick={() => void handleFinalizar(multiplicacao.id)}
+                          sx={{
+                            borderRadius: 2,
+                            fontWeight: 700,
+                            textTransform: "none",
+                          }}
+                        >
+                          Multiplicar
+                        </Button>
+                      )}
+                      <Button
+                        color="error"
+                        variant="outlined"
+                        size="small"
+                        startIcon={<IconTrash size={16} />}
+                        onClick={() => setMultiplicacaoExcluindoId(multiplicacao.id)}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 700,
+                          textTransform: "none",
+                        }}
+                      >
+                        Excluir
+                      </Button>
+                    </Stack>
                   </Box>
                 </Box>
 
@@ -282,10 +407,14 @@ export function MultiplicacaoScreen() {
 
       <ModalCadastroMultiplicacao
         open={modalAberto}
-        onClose={() => setModalAberto(false)}
+        onClose={() => {
+          setModalAberto(false);
+          setMultiplicacaoEditando(null);
+        }}
         onSave={handleSave}
         celulaId={celulaId}
         membros={membros}
+        multiplicacao={multiplicacaoEditando}
       />
 
       <Dialog
@@ -296,11 +425,10 @@ export function MultiplicacaoScreen() {
         aria-labelledby="dialog-excluir-multiplicacao-titulo"
       >
         <DialogTitle id="dialog-excluir-multiplicacao-titulo">
-          Excluir multiplicacao
+          Excluir multiplicacão
         </DialogTitle>
         <DialogContent>
-          A multiplicacao, os membros vinculados e a celula criada por ela serao
-          marcados como excluidos.
+          O planejamento de multiplicação será excluído permanentemente
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
