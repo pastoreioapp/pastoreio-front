@@ -43,12 +43,12 @@ const STATUS_LABEL: Record<StatusMultiplicacao, string> = {
   [StatusMultiplicacao.FINALIZADA]: "Finalizada",
 };
 
-const STATUS_COLOR: Record<StatusMultiplicacao, "default" | "info" | "success" | "error"> = {
-  [StatusMultiplicacao.EM_PLANEJAMENTO]: "default",
-  [StatusMultiplicacao.EM_ANALISE]: "info",
-  [StatusMultiplicacao.AUTORIZADA]: "success",
-  [StatusMultiplicacao.FINALIZADA]: "success",
-};
+const STATUS_STEPS = [
+  StatusMultiplicacao.EM_PLANEJAMENTO,
+  StatusMultiplicacao.EM_ANALISE,
+  StatusMultiplicacao.AUTORIZADA,
+  StatusMultiplicacao.FINALIZADA,
+] as const;
 
 export function MultiplicacaoScreen() {
   const { loggedUser } = useAppAuthentication();
@@ -272,18 +272,11 @@ export function MultiplicacaoScreen() {
                   }}
                 >
                   <Box sx={{ minWidth: 0 }}>
-                    <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
-                      <Typography sx={{ fontWeight: 800, color: "#111827" }}>
-                        {multiplicacao.celulaDestinoNome ??
-                          multiplicacao.nomeCelulaDestino ??
-                          "Nova celula planejada"}
-                      </Typography>
-                      <Chip
-                        size="small"
-                        color={STATUS_COLOR[multiplicacao.statusMultiplicacao]}
-                        label={STATUS_LABEL[multiplicacao.statusMultiplicacao]}
-                      />
-                    </Stack>
+                    <Typography sx={{ fontWeight: 800, color: "#111827" }}>
+                      {multiplicacao.celulaDestinoNome ??
+                        multiplicacao.nomeCelulaDestino ??
+                        "Nova celula planejada"}
+                    </Typography>
                     <Typography sx={{ color: "text.secondary", fontSize: "0.86rem", mt: 0.5 }}>
                       Data prevista: {formatDate(multiplicacao.dataMultiplicacao)}
                     </Typography>
@@ -379,6 +372,8 @@ export function MultiplicacaoScreen() {
                   </Box>
                 </Box>
 
+                <StatusProgress status={multiplicacao.statusMultiplicacao} />
+
                 {multiplicacao.observacoes && (
                   <Typography sx={{ color: "text.secondary", fontSize: "0.9rem", mt: 1.5 }}>
                     {multiplicacao.observacoes}
@@ -448,6 +443,115 @@ export function MultiplicacaoScreen() {
           </Button>
         </DialogActions>
       </Dialog>
+    </Box>
+  );
+}
+
+function StatusProgress({ status }: { status: StatusMultiplicacao }) {
+  const activeIndex = Math.max(
+    STATUS_STEPS.findIndex((step) => step === status),
+    0,
+  );
+
+  return (
+    <Box sx={{ mt: 2.5, mb: 0.5 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(2, minmax(0, 1fr))",
+            sm: "repeat(4, minmax(0, 1fr))",
+          },
+          gap: { xs: 1.5, sm: 0 },
+          position: "relative",
+          "&::before": {
+            content: { xs: "none", sm: '""' },
+            position: "absolute",
+            top: 18,
+            left: "12.5%",
+            right: "12.5%",
+            height: 3,
+            borderRadius: 999,
+            bgcolor: "#E5E7EB",
+          },
+        }}
+      >
+        {STATUS_STEPS.map((step, index) => {
+          const completed = index < activeIndex;
+          const active = index === activeIndex;
+
+          return (
+            <Box
+              key={step}
+              sx={{
+                position: "relative",
+                zIndex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                sx={{
+                  color: active ? "#111827" : "text.secondary",
+                  fontSize: "0.76rem",
+                  fontWeight: active ? 800 : 700,
+                  lineHeight: 1.2,
+                  minHeight: 28,
+                  px: 0.5,
+                }}
+              >
+                {STATUS_LABEL[step]}
+              </Typography>
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  mt: 0.75,
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: completed || active ? "#22C55E" : "#D1D5DB",
+                  color: "#fff",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                  border: "3px solid #fff",
+                  boxShadow: active
+                    ? "0 0 0 3px rgba(34, 197, 94, 0.18)"
+                    : "0 1px 3px rgba(17, 24, 39, 0.12)",
+                }}
+              >
+                {completed ? "✓" : index + 1}
+              </Box>
+              <Box
+                sx={{
+                  mt: 0.75,
+                  px: 1,
+                  py: 0.35,
+                  borderRadius: 1,
+                  bgcolor: active
+                    ? "#FEF3C7"
+                    : completed
+                      ? "#DCFCE7"
+                      : "#F3F4F6",
+                  color: active
+                    ? "#92400E"
+                    : completed
+                      ? "#166534"
+                      : "text.secondary",
+                  fontSize: "0.7rem",
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                }}
+              >
+                {active ? "atual" : completed ? "concluida" : "pendente"}
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
     </Box>
   );
 }
