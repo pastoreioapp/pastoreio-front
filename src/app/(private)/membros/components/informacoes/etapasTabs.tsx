@@ -2,9 +2,14 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
 import { EtapaCard } from "./etapaCard";
-import { listaTrajetoria } from "./listaTrajetoria";
-import { IconInfoCircle, IconInfoCircleFilled, IconInfoOctagon } from "@tabler/icons-react";
-import { IconChartBar } from "@tabler/icons-react";
+import { CursoCard } from "./cursoCard";
+import { FrequenciaCalendario } from "./frequenciaCalendario";
+import { useTrajetoriaMembro } from "../../hooks/useTrajetoriaMembro";
+import { useCursosDoMembro } from "../../hooks/useCursosDoMembro";
+import { useFrequenciasMembro } from "../../hooks/useFrequenciasMembro";
+import { IconInfoCircleFilled } from "@tabler/icons-react";
+import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
+import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 
 const STYLE_TAB = {
     fontSize: { xs: "14px", md: "16px" },
@@ -12,14 +17,17 @@ const STYLE_TAB = {
     width: { xs: "auto", md: "180px" },
     minWidth: "unset",
     padding: { xs: 1.5, md: 2.5 },
-    color: "#C5C5C5",
+    color: "text.secondary",
     "&.Mui-selected": {
         color: "#000",
     },
 };
 
-export function EtapasTabs() {
+export function EtapasTabs({ membroId }: { membroId: number }) {
     const [tab, setTab] = useState("1");
+    const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
+    const { cursos, loading: cursosLoading, erro: cursosErro } = useCursosDoMembro(membroId);
+    const { frequencias, loading: freqLoading, erro: freqErro } = useFrequenciasMembro(membroId);
 
     return (
         <Box
@@ -43,7 +51,7 @@ export function EtapasTabs() {
                         onChange={(e, v) => setTab(v)}
                         TabIndicatorProps={{
                             sx: {
-                                backgroundColor: "#E7E7E7",
+                                backgroundColor: "#5E79B3",
                                 borderRadius: "1.5px",
                             },
                         }}
@@ -56,47 +64,77 @@ export function EtapasTabs() {
                 <TabPanel
                     value="1"
                     sx={{
-                        paddingTop: 4,
+                        paddingTop: 3,
                     }}
                 >
-                    <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
-                        <EtapaCard
-                            etapa={1}
-                            titulo="Pastoreio 1"
-                            itens={listaTrajetoria.pastoreio1}
-                        />
-                        <EtapaCard
-                            etapa={2}
-                            titulo="Pastoreio 2"
-                            itens={listaTrajetoria.pastoreio2}
-                        />
-                        <EtapaCard
-                            etapa={3}
-                            titulo="Discipulado"
-                            itens={listaTrajetoria.discipulado}
-                        />
-                        <EtapaCard
-                            etapa={4}
-                            titulo="Líder de Célula"
-                            itens={listaTrajetoria.lider}
-                        />
-                    </Box>
+                    {loading && <LoadingBox />}
+                    {erro && <ErrorBox message={erro} />}
+                    {!loading && !erro && trajetoria && (
+                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                            {trajetoria.grupos.map((grupo) => (
+                                <EtapaCard
+                                    key={grupo.id}
+                                    etapa={grupo.ordem}
+                                    titulo={grupo.nome}
+                                    exibirEtapa={trajetoria.grupos.length > 1}
+                                    itens={grupo.passos.map((p) => ({
+                                        label: p.nome,
+                                        concluido: p.concluido,
+                                    }))}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                    {!loading && !erro && !trajetoria && (
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhuma trajetória ativa encontrada.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
-                <TabPanel value="2">
-                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
-                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
-                            <IconInfoCircleFilled size={24} />
-                            Funcionalidade disponível em breve!
-                        </Typography>
-                    </Box>
+                <TabPanel value="2" sx={{ paddingTop: 3 }}>
+                    {cursosLoading && <LoadingBox />}
+                    {cursosErro && <ErrorBox message={cursosErro} />}
+                    {!cursosLoading && !cursosErro && cursos.length > 0 && (
+                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                            {cursos.map((curso) => (
+                                <CursoCard
+                                    key={curso.inscricaoId}
+                                    cursoNome={curso.cursoNome}
+                                    turmaNome={curso.turmaNome}
+                                    status={curso.status}
+                                    statusLabel={curso.statusLabel}
+                                    dataInicio={curso.dataInicio}
+                                    dataFim={curso.dataFim}
+                                />
+                            ))}
+                        </Box>
+                    )}
+                    {!cursosLoading && !cursosErro && cursos.length === 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhum curso encontrado.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
-                <TabPanel value="3">
-                    <Box mx="145px" display="flex" justifyContent="center" alignItems="center" height="100%">
-                        <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
-                            <IconInfoCircleFilled size={24} />
-                            Funcionalidade disponível em breve!
-                        </Typography>
-                    </Box>
+                <TabPanel value="3" sx={{ paddingTop: 3, px: { xs: 0, md: 3 } }}>
+                    {freqLoading && <LoadingBox />}
+                    {freqErro && <ErrorBox message={freqErro} />}
+                    {!freqLoading && !freqErro && frequencias.length > 0 && (
+                        <FrequenciaCalendario frequencias={frequencias} />
+                    )}
+                    {!freqLoading && !freqErro && frequencias.length === 0 && (
+                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                                <IconInfoCircleFilled size={24} />
+                                Nenhuma frequência registrada.
+                            </Typography>
+                        </Box>
+                    )}
                 </TabPanel>
             </TabContext>
         </Box>

@@ -10,7 +10,7 @@ const STYLE_TAB = {
     width: { xs: "auto", md: "180px" },
     minWidth: "unset",
     padding: { xs: 1.5, md: 2.5 },
-    color: "#C5C5C5",
+    color: "text.secondary",
     "&.Mui-selected": {
         color: "#000",
     },
@@ -23,11 +23,10 @@ export function EtapasTabs({ data }: { data: Encontro["frequencia"] }) {
         <Box
             display="flex"
             flexDirection="column"
-            paddingTop="50px"
+            paddingTop="10px"
             marginX="auto"
             sx={{
-                width: { xs: "100%", md: "800px" },
-                maxWidth: "100%",
+                width: "100%",
                 overflowX: "auto",
             }}
         >
@@ -42,7 +41,7 @@ export function EtapasTabs({ data }: { data: Encontro["frequencia"] }) {
                         onChange={(e, v) => setTab(v)}
                         TabIndicatorProps={{
                             sx: {
-                                backgroundColor: "#E7E7E7",
+                                backgroundColor: "#5E79B3",
                                 borderRadius: "1.5px",
                             },
                         }}

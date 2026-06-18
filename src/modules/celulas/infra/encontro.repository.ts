@@ -48,9 +48,10 @@ export class EncontroRepository {
   }
 
   async create(dados: Encontro): Promise<Encontro> {
+    const { frequencia: _, ...row } = dados;
     const { data, error } = await this.supabase
       .from(TABLE)
-      .insert([dados])
+      .insert([row])
       .select()
       .single();
     
@@ -67,9 +68,10 @@ export class EncontroRepository {
   }
 
   async update(id: string, dados: Partial<Encontro>): Promise<Encontro> {
+    const { frequencia: _, ...row } = dados;
     const { data, error } = await this.supabase
       .from(TABLE)
-      .update(dados)
+      .update(row)
       .eq("id", id)
       .select()
       .single();
@@ -84,5 +86,54 @@ export class EncontroRepository {
     }
     
     return data;
+  }
+
+  /** Retorna true se existir encontro ativo (não deletado) com esse id e célula (respeita RLS). */
+  async existsByIdAndCelula(id: string, celulaId: number): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("id")
+      .eq("id", id)
+      .eq("celula_id", celulaId)
+      .eq("deletado", false)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data != null;
+  }
+
+  /**
+   * Exclusão lógica do encontro. Chame antes `FrequenciaCelulaRepository.softDeleteByEncontroId`
+   * para manter frequências alinhadas ao mesmo critério.
+   */
+  async deleteByIdAndCelula(
+    id: string,
+    celulaId: number,
+    audit: { por: string }
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .update({
+        deletado: true,
+        atualizado_em: now,
+        atualizado_por: audit.por,
+      })
+      .eq("id", id)
+      .eq("celula_id", celulaId)
+      .eq("deletado", false)
+      .select("id");
+
+    if (error) {
+      console.error("Erro ao excluir encontro:", error);
+      throw new Error(error.message);
+    }
+    if (!data?.length) {
+      throw new Error(
+        "Encontro não encontrado ou você não tem permissão para excluí-lo."
+      );
+    }
   }
 }

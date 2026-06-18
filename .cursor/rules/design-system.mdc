@@ -1,0 +1,389 @@
+---
+description: Guia de design visual do sistema — paleta de cores, padrões de layout, componentes e tokens de estilo MUI
+globs: src/ui/**,src/app/(private)/**/components/**,src/app/(public)/**/components/**
+---
+
+# Guia de Design Visual
+
+Este documento define os **padrões visuais oficiais** do sistema. Toda tela nova ou refatoração deve seguir estes tokens e patterns. As referências de implementação estão nas telas de **Membros** e **Encontros**, que servem como modelo.
+
+---
+
+## 1. Paleta de Cores
+
+### 1.1 Brand
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| Brand principal | `#5E79B3` | Botões primários, indicador de tab, avatar fallback, foco de input, badges |
+| Brand hover | `#4A6499` | Hover de botões primários |
+| Brand light | `#7B95CC` | Extremidade clara do gradient |
+
+### 1.2 Superfícies
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| Background card | `#fff` | Cards de detalhe, list items |
+| Background input | `#F8F8F8` | Campos de busca |
+| Background info group | `#FAFBFC` | Paper de grupos de informação |
+| Borda input default | `#F5F5F5` | Borda em repouso de inputs |
+| Borda input hover | `#E0E0E0` | Borda ao passar o mouse |
+| Borda list item | `#ECECEC` | Borda de itens de lista |
+| Borda empty state | `#DEE3EA` | Borda tracejada de estados vazios |
+
+### 1.3 Estados interativos (derivados do brand)
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| Selected background | `rgba(94, 121, 179, 0.1)` | Item de lista selecionado |
+| Hover background | `rgba(94, 121, 179, 0.06)` | Item de lista ao passar o mouse |
+| Hover sobre banner | `rgba(255, 255, 255, 0.15)` | Botões brancos sobre gradient |
+
+### 1.4 Texto
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| Texto primário | `#000` | Corpo de texto, nomes |
+| Texto secundário | `text.secondary` (MUI) | Labels, contadores, tabs inativas, títulos de grupo |
+| Texto desabilitado | `text.disabled` (MUI) | Valores ausentes ("—") |
+| Placeholder | `#929EAE` | Placeholder de inputs e ícone de busca |
+| Ícone empty state | `#5A6A85` | Ícone em estados vazios |
+
+### 1.5 Gradient (banner de detalhe)
+
+```typescript
+background: "linear-gradient(135deg, #4A6499 0%, #5E79B3 40%, #7B95CC 100%)"
+```
+
+Usado no topo de cards de detalhe. A altura varia conforme o contexto:
+- Com avatar sobreposto (ex: ficha de pessoa): `height: { xs: 80, md: 100 }`
+- Sem avatar (ex: detalhe de evento): `height: { xs: 50, md: 60 }`
+
+---
+
+## 2. Spacing e Unidades
+
+### 2.1 Regra de ouro
+
+> Sempre use o sistema de spacing do MUI (múltiplos de 8px). Nunca use valores literais em pixels como `"15.32px"` ou `"46px"`.
+
+Exemplos corretos: `px: 2`, `mb: 1.5`, `py: 1.5`, `gap: 2`
+Exemplos incorretos: `px: "15.32px"`, `mb: "15px"`, `pl: "46px"`
+
+### 2.2 Tokens de spacing recorrentes
+
+| Contexto | Valor |
+|----------|-------|
+| Padding do container da página | `pt: 2` |
+| Gap entre colunas (lista/detalhe) | `gap: { xs: 3, md: 5 }` |
+| Margem entre itens de lista | `mb: 1.5` |
+| Padding interno de item de lista | `py: 1.5, px: 2` |
+| Padding do conteúdo de detalhe | `px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 }` |
+| Padding do info group | `p: 2.5` |
+| Gap entre info groups | `gap: 2` |
+
+---
+
+## 3. Layout Master-Detail
+
+Padrão para telas que exibem uma lista à esquerda e detalhes à direita.
+
+### 3.1 Container
+
+```typescript
+<Box sx={{
+    display: "flex",
+    pt: 2,
+    gap: { xs: 3, md: 5 },
+    flexDirection: { xs: "column", md: "row" },
+}}>
+```
+
+- Nunca adicione uma barra de botões isolada acima do container. O botão de ação primária fica **dentro do sidebar**, ao lado do campo de busca.
+
+### 3.2 Coluna da lista (sidebar)
+
+```typescript
+<Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+```
+
+- Largura fixa `348px` no desktop, `100%` no mobile.
+- `flexShrink: 0` impede que o flex comprima a coluna.
+
+### 3.3 Coluna de detalhe
+
+```typescript
+<Box sx={{ flex: 1, minWidth: 0 }}>
+```
+
+- `flex: 1` preenche o restante do espaço.
+- `minWidth: 0` evita overflow de conteúdo longo.
+- Nunca use padding assimétrico (`pl: "33px"`, `pr: "17px"`). O `gap` do container já cuida do espaçamento entre colunas.
+
+### 3.4 Responsividade mobile
+
+- Use `useMediaQuery(theme.breakpoints.down("md"))` para detectar mobile.
+- No mobile, exiba **ou** a lista **ou** o detalhe, nunca ambos ao mesmo tempo.
+- Quando o detalhe está visível, exiba um botão "Voltar" para retornar à lista.
+
+---
+
+## 4. Sidebar: Busca + Ação + Lista
+
+### 4.1 Barra de busca com botão de ação
+
+```typescript
+<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+    <TextField
+        variant="outlined"
+        placeholder="Pesquisar ..."
+        sx={{
+            flex: 1,
+            height: "40px",
+            "& .MuiOutlinedInput-root": {
+                height: "40px",
+                backgroundColor: "#F8F8F8",
+                borderRadius: 2,
+                "& fieldset": { borderColor: "#F5F5F5" },
+                "&:hover fieldset": { borderColor: "#E0E0E0" },
+                "&.Mui-focused fieldset": { borderColor: "#5E79B3" },
+                "& .MuiInputBase-input::placeholder": {
+                    color: "#929EAE",
+                    opacity: 1,
+                    fontSize: ".9rem",
+                },
+            },
+        }}
+        InputProps={{
+            startAdornment: (
+                <InputAdornment position="start">
+                    <Search sx={{ width: 24, height: 24, color: "#929EAE" }} />
+                </InputAdornment>
+            ),
+        }}
+    />
+    <IconButton
+        onClick={onRegistrar}
+        sx={{
+            width: 40,
+            height: 40,
+            bgcolor: "#5E79B3",
+            color: "#fff",
+            borderRadius: 2,
+            "&:hover": { bgcolor: "#4A6499" },
+        }}
+    >
+        <IconPlus size={20} />
+    </IconButton>
+</Box>
+```
+
+- O campo ocupa todo o espaço (`flex: 1`), o botão tem tamanho fixo `40x40`.
+- Ícone do `InputAdornment`: `24x24`, cor `#929EAE`.
+
+### 4.2 Contador de itens
+
+```typescript
+<Typography sx={{ fontSize: "0.8rem", color: "text.secondary", mt: 1, mb: 0.5 }}>
+    {hasFilter ? `${filtered.length} de ${total} itens` : `${total} itens`}
+</Typography>
+```
+
+Sempre exiba a contagem. Quando há filtro ativo, mostre "X de Y".
+
+### 4.3 Lista scrollável
+
+```typescript
+<List sx={{
+    paddingTop: 1,
+    maxHeight: "calc(100vh - 240px)",
+    paddingRight: 2,
+    overflowY: "auto",
+    overflowX: "hidden",
+    "&::-webkit-scrollbar": { width: "6px" },
+    "&::-webkit-scrollbar-thumb": { backgroundColor: "#C9C9C9", borderRadius: "10px" },
+    "&::-webkit-scrollbar-track": { backgroundColor: "#F5F5F5" },
+}}>
+```
+
+- Altura adaptativa com `calc(100vh - 240px)` — nunca use alturas fixas em pixels.
+- Scrollbar customizada: fina (6px), arredondada.
+
+---
+
+## 5. Itens de Lista (`ListItemButton`)
+
+### 5.1 Estrutura base
+
+```typescript
+<ListItemButton
+    selected={selected}
+    sx={{
+        border: "1px solid #ECECEC",
+        bgcolor: selected ? "rgba(94, 121, 179, 0.1)" : "#fff",
+        borderRadius: "7px",
+        mb: 1.5,
+        py: 1.5,
+        px: 2,
+        gap: "17px",
+        width: "100%",
+        maxWidth: { xs: "100%", md: "330px" },
+        transition: "background-color 0.2s ease-in-out",
+        "&:hover": { backgroundColor: "rgba(94, 121, 179, 0.06)" },
+        "&.Mui-selected": {
+            bgcolor: "rgba(94, 121, 179, 0.1)",
+            "&:hover": { bgcolor: "rgba(94, 121, 179, 0.1)" },
+        },
+    }}
+>
+```
+
+### 5.2 Regras
+
+- **Nunca** use `Divider` dentro de list items — a hierarquia tipográfica (nome 16px vs badge 0.7rem) já diferencia os níveis.
+- **Nunca** defina `height` fixo — deixe o conteúdo + padding ditar a altura.
+- Avatar fallback (quando aplicável): `bgcolor: "#5E79B3"`, `color: "#fff"`.
+
+---
+
+## 6. Card de Detalhe
+
+### 6.1 Container externo
+
+```typescript
+borderRadius: 3,
+overflow: "hidden",
+boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.04)",
+bgcolor: "#fff",
+width: "100%",
+height: "100%",
+```
+
+### 6.2 Banner gradient
+
+Sempre presente no topo. Botões de ação ficam posicionados dentro do banner:
+- **Voltar** (mobile): `position: absolute, top: 12, left: 12`, ícone + texto brancos.
+- **Editar**: `position: absolute, top: 12, right: 12`, `IconButton` com `IconPencil` branco.
+- Hover dos botões no banner: `bgcolor: "rgba(255,255,255,0.15)"`.
+
+### 6.3 Conteúdo
+
+```typescript
+<Box sx={{ px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 } }}>
+```
+
+---
+
+## 7. Grupos de Informação (`InformacoesGroup`)
+
+```typescript
+<Paper
+    variant="outlined"
+    sx={{
+        borderRadius: 3,
+        p: 2.5,
+        bgcolor: "#FAFBFC",
+        width: "100%",
+    }}
+>
+```
+
+- Título: `fontSize: "0.8rem"`, `fontWeight: 700`, `textTransform: "uppercase"`, `letterSpacing: "0.05em"`, `color: "text.secondary"`, `mb: 2`.
+- Labels: `variant="body2"`, `color: "text.secondary"`, `fontWeight: 600`.
+- Valores: `fontSize: ".9rem"`, cor `#000` quando preenchido, `text.disabled` quando vazio (exibir "—").
+- Nunca use `Divider` abaixo do título — o espaço (`mb: 2`) e a diferença tipográfica já criam separação.
+
+---
+
+## 8. Estado Vazio (nenhum item selecionado)
+
+```typescript
+<Box sx={{
+    border: "2px dashed #DEE3EA",
+    width: "100%",
+    height: "100%",
+    borderRadius: 3,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 2,
+}}>
+    <IconContextual size={48} stroke={1.5} color="#5A6A85" />
+    <Typography sx={{ color: "text.secondary", fontSize: "16px" }}>
+        Mensagem descritiva
+    </Typography>
+</Box>
+```
+
+- Borda tracejada `2px dashed #DEE3EA` — nunca borda sólida fina quase invisível.
+- Ícone contextual de 48px (ex: `IconUserSearch` para membros, `IconCalendarSearch` para encontros).
+- Texto em `text.secondary`.
+
+---
+
+## 9. Tabs (`TabContext` / `TabList`)
+
+### 9.1 Estilo da tab
+
+```typescript
+const STYLE_TAB = {
+    fontSize: { xs: "14px", md: "16px" },
+    fontWeight: "500",
+    width: { xs: "auto", md: "180px" },
+    minWidth: "unset",
+    padding: { xs: 1.5, md: 2.5 },
+    color: "text.secondary",
+    "&.Mui-selected": { color: "#000" },
+};
+```
+
+### 9.2 Indicador
+
+```typescript
+TabIndicatorProps={{
+    sx: {
+        backgroundColor: "#5E79B3",
+        borderRadius: "1.5px",
+    },
+}}
+```
+
+- Sempre use a cor brand (`#5E79B3`) — nunca cinza.
+- Tabs inativas: `text.secondary` — nunca `#C5C5C5`.
+
+### 9.3 Container das tabs
+
+- `paddingTop: "10px"` acima das tabs.
+- Nunca defina `width` fixo (ex: `"800px"`) — deixe o container pai controlar a largura.
+- Painéis placeholder (funcionalidade futura): use `py: 6` para centralizar verticalmente, sem `mx` fixo.
+
+---
+
+## 10. Feedback e Notificações
+
+- **Loading**: `<LoadingBox />` de `@/ui/components/feedback/LoadingBox`.
+- **Erro**: `<ErrorBox message={erro} />` de `@/ui/components/feedback/ErrorBox`.
+- **Snackbar**: use `enqueueSnackbar` do `notistack` com `autoHideDuration: 2000`.
+  - Sucesso: `variant: "success"`
+  - Info (funcionalidade futura): `variant: "info"`
+  - Erro: `variant: "error"`
+
+---
+
+## 11. Checklist para Novas Telas
+
+Ao criar ou refatorar uma tela, verifique:
+
+- [ ] Spacing usa sistema MUI (múltiplos de 8px), sem valores literais em pixels
+- [ ] Estados de seleção e hover usam cores derivadas do brand (`rgba(94, 121, 179, ...)`)
+- [ ] Não há `Divider` dentro de list items
+- [ ] Itens de lista não têm `height` fixo
+- [ ] Lista usa `maxHeight: "calc(100vh - Xpx)"`, não altura fixa
+- [ ] Estado vazio usa borda tracejada com ícone contextual
+- [ ] Card de detalhe tem `boxShadow` e `borderRadius: 3`
+- [ ] Banner gradient está presente no topo do card de detalhe
+- [ ] Botões de ação ficam no banner, não em barras separadas
+- [ ] Tabs usam indicador brand (`#5E79B3`), não cinza
+- [ ] Grupos de informação usam `Paper variant="outlined"` com `bgcolor: "#FAFBFC"`
+- [ ] Títulos de grupo são uppercase, `0.8rem`, `fontWeight: 700`
