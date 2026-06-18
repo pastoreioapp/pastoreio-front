@@ -11,17 +11,21 @@ import {
     Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Tab from "@mui/material/Tab";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Dados } from "./components/dados";
-import { Cursos, cursosIniciais } from "./components/cursos";
+import { Cursos } from "./components/cursos";
 import {
     Trajetoria,
-    initialFases,
     calculateState,
+    initialFases,
 } from "./components/trajetoria";
 import { createMembroFromUI } from "@/app/actions/membros";
+import { getTrajetoriaAtivaParaCadastro } from "@/app/actions/trajetoria";
+import { getCursosAtivosParaCadastro } from "@/app/actions/cursos";
+import type { CursoCadastro } from "./components/cursos";
+import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 
 interface RegisterMembroProps {
     open: boolean;
@@ -37,13 +41,22 @@ export interface MembroPayload {
         email: string;
         telefone: string;
         endereco: string;
-        cargo: string;
+        cargo: PapelCelula;
         ministerio: string;
         discipulador: string;
         discipulo: string;
         estadoCivil: string;
+        conjuge: string;
         filhos: string;
     };
+}
+export interface CursoPayload {
+    turmaId: number;
+    cursoId: number;
+    nome: string;
+    turmaNome: string;
+    status: string;
+    ano?: string;
 }
 
 const initialPayload: MembroPayload = {
@@ -53,11 +66,12 @@ const initialPayload: MembroPayload = {
         email: "",
         telefone: "",
         endereco: "",
-        cargo: "Membro",
-        ministerio: "",
+        cargo: PapelCelula.MEMBRO,
+        ministerio: "Nenhum",
         discipulador: "",
         discipulo: "",
         estadoCivil: "Solteiro",
+        conjuge: "",
         filhos: "Nao",
     },
 };
@@ -71,10 +85,8 @@ export function RegisterMembro({
     const [tabValue, setTabValue] = useState("1");
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<MembroPayload>(initialPayload);
-    const [cursosData, setCursosData] = useState(cursosIniciais);
-    const [trajetoriaData, setTrajetoriaData] = useState(() =>
-        calculateState(initialFases),
-    );
+    const [cursosData, setCursosData] = useState<CursoCadastro[]>([]);
+    const [trajetoriaData, setTrajetoriaData] = useState<any[]>([]);
 
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -82,16 +94,61 @@ export function RegisterMembro({
         severity: "error" as "error" | "success",
     });
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
-        setTabValue(newValue);
-    };
+    useEffect(() => {
+        if (open) {
+            getTrajetoriaAtivaParaCadastro()
+                .then((res) => {
+                    if (res && res.grupos && res.grupos.length > 0) {
+                        const fasesMapeadas = res.grupos.map((g: any) => ({
+                            id: g.ordem || g.id,
+                            title: g.nome,
+                            items: g.passos
+                                ? g.passos.map((p: any) => ({
+                                      id: p.id,
+                                      label: p.nome,
+                                      checked: false,
+                                  }))
+                                : [],
+                        }));
+                        setTrajetoriaData(calculateState(fasesMapeadas));
+                    } else {
+                        setTrajetoriaData(calculateState(initialFases));
+                    }
+                })
+                .catch((err) => console.error(err));
 
-    const handleDadosChange = (field: string, value: any) => {
+            getCursosAtivosParaCadastro()
+                .then((res) => {
+                    if (res && res.length > 0) {
+                        const cursosMapeados: CursoCadastro[] = res.map(
+                            (t: any) => ({
+                                turmaId: t.id,
+                                cursoId: t.cursos.id,
+                                nome: t.cursos.nome,
+                                turmaNome: t.nome,
+                                status: "A_FAZER",
+                                dataConclusao: null,
+                                dataInicio: t.data_inicio,
+                                dataFim: t.data_fim,
+                            }),
+                        );
+
+                        setCursosData(cursosMapeados);
+                    } else {
+                        setCursosData([]);
+                    }
+                })
+                .catch((err) => console.error(err));
+        }
+    }, [open]);
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: string) =>
+        setTabValue(newValue);
+    const handleDadosChange = (field: string, value: any) =>
         setFormData((prev) => ({
             ...prev,
             dadosPessoais: { ...prev.dadosPessoais, [field]: value },
         }));
-    };
 
     const validateForm = () => {
         const {
@@ -131,7 +188,7 @@ export function RegisterMembro({
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             setSnackbar({
                 open: true,
-                message: "Por favor, insira um e-mail válido.",
+                message: "E-mail inválido.",
                 severity: "error",
             });
             setTabValue("1");
@@ -142,13 +199,24 @@ export function RegisterMembro({
 
     const handleSave = async () => {
         if (!validateForm()) return;
-
         setIsSaving(true);
         try {
+            const passosMarcadosIds = trajetoriaData.flatMap((fase) => {
+                if (!fase || !fase.items || !Array.isArray(fase.items))
+                    return [];
+                return fase.items
+                    .filter((item: any) => item.checked)
+                    .map((item: any) => item.id);
+            });
+
+            const cursosSelecionados = cursosData.filter(
+                (curso) => curso.status !== "A_FAZER",
+            );
+
             const payloadCompleto = {
                 dadosPessoais: formData.dadosPessoais,
-                cursos: cursosData,
-                trajetoria: trajetoriaData,
+                cursos: cursosSelecionados,
+                trajetoria: passosMarcadosIds,
             };
 
             const result = await createMembroFromUI(payloadCompleto, celulaId);
@@ -163,18 +231,15 @@ export function RegisterMembro({
 
             setTimeout(() => {
                 setFormData(initialPayload);
-                setCursosData(cursosIniciais);
-                setTrajetoriaData(calculateState(initialFases));
+                setCursosData([]);
+                setTrajetoriaData([]);
                 setTabValue("1");
                 onSuccess();
             }, 1000);
         } catch (error: any) {
-            console.error("Erro ao salvar membro:", error);
             setSnackbar({
                 open: true,
-                message:
-                    error.message ||
-                    "Erro ao salvar os dados. Tente novamente.",
+                message: error.message || "Erro ao salvar.",
                 severity: "error",
             });
         } finally {
@@ -185,8 +250,8 @@ export function RegisterMembro({
     const handleCloseModal = () => {
         if (!isSaving) {
             setFormData(initialPayload);
-            setCursosData(cursosIniciais);
-            setTrajetoriaData(calculateState(initialFases));
+            setCursosData([]);
+            setTrajetoriaData([]);
             setTabValue("1");
             onClose();
         }
@@ -250,19 +315,41 @@ export function RegisterMembro({
                     value="2"
                     sx={{ p: 0, height: "60vh", overflowY: "auto" }}
                 >
-                    <Trajetoria
-                        fasesList={trajetoriaData}
-                        setFasesList={setTrajetoriaData}
-                    />
+                    {trajetoriaData.length > 0 ? (
+                        <Trajetoria
+                            fasesList={trajetoriaData}
+                            setFasesList={setTrajetoriaData}
+                        />
+                    ) : (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100%"
+                        >
+                            <CircularProgress />
+                        </Box>
+                    )}
                 </TabPanel>
                 <TabPanel
                     value="3"
                     sx={{ p: 0, height: "60vh", overflowY: "auto" }}
                 >
-                    <Cursos
-                        cursosList={cursosData}
-                        setCursosList={setCursosData}
-                    />
+                    {cursosData.length > 0 ? (
+                        <Cursos
+                            cursosList={cursosData}
+                            setCursosList={setCursosData}
+                        />
+                    ) : (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100%"
+                        >
+                            <CircularProgress />
+                        </Box>
+                    )}
                 </TabPanel>
             </TabContext>
             <Box
@@ -284,10 +371,6 @@ export function RegisterMembro({
                         textTransform: "none",
                         fontWeight: 600,
                         color: "#4B5563",
-                        "&:hover": {
-                            backgroundColor: "transparent",
-                            color: "#1F2937",
-                        },
                     }}
                 >
                     Cancelar
@@ -304,10 +387,6 @@ export function RegisterMembro({
                         px: 4,
                         py: 1,
                         boxShadow: "none",
-                        "&:hover": {
-                            backgroundColor: "#314574",
-                            boxShadow: "none",
-                        },
                     }}
                 >
                     {isSaving ? (
@@ -326,9 +405,6 @@ export function RegisterMembro({
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
                 <Alert
-                    onClose={() =>
-                        setSnackbar((prev) => ({ ...prev, open: false }))
-                    }
                     severity={snackbar.severity}
                     sx={{ width: "100%", fontWeight: 500 }}
                     elevation={6}

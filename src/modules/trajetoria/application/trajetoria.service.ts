@@ -16,4 +16,11 @@ export class TrajetoriaService {
 
     return toTrajetoriaDoMembroDto(trajetoria, passosDoMembro, passosSoltos);
   }
+
+  async getAtiva(): Promise<TrajetoriaDoMembroDto | null> {
+    const trajetoria = await this.repo.findAtiva();
+    if (!trajetoria) return null;
+
+    return toTrajetoriaDoMembroDto(trajetoria, [], []);
+  }
 }

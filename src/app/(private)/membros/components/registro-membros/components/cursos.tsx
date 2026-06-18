@@ -2,14 +2,12 @@
 
 import {
     Box,
-    Checkbox,
-    FormControlLabel,
-    Grid,
-    Typography,
-    Paper,
+    Button,
     Dialog,
     DialogContent,
-    Button,
+    Grid,
+    Paper,
+    Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -17,33 +15,72 @@ import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/pt-br";
 
 const successColor = "#7FB77E";
+const primaryColor = "#5B73A8";
 
-export const cursosIniciais = [
-    {
-        nome: "Panorama Bíblico do Novo Testamento",
-        status: "A fazer",
-        ano: undefined as string | undefined,
-    },
-    { nome: "Curso Nova Criatura", status: "Concluído", ano: "2021" },
-    { nome: "Vida Devocional", status: "Concluído", ano: "2021" },
-    { nome: "Família Cristã", status: "A fazer", ano: undefined },
-    { nome: "Ide e Fazei Discípulos", status: "Concluído", ano: "2021" },
-    { nome: "Autoridade e Submissão", status: "A fazer", ano: undefined },
-    { nome: "Carta aos Romanos", status: "Concluído", ano: "2021" },
-    { nome: "Mordomia e Finanças", status: "A fazer", ano: undefined },
-    { nome: "TLC", status: "A fazer", ano: undefined },
-    { nome: "Maturidade Cristã", status: "A fazer", ano: undefined },
-    { nome: "Escatologia", status: "A fazer", ano: undefined },
-    {
-        nome: "Panorama do Antigo Testamento",
-        status: "A fazer",
-        ano: undefined,
-    },
-];
+export type StatusCursoCadastro = "A_FAZER" | "EM_ANDAMENTO" | "CONCLUIDO";
+
+export interface CursoCadastro {
+    turmaId: number;
+    turmaNome: string;
+    cursoId: number;
+    nome: string;
+    status: StatusCursoCadastro;
+    dataConclusao?: string | null;
+    dataInicio?: string | null;
+    dataFim?: string | null;
+}
 
 interface CursosProps {
-    cursosList: typeof cursosIniciais;
-    setCursosList: (novaLista: typeof cursosIniciais) => void;
+    cursosList: CursoCadastro[];
+    setCursosList: (novaLista: CursoCadastro[]) => void;
+}
+
+function getStatusLabel(status: StatusCursoCadastro) {
+    if (status === "CONCLUIDO") return "Concluído";
+    if (status === "EM_ANDAMENTO") return "Cursando";
+    return "A fazer";
+}
+
+function getStatusStyle(status: StatusCursoCadastro) {
+    if (status === "CONCLUIDO") {
+        return {
+            color: successColor,
+            backgroundColor: "#7FB77E20",
+        };
+    }
+
+    if (status === "EM_ANDAMENTO") {
+        return {
+            color: "#9A6200",
+            backgroundColor: "#F59E0B22",
+        };
+    }
+
+    return {
+        color: "#777",
+        backgroundColor: "#00000010",
+    };
+}
+
+function formatDate(value?: string | null): string | null {
+    if (!value) return null;
+
+    const [year, month, day] = value.split("-");
+    return `${day}/${month}/${year}`;
+}
+
+function buildPeriodoLabel(
+    dataInicio?: string | null,
+    dataFim?: string | null,
+): string | null {
+    const inicio = formatDate(dataInicio);
+    const fim = formatDate(dataFim);
+
+    if (inicio && fim) return `${inicio} - ${fim}`;
+    if (inicio) return `${inicio}`;
+    if (fim) return `${fim}`;
+
+    return null;
 }
 
 export function Cursos({ cursosList, setCursosList }: CursosProps) {
@@ -53,30 +90,42 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
     );
     const [completionDate, setCompletionDate] = useState<Dayjs | null>(null);
 
-    const handleToggle = (index: number) => {
+    const handleSetStatus = (index: number, status: StatusCursoCadastro) => {
         const curso = cursosList[index];
 
-        if (curso.status === "A fazer") {
+        if (status === "CONCLUIDO") {
             setActiveCourseIndex(index);
-            setCompletionDate(null);
+            setCompletionDate(
+                curso.dataConclusao ? dayjs(curso.dataConclusao) : null,
+            );
             setIsModalOpen(true);
-        } else {
-            const novaLista = [...cursosList];
-            novaLista[index] = { ...curso, status: "A fazer", ano: undefined };
-            setCursosList(novaLista);
+            return;
         }
+
+        const novaLista = [...cursosList];
+
+        novaLista[index] = {
+            ...curso,
+            status,
+            dataConclusao: null,
+        };
+
+        setCursosList(novaLista);
     };
 
     const handleConfirm = () => {
         if (activeCourseIndex !== null && completionDate) {
             const novaLista = [...cursosList];
+
             novaLista[activeCourseIndex] = {
                 ...novaLista[activeCourseIndex],
-                status: "Concluído",
-                ano: completionDate.format("YYYY"),
+                status: "CONCLUIDO",
+                dataConclusao: completionDate.format("YYYY-MM-DD"),
             };
+
             setCursosList(novaLista);
         }
+
         handleCloseModal();
     };
 
@@ -90,74 +139,168 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
         <Box sx={{ px: 6.5, pb: 4, pt: "40px" }}>
             <Grid container spacing={2}>
                 {cursosList.map((curso, index) => {
-                    const isDone = curso.status === "Concluído";
+                    const statusStyle = getStatusStyle(curso.status);
+
                     return (
-                        <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Grid item xs={12} sm={6} md={4} key={curso.turmaId}>
                             <Paper
                                 elevation={0}
                                 sx={{
                                     p: 2,
+                                    minHeight: 112,
                                     borderRadius: "12px",
                                     backgroundColor: "#F2F4F7",
                                     display: "flex",
                                     flexDirection: "column",
-                                    gap: 1,
+                                    gap: 1.25,
                                     transition: "0.2s",
-                                    "&:hover": { backgroundColor: "#ECEEF2" },
+                                    "&:hover": {
+                                        backgroundColor: "#ECEEF2",
+                                    },
                                 }}
                             >
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={isDone}
-                                            onChange={() => handleToggle(index)}
-                                            sx={{
-                                                color: "#C4C4C4",
-                                                "&.Mui-checked": {
-                                                    color: successColor,
-                                                },
-                                            }}
-                                        />
-                                    }
-                                    label={
-                                        <Typography
-                                            sx={{
-                                                fontSize: "14px",
-                                                fontWeight: 600,
-                                                color: "#191C1E",
-                                            }}
-                                        >
-                                            {curso.nome}
-                                        </Typography>
-                                    }
-                                />
-                                <Box display="flex" alignItems="center" gap={1}>
+                                <Typography
+                                    title={curso.nome}
+                                    sx={{
+                                        fontSize: "14px",
+                                        fontWeight: 700,
+                                        color: "#191C1E",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    {curso.nome}
+                                </Typography>
+
+                                <Typography
+                                    title={curso.turmaNome}
+                                    sx={{
+                                        fontSize: "12px",
+                                        color: "#667085",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    <span style={{ fontWeight: 900 }}>
+                                        Turma:
+                                    </span>{" "}
+                                    {curso.turmaNome}
+                                </Typography>
+
+                                {buildPeriodoLabel(
+                                    curso.dataInicio,
+                                    curso.dataFim,
+                                ) && (
                                     <Typography
                                         sx={{
                                             fontSize: "12px",
-                                            px: 1,
-                                            py: "2px",
-                                            borderRadius: "6px",
-                                            color: isDone
-                                                ? successColor
-                                                : "#777",
-                                            backgroundColor: isDone
-                                                ? "#7FB77E20"
-                                                : "#00000010",
+                                            color: "#667085",
                                         }}
                                     >
-                                        {curso.status}
+                                        <span style={{ fontWeight: 900 }}>
+                                            Período da turma:{" "}
+                                        </span>
+                                        {buildPeriodoLabel(
+                                            curso.dataInicio,
+                                            curso.dataFim,
+                                        )}
                                     </Typography>
-                                    {curso.ano && (
-                                        <Typography
-                                            sx={{
-                                                fontSize: "12px",
-                                                color: "#666",
-                                            }}
-                                        >
-                                            {curso.ano}
-                                        </Typography>
-                                    )}
+                                )}
+
+                                <Box
+                                    display="flex"
+                                    gap={1}
+                                    mt="auto"
+                                    flexWrap="wrap"
+                                >
+                                    <Button
+                                        size="small"
+                                        variant={
+                                            curso.status === "A_FAZER"
+                                                ? "contained"
+                                                : "outlined"
+                                        }
+                                        onClick={() =>
+                                            handleSetStatus(index, "A_FAZER")
+                                        }
+                                        sx={{
+                                            textTransform: "none",
+                                            fontSize: "11px",
+                                            minWidth: "auto",
+                                            boxShadow: "none",
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        A fazer
+                                    </Button>
+
+                                    <Button
+                                        size="small"
+                                        variant={
+                                            curso.status === "EM_ANDAMENTO"
+                                                ? "contained"
+                                                : "outlined"
+                                        }
+                                        onClick={() =>
+                                            handleSetStatus(
+                                                index,
+                                                "EM_ANDAMENTO",
+                                            )
+                                        }
+                                        sx={{
+                                            textTransform: "none",
+                                            fontSize: "11px",
+                                            minWidth: "auto",
+                                            boxShadow: "none",
+                                            borderRadius: 2,
+                                            bgcolor:
+                                                curso.status === "EM_ANDAMENTO"
+                                                    ? "#F59E0B"
+                                                    : undefined,
+                                            "&:hover": {
+                                                bgcolor:
+                                                    curso.status ===
+                                                    "EM_ANDAMENTO"
+                                                        ? "#D97706"
+                                                        : undefined,
+                                            },
+                                        }}
+                                    >
+                                        Em andamento
+                                    </Button>
+
+                                    <Button
+                                        size="small"
+                                        variant={
+                                            curso.status === "CONCLUIDO"
+                                                ? "contained"
+                                                : "outlined"
+                                        }
+                                        onClick={() =>
+                                            handleSetStatus(index, "CONCLUIDO")
+                                        }
+                                        sx={{
+                                            textTransform: "none",
+                                            fontSize: "11px",
+                                            minWidth: "auto",
+                                            boxShadow: "none",
+                                            borderRadius: 2,
+                                            bgcolor:
+                                                curso.status === "CONCLUIDO"
+                                                    ? successColor
+                                                    : undefined,
+                                            "&:hover": {
+                                                bgcolor:
+                                                    curso.status === "CONCLUIDO"
+                                                        ? "#6AA66A"
+                                                        : undefined,
+                                            },
+                                        }}
+                                    >
+                                        Concluído
+                                    </Button>
                                 </Box>
                             </Paper>
                         </Grid>
@@ -170,7 +313,12 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
                 onClose={handleCloseModal}
                 maxWidth="xs"
                 fullWidth
-                sx={{ "& .MuiDialog-paper": { borderRadius: 3, p: 1 } }}
+                sx={{
+                    "& .MuiDialog-paper": {
+                        borderRadius: 3,
+                        p: 1,
+                    },
+                }}
             >
                 <DialogContent>
                     <Typography
@@ -181,9 +329,11 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
                     >
                         Confirmar Conclusão
                     </Typography>
+
                     <Typography variant="body2" color="#6B7280" mb={3}>
                         Informe a data em que o curso foi concluído.
                     </Typography>
+
                     <Box mb={4}>
                         <Typography
                             sx={{
@@ -195,6 +345,7 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
                         >
                             Data de Conclusão
                         </Typography>
+
                         <DatePicker
                             format="DD/MM/YYYY"
                             value={completionDate}
@@ -203,16 +354,55 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
                                 textField: {
                                     size: "small",
                                     fullWidth: true,
-                                    placeholder: "mm/dd/yyyy",
+                                    placeholder: "DD/MM/AAAA",
                                     sx: {
-                                        "& .MuiOutlinedInput-root": {
-                                            borderRadius: "8px",
+                                        "& .MuiInputBase-root, & .MuiOutlinedInput-root, & .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root":
+                                            {
+                                                backgroundColor: "#F4F6F8",
+                                                borderRadius: "8px",
+                                                minHeight: "48px",
+                                                height: "48px",
+                                                padding: "5px",
+                                                alignItems: "center",
+                                            },
+
+                                        "& .MuiInputBase-input": {
+                                            color: "#1F2937",
+                                            padding: "0 14px 0 16px",
+                                            height: "100%",
+                                            boxSizing: "border-box",
+
+                                            "&::placeholder": {
+                                                color: "#9CA3AF",
+                                                opacity: 1,
+                                            },
+                                        },
+
+                                        "& .MuiPickersInputBase-sectionsContainer":
+                                            {
+                                                color: "#1F2937",
+                                                padding: "0 14px 0 16px",
+                                                height: "100%",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                ml: 1.5,
+                                            },
+
+                                        "& .MuiPickersSectionList-root": {
+                                            padding: 0,
+                                        },
+
+                                        "& .MuiIconButton-root": {
+                                            color: "#6B7280",
+                                            padding: "6px",
+                                            mr: 0.5,
                                         },
                                     },
                                 },
                             }}
                         />
                     </Box>
+
                     <Box display="flex" justifyContent="flex-end" gap={2}>
                         <Button
                             onClick={handleCloseModal}
@@ -224,12 +414,13 @@ export function Cursos({ cursosList, setCursosList }: CursosProps) {
                         >
                             Cancelar
                         </Button>
+
                         <Button
                             onClick={handleConfirm}
                             disabled={!completionDate}
                             variant="contained"
                             sx={{
-                                backgroundColor: "#5B73A8",
+                                backgroundColor: primaryColor,
                                 textTransform: "none",
                                 fontWeight: 600,
                                 borderRadius: 2,

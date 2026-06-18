@@ -26,8 +26,16 @@ const STYLE_TAB = {
 export function EtapasTabs({ membroId }: { membroId: number }) {
     const [tab, setTab] = useState("1");
     const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
-    const { cursos, loading: cursosLoading, erro: cursosErro } = useCursosDoMembro(membroId);
-    const { frequencias, loading: freqLoading, erro: freqErro } = useFrequenciasMembro(membroId);
+    const {
+        cursos,
+        loading: cursosLoading,
+        erro: cursosErro,
+    } = useCursosDoMembro(membroId);
+    const {
+        frequencias,
+        loading: freqLoading,
+        erro: freqErro,
+    } = useFrequenciasMembro(membroId);
 
     return (
         <Box
@@ -70,7 +78,12 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                     {loading && <LoadingBox />}
                     {erro && <ErrorBox message={erro} />}
                     {!loading && !erro && trajetoria && (
-                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            gap={2}
+                            flexWrap="wrap"
+                        >
                             {trajetoria.grupos.map((grupo) => (
                                 <EtapaCard
                                     key={grupo.id}
@@ -86,8 +99,20 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         </Box>
                     )}
                     {!loading && !erro && !trajetoria && (
-                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            py={4}
+                        >
+                            <Typography
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    color: "text.secondary",
+                                }}
+                            >
                                 <IconInfoCircleFilled size={24} />
                                 Nenhuma trajetória ativa encontrada.
                             </Typography>
@@ -98,7 +123,12 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                     {cursosLoading && <LoadingBox />}
                     {cursosErro && <ErrorBox message={cursosErro} />}
                     {!cursosLoading && !cursosErro && cursos.length > 0 && (
-                        <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            gap={2}
+                            flexWrap="wrap"
+                        >
                             {cursos.map((curso) => (
                                 <CursoCard
                                     key={curso.inscricaoId}
@@ -108,28 +138,56 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                                     statusLabel={curso.statusLabel}
                                     dataInicio={curso.dataInicio}
                                     dataFim={curso.dataFim}
+                                    dataConclusao={curso.dataConclusao}
                                 />
                             ))}
                         </Box>
                     )}
                     {!cursosLoading && !cursosErro && cursos.length === 0 && (
-                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            py={4}
+                        >
+                            <Typography
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    color: "text.secondary",
+                                }}
+                            >
                                 <IconInfoCircleFilled size={24} />
                                 Nenhum curso encontrado.
                             </Typography>
                         </Box>
                     )}
                 </TabPanel>
-                <TabPanel value="3" sx={{ paddingTop: 3, px: { xs: 0, md: 3 } }}>
+                <TabPanel
+                    value="3"
+                    sx={{ paddingTop: 3, px: { xs: 0, md: 3 } }}
+                >
                     {freqLoading && <LoadingBox />}
                     {freqErro && <ErrorBox message={freqErro} />}
                     {!freqLoading && !freqErro && frequencias.length > 0 && (
                         <FrequenciaCalendario frequencias={frequencias} />
                     )}
                     {!freqLoading && !freqErro && frequencias.length === 0 && (
-                        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-                            <Typography sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            py={4}
+                        >
+                            <Typography
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    color: "text.secondary",
+                                }}
+                            >
                                 <IconInfoCircleFilled size={24} />
                                 Nenhuma frequência registrada.
                             </Typography>

@@ -16,6 +16,8 @@ import { ReactNode, useState } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/pt-br";
+import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
+import { getFuncaoLabel } from "../../../lib/getFuncaoLabel";
 
 export const applyPhoneMask = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -103,10 +105,19 @@ const CustomInput = ({
                         "&.Mui-focused fieldset": {
                             border: error ? "1px solid #d32f2f" : "none",
                         },
+                        "&.Mui-disabled": {
+                            backgroundColor: "#EEF1F5",
+                            opacity: 0.75,
+                            cursor: "not-allowed",
+                        },
                     },
                     "& .MuiInputBase-input": {
                         color: "#1F2937",
                         "&::placeholder": { color: "#9CA3AF", opacity: 1 },
+                        "&.Mui-disabled": {
+                            WebkitTextFillColor: "#9CA3AF",
+                            cursor: "not-allowed",
+                        },
                     },
                 }}
                 {...props}
@@ -115,6 +126,21 @@ const CustomInput = ({
     </Box>
 );
 
+const CARGO_OPTIONS = [
+    PapelCelula.AUXILIAR_CELULA,
+    PapelCelula.MEMBRO,
+    PapelCelula.VISITANTE,
+] as const;
+
+const MINISTERIOS_OPTIONS = [
+    "Nenhum",
+    "Louvor",
+    "Paz Kids",
+    "Mídia",
+    "Atmosfera",
+    "Intercessão",
+] as const;
+
 interface DadosProps {
     data: {
         nome: string;
@@ -122,11 +148,12 @@ interface DadosProps {
         email: string;
         telefone: string;
         endereco: string;
-        cargo: string;
+        cargo: PapelCelula;
         ministerio: string;
         discipulador: string;
         discipulo: string;
         estadoCivil: string;
+        conjuge: string;
         filhos: string;
     };
     onChange: (field: string, value: any) => void;
@@ -211,26 +238,65 @@ export function Dados({ data, onChange }: DadosProps) {
                                     fullWidth: true,
                                     placeholder: "DD/MM/AAAA",
                                     error: !!errors.nascimento,
-                                    onBlur: () => handleBlur("nascimento"),
                                     sx: {
-                                        "& .MuiOutlinedInput-root": {
-                                            backgroundColor: "#F4F6F8",
-                                            borderRadius: "8px",
-                                            "& fieldset": {
-                                                border: errors.nascimento
-                                                    ? "1px solid #d32f2f"
-                                                    : "none",
+                                        "& .MuiInputBase-root, & .MuiOutlinedInput-root, & .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root":
+                                            {
+                                                backgroundColor: "#F4F6F8",
+                                                borderRadius: "8px",
+                                                minHeight: "48px",
+                                                height: "48px",
+                                                padding: "5px",
+                                                alignItems: "center",
+
+                                                "& fieldset": {
+                                                    border: errors.nascimento
+                                                        ? "1px solid #d32f2f"
+                                                        : "none",
+                                                },
+
+                                                "&:hover fieldset": {
+                                                    border: errors.nascimento
+                                                        ? "1px solid #d32f2f"
+                                                        : "none",
+                                                },
+
+                                                "&.Mui-focused fieldset": {
+                                                    border: errors.nascimento
+                                                        ? "1px solid #d32f2f"
+                                                        : "none",
+                                                },
                                             },
-                                            "&:hover fieldset": {
-                                                border: errors.nascimento
-                                                    ? "1px solid #d32f2f"
-                                                    : "none",
+
+                                        "& .MuiInputBase-input": {
+                                            color: "#1F2937",
+                                            padding: "0 14px 0 16px",
+                                            height: "100%",
+                                            boxSizing: "border-box",
+                                            
+                                            "&::placeholder": {
+                                                color: "#9CA3AF",
+                                                opacity: 1,
                                             },
-                                            "&.Mui-focused fieldset": {
-                                                border: errors.nascimento
-                                                    ? "1px solid #d32f2f"
-                                                    : "none",
+                                        },
+                                        
+                                        "& .MuiPickersInputBase-sectionsContainer":
+                                            {
+                                                color: "#1F2937",
+                                                padding: "0 14px 0 16px",
+                                                height: "100%",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                ml: 1.5,
                                             },
+
+                                        "& .MuiPickersSectionList-root": {
+                                            padding: 0,
+                                        },
+
+                                        "& .MuiIconButton-root": {
+                                            color: "#6B7280",
+                                            padding: "6px",
+                                            mr: 0.5,
                                         },
                                     },
                                 },
@@ -284,28 +350,63 @@ export function Dados({ data, onChange }: DadosProps) {
                 <Grid item xs={12} sm={6}>
                     <CustomInput
                         label="Cargo"
-                        placeholder="Membro"
-                        value={data.cargo}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleChange("cargo", e.target.value)
-                        }
-                        onBlur={() => handleBlur("cargo")}
                         error={!!errors.cargo}
                         helperText={errors.cargo}
-                    />
+                    >
+                        <FormControl
+                            fullWidth
+                            size="small"
+                            error={!!errors.cargo}
+                        >
+                            <Select
+                                value={data.cargo || PapelCelula.MEMBRO}
+                                onChange={(e) =>
+                                    handleChange("cargo", e.target.value)
+                                }
+                                onBlur={() => handleBlur("cargo")}
+                                displayEmpty
+                                sx={selectStyles}
+                            >
+                                {CARGO_OPTIONS.map((papel) => (
+                                    <MenuItem key={papel} value={papel}>
+                                        {getFuncaoLabel(papel)}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </CustomInput>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <CustomInput
                         label="Ministério"
-                        placeholder="Ex: Louvor, Kids, Mídia"
-                        value={data.ministerio}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleChange("ministerio", e.target.value)
-                        }
-                        onBlur={() => handleBlur("ministerio")}
                         error={!!errors.ministerio}
                         helperText={errors.ministerio}
-                    />
+                    >
+                        <FormControl
+                            fullWidth
+                            size="small"
+                            error={!!errors.ministerio}
+                        >
+                            <Select
+                                value={data.ministerio || "Nenhum"}
+                                onChange={(e) =>
+                                    handleChange("ministerio", e.target.value)
+                                }
+                                onBlur={() => handleBlur("ministerio")}
+                                displayEmpty
+                                sx={selectStyles}
+                            >
+                                {MINISTERIOS_OPTIONS.map((ministerio) => (
+                                    <MenuItem
+                                        key={ministerio}
+                                        value={ministerio}
+                                    >
+                                        {ministerio}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </CustomInput>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <CustomInput
@@ -318,15 +419,6 @@ export function Dados({ data, onChange }: DadosProps) {
                         onBlur={() => handleBlur("discipulador")}
                         error={!!errors.discipulador}
                         helperText={errors.discipulador}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <PersonOutlineIcon
-                                        sx={{ color: "#9CA3AF", fontSize: 20 }}
-                                    />
-                                </InputAdornment>
-                            ),
-                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -351,9 +443,14 @@ export function Dados({ data, onChange }: DadosProps) {
                         <FormControl fullWidth size="small">
                             <Select
                                 value={data.estadoCivil}
-                                onChange={(e) =>
-                                    handleChange("estadoCivil", e.target.value)
-                                }
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    handleChange("estadoCivil", value);
+
+                                    if (value !== "Casado") {
+                                        handleChange("conjuge", "");
+                                    }
+                                }}
                                 displayEmpty
                                 sx={selectStyles}
                             >
@@ -369,6 +466,31 @@ export function Dados({ data, onChange }: DadosProps) {
                         </FormControl>
                     </CustomInput>
                 </Grid>
+
+                <Grid item xs={12} sm={6}>
+                    <CustomInput
+                        label="Cônjuge"
+                        placeholder={
+                            data.estadoCivil === "Casado"
+                                ? "Nome do cônjuge"
+                                : "Disponível apenas para casado(a)"
+                        }
+                        value={data.conjuge}
+                        disabled={data.estadoCivil !== "Casado"}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleChange("conjuge", e.target.value)
+                        }
+                        error={
+                            data.estadoCivil === "Casado" && !!errors.conjuge
+                        }
+                        helperText={
+                            data.estadoCivil !== "Casado"
+                                ? "Este campo é habilitado somente quando o estado civil for Casado(a)."
+                                : errors.conjuge
+                        }
+                    />
+                </Grid>
+
                 <Grid item xs={12} sm={6}>
                     <CustomInput label="Filhos">
                         <FormControl fullWidth size="small">
