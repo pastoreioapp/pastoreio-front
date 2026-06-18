@@ -18,7 +18,8 @@ import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { ModalCadastroEncontro, DadosEncontro } from "./components/modal-cadastro/ModalCadastroEncontro";
-import { useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     deletarEncontro,
     salvarEncontroComFrequencias,
@@ -28,17 +29,21 @@ import { Encontro } from "@/modules/celulas/domain/encontro";
 import type { FrequenciaSyncLinha } from "@/modules/celulas/domain/frequencia-sync";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
+import { estaNaSemanaAtual } from "@/ui/utils/datas";
 
-export default function Encontros() {
+function EncontrosContent() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const { loggedUser } = useAppAuthentication();
     const celulaId = loggedUser?.celulaId;
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const {
         encontros,
         encontrosSelecionado,
         toggleEncontrosSelecionado,
+        selectEncontro,
         deselectEncontro,
         loading,
         erro,
@@ -49,6 +54,49 @@ export default function Encontros() {
     const [encontroEditando, setEncontroEditando] = useState<Encontro | null>(null);
     const [dialogExcluirAberto, setDialogExcluirAberto] = useState(false);
     const [excluindo, setExcluindo] = useState(false);
+    const [stepInicialModal, setStepInicialModal] = useState<0 | 1>(0);
+    const lancarFrequenciaProcessadoRef = useRef(false);
+    const verUltimoProcessadoRef = useRef(false);
+
+    useEffect(() => {
+        if (lancarFrequenciaProcessadoRef.current) return;
+        if (searchParams.get("lancarFrequencia") !== "true") return;
+        if (loading) return;
+
+        lancarFrequenciaProcessadoRef.current = true;
+
+        const encontroDaSemana = encontros
+            .filter((e) => estaNaSemanaAtual(e.data))
+            .sort((a, b) => b.data.localeCompare(a.data))[0];
+
+        if (encontroDaSemana) {
+            selectEncontro(encontroDaSemana);
+            setEncontroEditando(encontroDaSemana);
+            setStepInicialModal(1);
+        } else {
+            setEncontroEditando(null);
+            setStepInicialModal(0);
+        }
+        setModalAberto(true);
+        router.replace("/encontros", { scroll: false });
+    }, [searchParams, loading, encontros, selectEncontro, router]);
+
+    useEffect(() => {
+        if (verUltimoProcessadoRef.current) return;
+        if (searchParams.get("verUltimo") !== "true") return;
+        if (loading) return;
+
+        verUltimoProcessadoRef.current = true;
+
+        const ultimoEncontro = [...encontros].sort((a, b) =>
+            b.data.localeCompare(a.data)
+        )[0];
+
+        if (ultimoEncontro) {
+            selectEncontro(ultimoEncontro);
+        }
+        router.replace("/encontros", { scroll: false });
+    }, [searchParams, loading, encontros, selectEncontro, router]);
 
     const handleSalvarEncontro = async (payload: {
         dados: DadosEncontro;
@@ -95,6 +143,7 @@ export default function Encontros() {
     const handleFecharModal = () => {
         setModalAberto(false);
         setEncontroEditando(null);
+        setStepInicialModal(0);
     };
 
     const handleAbrirExcluir = () => {
@@ -142,51 +191,33 @@ export default function Encontros() {
                 <ErrorBox message={erro} />
             ) : (
                 <>
-                    <Box>
-                        <Box sx={{ display: "flex", justifyContent: "end" }}>
-                            <Button
-                                variant="contained"
-                                onClick={() => setModalAberto(true)}
-                                sx={{
-                                    bgcolor: "primary.main",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    display: "flex",
-                                    gap: 1,
-                                    color: "common.white",
-                                }}
-                            >
-                                <IconPlus width={16} /> Registrar encontro
-                            </Button>
-                        </Box>
+                    <Box sx={{
+                        display: "flex",
+                        pt: 2,
+                        gap: { xs: 3, md: 5 },
+                        flexDirection: { xs: "column", md: "row" },
+                    }}>
+                        {(!isMobile || !encontrosSelecionado) && (
+                            <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+                                <Filtro
+                                    data={encontros}
+                                    onSelect={toggleEncontrosSelecionado}
+                                    encontroSelecionado={encontrosSelecionado}
+                                    onRegistrar={() => setModalAberto(true)}
+                                />
+                            </Box>
+                        )}
 
-                        <Box sx={{
-                            display: "flex",
-                            pt: 5,
-                            gap: { xs: 3, md: 5 },
-                            flexDirection: { xs: "column", md: "row" },
-                        }}>
-                            {(!isMobile || !encontrosSelecionado) && (
-                                <Box sx={{ width: { xs: "100%", md: 348 } }}>
-                                    <Filtro
-                                        data={encontros}
-                                        onSelect={toggleEncontrosSelecionado}
-                                        encontroSelecionado={encontrosSelecionado}
-                                    />
-                                </Box>
-                            )}
-
-                            {(!isMobile || !!encontrosSelecionado) && (
-                                <Box flex={1} sx={{ pl: { xs: 0, md: "33px" }, pr: { xs: 0, md: "17px" } }}>
-                                    <Informacao
-                                        data={encontrosSelecionado || null}
-                                        onBack={isMobile ? deselectEncontro : undefined}
-                                        onEditar={handleEditarEncontro}
-                                        onExcluir={handleAbrirExcluir}
-                                    />
-                                </Box>
-                            )}
-                        </Box>
+                        {(!isMobile || !!encontrosSelecionado) && (
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Informacao
+                                    data={encontrosSelecionado || null}
+                                    onBack={isMobile ? deselectEncontro : undefined}
+                                    onEditar={handleEditarEncontro}
+                                    onExcluir={handleAbrirExcluir}
+                                />
+                            </Box>
+                        )}
                     </Box>
 
                     <ModalCadastroEncontro
@@ -195,6 +226,7 @@ export default function Encontros() {
                         onSave={handleSalvarEncontro}
                         celulaId={celulaId ?? null}
                         frequenciasExistentes={encontroEditando?.frequencia}
+                        stepInicial={stepInicialModal}
                         dadosIniciais={encontroEditando ? {
                             celula_id: encontroEditando.celula_id,
                             tema: encontroEditando.tema,
@@ -243,5 +275,13 @@ export default function Encontros() {
                 </>
             )}
         </PageContainer>
+    );
+}
+
+export default function Encontros() {
+    return (
+        <Suspense fallback={<LoadingBox />}>
+            <EncontrosContent />
+        </Suspense>
     );
 }

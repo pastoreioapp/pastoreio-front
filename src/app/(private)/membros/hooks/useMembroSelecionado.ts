@@ -5,15 +5,18 @@ import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 
 export function useMembrosSelecionados(
     celulaId?: number | null,
-    membroIdInicial?: number | null
+    membroIdInicial?: number | null,
 ) {
     const { membros, loading, erro, refetch } = useMembros(celulaId);
-    
     const membrosVisiveis = useMemo(
-        () => membros.filter((membro) => membro.funcao !== PapelCelula.LIDER_CELULA),
-        [membros]
+        () =>
+            membros.filter(
+                (membro) => membro.funcao !== PapelCelula.LIDER_CELULA,
+            ),
+        [membros],
     );
-    const [membroSelecionado, setMembroSelecionado] = useState<MembroDaCelulaListItemDto | null>(null);
+    const [membroSelecionado, setMembroSelecionado] =
+        useState<MembroDaCelulaListItemDto | null>(null);
     const hasAppliedInitialSelection = useRef(false);
 
     useEffect(() => {
@@ -32,19 +35,26 @@ export function useMembrosSelecionados(
             return;
         }
 
-        const membroInicial = membrosVisiveis.find((membro) => membro.id === membroIdInicial) ?? null;
+        const membroInicial =
+            membrosVisiveis.find((membro) => membro.id === membroIdInicial) ??
+            null;
         setMembroSelecionado(membroInicial);
     }, [loading, membroIdInicial, membrosVisiveis]);
 
     useEffect(() => {
-        if (membroSelecionado && !membrosVisiveis.some((membro) => membro.id === membroSelecionado.id)) {
+        if (
+            membroSelecionado &&
+            !membrosVisiveis.some(
+                (membro) => membro.id === membroSelecionado.id,
+            )
+        ) {
             setMembroSelecionado(null);
         }
     }, [membroSelecionado, membrosVisiveis]);
 
     function toggleMembroSelecionado(membro: MembroDaCelulaListItemDto) {
         setMembroSelecionado((prev) =>
-            prev?.id === membro.id ? null : membro
+            prev?.id === membro.id ? null : membro,
         );
     }
 
@@ -57,8 +67,8 @@ export function useMembrosSelecionados(
         membroSelecionado,
         toggleMembroSelecionado,
         deselectMembro,
+        refetch,
         loading,
         erro,
-        refetch,
     };
 }

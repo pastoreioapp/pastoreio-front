@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listMembrosDaCelula } from "@/app/actions/celulas";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
@@ -11,10 +11,10 @@ export function useMembros(celulaId?: number | null) {
     const [membros, setMembros] = useState<MembroDaCelulaListItemDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [fetchTrigger, setFetchTrigger] = useState(0);
 
     const refetch = useCallback(() => {
-        setRefreshTrigger((prev) => prev + 1);
+        setFetchTrigger((prev) => prev + 1);
     }, []);
 
     useEffect(() => {
@@ -41,7 +41,11 @@ export function useMembros(celulaId?: number | null) {
                 if (!isMounted) {
                     return;
                 }
-                setErro(error instanceof Error ? error.message : "Erro ao carregar membros");
+                setErro(
+                    error instanceof Error
+                        ? error.message
+                        : "Erro ao carregar membros",
+                );
             } finally {
                 if (isMounted) {
                     setLoading(false);
@@ -53,7 +57,7 @@ export function useMembros(celulaId?: number | null) {
         return () => {
             isMounted = false;
         };
-    }, [celulaId, refreshTrigger]);
+    }, [celulaId, fetchTrigger]);
 
     return { membros, loading, erro, refetch };
 }

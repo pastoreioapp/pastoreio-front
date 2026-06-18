@@ -26,6 +26,10 @@ export function useEncontrosSelecionados(celulaId?: number | null) {
         );
     }
 
+    function selectEncontro(encontro: Encontro) {
+        setEncontrosSelecionado(encontro);
+    }
+
     function deselectEncontro() {
         setEncontrosSelecionado(null);
     }
@@ -34,6 +38,7 @@ export function useEncontrosSelecionados(celulaId?: number | null) {
         encontros,
         encontrosSelecionado,
         toggleEncontrosSelecionado,
+        selectEncontro,
         deselectEncontro,
         loading,
         erro,

@@ -28,9 +28,9 @@ function MembrosContent() {
         membroSelecionado,
         toggleMembroSelecionado,
         deselectMembro,
+        refetch,
         loading,
         erro,
-        refetch,
     } = useMembrosSelecionados(
         celulaId,
         Number.isFinite(membroIdInicial) ? membroIdInicial : null,
@@ -92,6 +92,7 @@ function MembrosContent() {
                             <Informacao
                                 data={membroSelecionado || null}
                                 onBack={isMobile ? deselectMembro : undefined}
+                                onDesvincular={refetch}
                             />
                         </Box>
                     )}

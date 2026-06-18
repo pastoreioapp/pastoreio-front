@@ -11,9 +11,31 @@ async function getMembrosCelulaService(): Promise<MembrosCelulaService> {
   return new MembrosCelulaService(repo);
 }
 
+async function getAuditUserId(): Promise<string> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.email ?? user?.id ?? "sistema";
+}
+
 export async function listMembrosDaCelula(
   celulaId: number
 ): Promise<MembroDaCelulaListItemDto[]> {
   const service = await getMembrosCelulaService();
   return service.listMembros(celulaId);
+}
+
+export async function listMembrosDaCelulaParaData(
+  celulaId: number,
+  data: string,
+): Promise<MembroDaCelulaListItemDto[]> {
+  const service = await getMembrosCelulaService();
+  return service.listMembrosNaData(celulaId, data);
+}
+
+export async function desvincularMembroDaCelula(
+  vinculoId: number,
+): Promise<void> {
+  const service = await getMembrosCelulaService();
+  const audit = await getAuditUserId();
+  await service.desvincular(vinculoId, audit);
 }

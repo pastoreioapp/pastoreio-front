@@ -239,6 +239,7 @@ CREATE TABLE "membros_passos" (
   "data_inicio" date,
   "data_conclusao" date,
   PRIMARY KEY ("membro_id", "passo_id")
+  -- TODO: adicionar colunas "deletado", "criado_em","criado_por", "atualizado_em" e "atualizado_por"
 );
 
 CREATE TABLE "frequencias_celula" (
@@ -260,6 +261,7 @@ CREATE TABLE "acompanhamentos_pastorais" (
   "data" timestamp NOT NULL,
   "observacoes" text,
   "tipo" varchar
+  -- TODO: adicionar colunas "deletado", "criado_em","criado_por", "atualizado_em" e "atualizado_por"
 );
 
 CREATE TABLE "acompanhamento_pastoral_membros" (
