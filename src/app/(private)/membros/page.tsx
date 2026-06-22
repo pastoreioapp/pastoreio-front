@@ -67,6 +67,7 @@ function MembrosContent() {
                                 data={membroSelecionado || null}
                                 onBack={isMobile ? deselectMembro : undefined}
                                 onDesvincular={refetch}
+                                onMembroAtualizado={refetch}
                             />
                         </Box>
                     )}

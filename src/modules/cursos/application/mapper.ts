@@ -13,5 +13,6 @@ export function toCursoDoMembroDto(row: InscricaoComCursoRow): CursoDoMembroDto 
     statusLabel: getStatusTurmaLabel(status),
     dataInicio: row.turmas.data_inicio,
     dataFim: row.turmas.data_fim,
+    concluidoEm: row.concluido_em,
   };
 }

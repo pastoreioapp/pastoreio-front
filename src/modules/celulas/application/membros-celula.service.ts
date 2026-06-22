@@ -1,4 +1,4 @@
-import type { MembroDaCelulaListItemDto } from "./dtos";
+import type { MembroDaCelulaListItemDto, VinculosDoMembroDto } from "./dtos";
 import type { MembrosCelulaRepository } from "../infra/membros-celula.repository";
 
 export class MembrosCelulaService {
@@ -10,6 +10,15 @@ export class MembrosCelulaService {
 
   async listMembrosNaData(celulaId: number, data: string): Promise<MembroDaCelulaListItemDto[]> {
     return this.repo.findMembrosByCelulaIdNaData(celulaId, data);
+  }
+
+  async getVinculosDoMembro(membroId: number): Promise<VinculosDoMembroDto> {
+    const [celulaAtual, historico] = await Promise.all([
+      this.repo.findVinculoAtivoByMembroId(membroId),
+      this.repo.findHistoricoByMembroId(membroId),
+    ]);
+
+    return { celulaAtual, historico };
   }
 
   async desvincular(vinculoId: number, desvinculadoPor: string): Promise<void> {

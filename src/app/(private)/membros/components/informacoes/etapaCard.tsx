@@ -64,16 +64,28 @@ function AnelProgresso({
     );
 }
 
+type ItemPasso = {
+    id: number;
+    label: string;
+    concluido: boolean;
+};
+
 export function EtapaCard({
     etapa,
     titulo,
     itens,
     exibirEtapa = true,
+    podeRegistrarAvancos = false,
+    onMarcarConcluido,
+    passoEmRegistro,
 }: {
     etapa: number;
     titulo: string;
-    itens: { label: string; concluido: boolean }[];
+    itens: ItemPasso[];
     exibirEtapa?: boolean;
+    podeRegistrarAvancos?: boolean;
+    onMarcarConcluido?: (passoId: number) => void;
+    passoEmRegistro?: number | null;
 }) {
     const theme = useTheme();
     const totalConcluidos = itens.filter((item) => item.concluido).length;
@@ -127,55 +139,66 @@ export function EtapaCard({
             </Typography>
 
             <Stack spacing={0} sx={{ width: "100%" }}>
-                {itens.map((item, i) => (
-                    <Box
-                        key={i}
-                        display="flex"
-                        alignItems="center"
-                        sx={{
-                            py: 0.25,
-                            borderRadius: 1,
-                        }}
-                    >
-                        <Checkbox
-                            checked={item.concluido}
-                            disabled
-                            size="small"
-                            icon={
-                                <Box
-                                    sx={{
-                                        border: "1.5px solid",
-                                        borderColor: "#C5C5C5",
-                                        width: 16,
-                                        height: 16,
-                                        borderRadius: "4px",
-                                    }}
-                                />
-                            }
-                            checkedIcon={
-                                <CheckCircle
-                                    sx={{
-                                        fontSize: "1.25rem",
-                                        color: theme.palette.success.main,
-                                    }}
-                                />
-                            }
-                            sx={{ p: 0.5 }}
-                        />
-                        <Typography
+                {itens.map((item) => {
+                    const interativo =
+                        podeRegistrarAvancos && !item.concluido && onMarcarConcluido;
+                    const registrando = passoEmRegistro === item.id;
+
+                    return (
+                        <Box
+                            key={item.id}
+                            display="flex"
+                            alignItems="center"
                             sx={{
-                                fontSize: "0.85rem",
-                                color: item.concluido
-                                    ? theme.palette.text.secondary
-                                    : theme.palette.text.primary,
-                                textDecoration: item.concluido ? "line-through" : "none",
-                                ml: 0.5,
+                                py: 0.25,
+                                borderRadius: 1,
                             }}
                         >
-                            {item.label}
-                        </Typography>
-                    </Box>
-                ))}
+                            {registrando ? (
+                                <CircularProgress size={18} sx={{ m: 0.5 }} />
+                            ) : (
+                                <Checkbox
+                                    checked={item.concluido}
+                                    disabled={!interativo}
+                                    onChange={() => onMarcarConcluido?.(item.id)}
+                                    size="small"
+                                    icon={
+                                        <Box
+                                            sx={{
+                                                border: "1.5px solid",
+                                                borderColor: "#C5C5C5",
+                                                width: 16,
+                                                height: 16,
+                                                borderRadius: "4px",
+                                            }}
+                                        />
+                                    }
+                                    checkedIcon={
+                                        <CheckCircle
+                                            sx={{
+                                                fontSize: "1.25rem",
+                                                color: theme.palette.success.main,
+                                            }}
+                                        />
+                                    }
+                                    sx={{ p: 0.5 }}
+                                />
+                            )}
+                            <Typography
+                                sx={{
+                                    fontSize: "0.85rem",
+                                    color: item.concluido
+                                        ? theme.palette.text.secondary
+                                        : theme.palette.text.primary,
+                                    textDecoration: item.concluido ? "line-through" : "none",
+                                    ml: 0.5,
+                                }}
+                            >
+                                {item.label}
+                            </Typography>
+                        </Box>
+                    );
+                })}
             </Stack>
         </Paper>
     );

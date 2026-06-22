@@ -1,6 +1,7 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
+import { enqueueSnackbar } from "notistack";
 import { EtapaCard } from "./etapaCard";
 import { CursoCard } from "./cursoCard";
 import { FrequenciaCalendario } from "./frequenciaCalendario";
@@ -10,6 +11,8 @@ import { useFrequenciasMembro } from "../../hooks/useFrequenciasMembro";
 import { IconInfoCircleFilled } from "@tabler/icons-react";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
+import { registrarAvancoPasso } from "@/app/actions/trajetoria";
+import { registrarAvancoInscricao } from "@/app/actions/cursos";
 
 const STYLE_TAB = {
     fontSize: { xs: "14px", md: "16px" },
@@ -23,11 +26,63 @@ const STYLE_TAB = {
     },
 };
 
-export function EtapasTabs({ membroId }: { membroId: number }) {
+export function EtapasTabs({
+    membroId,
+    podeRegistrarAvancos = false,
+}: {
+    membroId: number;
+    podeRegistrarAvancos?: boolean;
+}) {
     const [tab, setTab] = useState("1");
-    const { trajetoria, loading, erro } = useTrajetoriaMembro(membroId);
-    const { cursos, loading: cursosLoading, erro: cursosErro } = useCursosDoMembro(membroId);
+    const [passoEmRegistro, setPassoEmRegistro] = useState<number | null>(null);
+    const [inscricaoEmRegistro, setInscricaoEmRegistro] = useState<number | null>(null);
+
+    const { trajetoria, loading, erro, refetch: refetchTrajetoria } = useTrajetoriaMembro(membroId);
+    const {
+        cursos,
+        loading: cursosLoading,
+        erro: cursosErro,
+        refetch: refetchCursos,
+    } = useCursosDoMembro(membroId);
     const { frequencias, loading: freqLoading, erro: freqErro } = useFrequenciasMembro(membroId);
+
+    async function handleMarcarPasso(passoId: number) {
+        try {
+            setPassoEmRegistro(passoId);
+            await registrarAvancoPasso(membroId, passoId);
+            enqueueSnackbar("Passo registrado com sucesso!", {
+                variant: "success",
+                autoHideDuration: 2000,
+            });
+            refetchTrajetoria();
+        } catch (error: unknown) {
+            enqueueSnackbar(
+                error instanceof Error ? error.message : "Erro ao registrar passo",
+                { variant: "error", autoHideDuration: 3000 },
+            );
+        } finally {
+            setPassoEmRegistro(null);
+        }
+    }
+
+    async function handleMarcarInscricao(inscricaoId: number) {
+        try {
+            setInscricaoEmRegistro(inscricaoId);
+            await registrarAvancoInscricao(inscricaoId);
+            enqueueSnackbar("Curso marcado como concluído!", {
+                variant: "success",
+                autoHideDuration: 2000,
+            });
+            refetchCursos();
+        } catch (error: unknown) {
+            enqueueSnackbar(
+                error instanceof Error ? error.message : "Erro ao registrar conclusão",
+                { variant: "error", autoHideDuration: 3000 },
+            );
+        } finally {
+            setInscricaoEmRegistro(null);
+        }
+    }
 
     return (
         <Box
@@ -77,7 +132,13 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                                     etapa={grupo.ordem}
                                     titulo={grupo.nome}
                                     exibirEtapa={trajetoria.grupos.length > 1}
+                                    podeRegistrarAvancos={podeRegistrarAvancos}
+                                    passoEmRegistro={passoEmRegistro}
+                                    onMarcarConcluido={
+                                        podeRegistrarAvancos ? handleMarcarPasso : undefined
+                                    }
                                     itens={grupo.passos.map((p) => ({
+                                        id: p.id,
                                         label: p.nome,
                                         concluido: p.concluido,
                                     }))}
@@ -102,12 +163,19 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                             {cursos.map((curso) => (
                                 <CursoCard
                                     key={curso.inscricaoId}
+                                    inscricaoId={curso.inscricaoId}
                                     cursoNome={curso.cursoNome}
                                     turmaNome={curso.turmaNome}
                                     status={curso.status}
                                     statusLabel={curso.statusLabel}
                                     dataInicio={curso.dataInicio}
                                     dataFim={curso.dataFim}
+                                    concluidoEm={curso.concluidoEm}
+                                    podeRegistrarAvancos={podeRegistrarAvancos}
+                                    registrando={inscricaoEmRegistro === curso.inscricaoId}
+                                    onMarcarConcluido={
+                                        podeRegistrarAvancos ? handleMarcarInscricao : undefined
+                                    }
                                 />
                             ))}
                         </Box>

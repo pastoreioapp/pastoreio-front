@@ -1,6 +1,9 @@
 "use server";
 
-import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import type {
+  MembroDaCelulaListItemDto,
+  VinculosDoMembroDto,
+} from "@/modules/celulas/application/dtos";
 import { createClient } from "@/shared/supabase/server";
 import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
 import { MembrosCelulaService } from "@/modules/celulas/application/membros-celula.service";
@@ -30,6 +33,13 @@ export async function listMembrosDaCelulaParaData(
 ): Promise<MembroDaCelulaListItemDto[]> {
   const service = await getMembrosCelulaService();
   return service.listMembrosNaData(celulaId, data);
+}
+
+export async function getVinculosDoMembro(
+  membroId: number,
+): Promise<VinculosDoMembroDto> {
+  const service = await getMembrosCelulaService();
+  return service.getVinculosDoMembro(membroId);
 }
 
 export async function desvincularMembroDaCelula(

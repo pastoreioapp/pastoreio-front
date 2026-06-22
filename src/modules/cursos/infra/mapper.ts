@@ -15,5 +15,6 @@ interface TurmaRow {
 export interface InscricaoComCursoRow {
   id: number;
   data_inscricao: string | null;
+  concluido_em: string | null;
   turmas: TurmaRow;
 }

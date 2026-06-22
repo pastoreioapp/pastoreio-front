@@ -6,4 +6,5 @@ export interface CursoDoMembroDto {
   statusLabel: string;
   dataInicio: string | null;
   dataFim: string | null;
+  concluidoEm: string | null;
 }

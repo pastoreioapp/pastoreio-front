@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { MembroDaCelulaListItemDto } from "../application/dtos";
+import type {
+  CelulaAtualDto,
+  MembroDaCelulaListItemDto,
+  VinculoHistoricoDto,
+} from "../application/dtos";
 import type { PapelCelula } from "../domain/papel-celula";
 import {
   PAPEIS_CELULA_LIDERANCA,
@@ -101,6 +105,56 @@ export class MembrosCelulaRepository {
     if (error) throw new Error(error.message);
     if (!data) return null;
     return { id: data.id, dataSaida: data.data_saida };
+  }
+
+  async findVinculoAtivoByMembroId(membroId: number): Promise<CelulaAtualDto | null> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("celula_id, papel_celula, data_entrada, celulas!inner(nome)")
+      .eq("membro_id", membroId)
+      .eq("deletado", false)
+      .is("data_saida", null)
+      .order("data_entrada", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data?.celula_id) return null;
+
+    const papelCelula = parsePapelCelula(data.papel_celula);
+    if (!papelCelula) return null;
+
+    const celula = data.celulas as { nome: string | null };
+
+    return {
+      celulaId: Number(data.celula_id),
+      celulaNome: celula?.nome ?? "Célula",
+      papelCelula,
+      dataEntrada: data.data_entrada != null ? String(data.data_entrada) : null,
+    };
+  }
+
+  async findHistoricoByMembroId(membroId: number): Promise<VinculoHistoricoDto[]> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("id, celula_id, papel_celula, data_entrada, data_saida, celulas!inner(nome)")
+      .eq("membro_id", membroId)
+      .eq("deletado", false)
+      .order("data_entrada", { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []).map((row) => {
+      const celula = row.celulas as { nome: string | null };
+      return {
+        vinculoId: Number(row.id),
+        celulaId: Number(row.celula_id),
+        celulaNome: celula?.nome ?? "Célula",
+        papelCelula: parsePapelCelula(row.papel_celula),
+        dataEntrada: row.data_entrada != null ? String(row.data_entrada) : null,
+        dataSaida: row.data_saida != null ? String(row.data_saida) : null,
+      };
+    });
   }
 
   async desvincular(vinculoId: number, desvinculadoPor: string): Promise<void> {

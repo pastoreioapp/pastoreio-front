@@ -55,9 +55,58 @@ export class TrajetoriaRepository {
     const { data, error } = await this.supabase
       .from("membros_passos")
       .select("passo_id, status, data_inicio, data_conclusao")
-      .eq("membro_id", membroId);
+      .eq("membro_id", membroId)
+      .eq("deletado", false);
 
     if (error) throw new Error(error.message);
     return (data as MembroPassoRow[] ?? []).map((r) => rowToMembroPasso(r, membroId));
+  }
+
+  async upsertPassoConcluido(
+    membroId: number,
+    passoId: number,
+    audit: string,
+  ): Promise<void> {
+    const hoje = new Date().toISOString().split("T")[0];
+    const now = new Date().toISOString();
+
+    const { data: existente, error: selectError } = await this.supabase
+      .from("membros_passos")
+      .select("membro_id, passo_id, data_inicio")
+      .eq("membro_id", membroId)
+      .eq("passo_id", passoId)
+      .maybeSingle();
+
+    if (selectError) throw new Error(selectError.message);
+
+    if (existente) {
+      const { error } = await this.supabase
+        .from("membros_passos")
+        .update({
+          status: "CONCLUIDO",
+          data_conclusao: hoje,
+          atualizado_em: now,
+          atualizado_por: audit,
+          deletado: false,
+        })
+        .eq("membro_id", membroId)
+        .eq("passo_id", passoId);
+
+      if (error) throw new Error(error.message);
+      return;
+    }
+
+    const { error } = await this.supabase.from("membros_passos").insert({
+      membro_id: membroId,
+      passo_id: passoId,
+      status: "CONCLUIDO",
+      data_inicio: hoje,
+      data_conclusao: hoje,
+      criado_em: now,
+      criado_por: audit,
+      deletado: false,
+    });
+
+    if (error) throw new Error(error.message);
   }
 }

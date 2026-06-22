@@ -3,7 +3,7 @@
 import { createClient } from "@/shared/supabase/server";
 import { MembroRepository } from "@/modules/secretaria/infra/membro.repository";
 import { MembroService } from "@/modules/secretaria/application/membro.service";
-import type { CreateMembroDto, UpdateMembroDto } from "@/modules/secretaria/application/dtos";
+import type { CreateMembroDto, UpdateMembroDto, UpdateMembroPorLiderDto } from "@/modules/secretaria/application/dtos";
 
 async function getMembroService(): Promise<MembroService> {
   const supabase = await createClient();
@@ -38,6 +38,12 @@ export async function updateMembro(id: number, dto: UpdateMembroDto) {
   const service = await getMembroService();
   const audit = await getAuditUserId();
   await service.update(id, dto, audit);
+}
+
+export async function updateMembroPorLider(id: number, dto: UpdateMembroPorLiderDto) {
+  const service = await getMembroService();
+  const audit = await getAuditUserId();
+  await service.updatePorLider(id, dto, audit);
 }
 
 export async function deleteMembro(id: number) {

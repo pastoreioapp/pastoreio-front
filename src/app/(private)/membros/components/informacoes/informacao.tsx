@@ -10,8 +10,13 @@ import { InformacaoHeader } from "./informacoesHeader";
 import { InformacoesGroup } from "./informacoesGroup";
 import { EtapasTabs } from "./etapasTabs";
 import { ModalConfirmarDesvinculo } from "./ModalConfirmarDesvinculo";
+import { CelulaAtualSection } from "./CelulaAtualSection";
+import { HistoricoVinculosSection } from "./HistoricoVinculosSection";
+import { ModalEditarMembro } from "./ModalEditarMembro";
 import { desvincularMembroDaCelula } from "@/app/actions/celulas";
 import { enqueueSnackbar } from "notistack";
+import { usePermissaoCelula } from "@/ui/hooks/usePermissaoCelula";
+import { useVinculosMembro } from "../../hooks/useVinculosMembro";
 
 const MensagemNenhumMembroSelecionado = () => (
     <Box
@@ -43,13 +48,21 @@ export function Informacao({
     data,
     onBack,
     onDesvincular,
+    onMembroAtualizado,
 }: {
     data: MembroDaCelulaListItemDto | null;
     onBack?: () => void;
     onDesvincular?: () => void;
+    onMembroAtualizado?: () => void;
 }) {
-    const [modalAberto, setModalAberto] = useState(false);
+    const [modalDesvinculoAberto, setModalDesvinculoAberto] = useState(false);
+    const [modalEditarAberto, setModalEditarAberto] = useState(false);
     const [desvinculando, setDesvinculando] = useState(false);
+
+    const { podeEditarDados, podeRegistrarAvancos } = usePermissaoCelula();
+    const { vinculos, loading: loadingVinculos, erro: erroVinculos } = useVinculosMembro(
+        data?.id ?? null,
+    );
 
     if (!data) return <MensagemNenhumMembroSelecionado />;
 
@@ -81,9 +94,6 @@ export function Informacao({
         },
     ];
 
-    const handleEditar = () =>
-        enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 });
-
     const podeDesvincular =
         !!data.funcao && (FUNCOES_DESVINCULAVEIS as readonly PapelCelula[]).includes(data.funcao);
 
@@ -92,7 +102,7 @@ export function Informacao({
         try {
             setDesvinculando(true);
             await desvincularMembroDaCelula(data.vinculoId);
-            setModalAberto(false);
+            setModalDesvinculoAberto(false);
             enqueueSnackbar("Membro desvinculado com sucesso!", { variant: "success", autoHideDuration: 2000 });
             onDesvincular?.();
         } catch (error: unknown) {
@@ -103,6 +113,10 @@ export function Informacao({
         } finally {
             setDesvinculando(false);
         }
+    }
+
+    function handleMembroSalvo() {
+        onMembroAtualizado?.();
     }
 
     return (
@@ -167,7 +181,7 @@ export function Informacao({
                     {podeDesvincular && (
                         <Tooltip title="Desvincular da célula">
                             <IconButton
-                                onClick={() => setModalAberto(true)}
+                                onClick={() => setModalDesvinculoAberto(true)}
                                 sx={{
                                     color: "#fff",
                                     "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
@@ -177,17 +191,19 @@ export function Informacao({
                             </IconButton>
                         </Tooltip>
                     )}
-                    <Tooltip title="Editar">
-                        <IconButton
-                            onClick={handleEditar}
-                            sx={{
-                                color: "#fff",
-                                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
-                            }}
-                        >
-                            <IconPencil size={20} />
-                        </IconButton>
-                    </Tooltip>
+                    {podeEditarDados && (
+                        <Tooltip title="Editar">
+                            <IconButton
+                                onClick={() => setModalEditarAberto(true)}
+                                sx={{
+                                    color: "#fff",
+                                    "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+                                }}
+                            >
+                                <IconPencil size={20} />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </Box>
             </Box>
 
@@ -227,16 +243,41 @@ export function Informacao({
                     </Box>
                 </Box>
 
-                <EtapasTabs membroId={data.id} />
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+                    <CelulaAtualSection
+                        celulaAtual={vinculos?.celulaAtual ?? null}
+                        loading={loadingVinculos}
+                        erro={erroVinculos}
+                    />
+                    <HistoricoVinculosSection
+                        historico={vinculos?.historico ?? []}
+                        loading={loadingVinculos}
+                        erro={erroVinculos}
+                    />
+                </Box>
+
+                <EtapasTabs
+                    membroId={data.id}
+                    podeRegistrarAvancos={podeRegistrarAvancos}
+                />
             </Box>
 
             <ModalConfirmarDesvinculo
-                open={modalAberto}
+                open={modalDesvinculoAberto}
                 nomeDoMembro={data.nome ?? "este membro"}
                 loading={desvinculando}
-                onClose={() => setModalAberto(false)}
+                onClose={() => setModalDesvinculoAberto(false)}
                 onConfirm={handleConfirmarDesvinculo}
             />
+
+            {podeEditarDados && (
+                <ModalEditarMembro
+                    open={modalEditarAberto}
+                    membro={data}
+                    onClose={() => setModalEditarAberto(false)}
+                    onSaved={handleMembroSalvo}
+                />
+            )}
         </Box>
     );
 }

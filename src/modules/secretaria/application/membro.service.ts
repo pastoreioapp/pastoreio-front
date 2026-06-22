@@ -1,6 +1,6 @@
 import type { Membro } from "../domain/membro";
 import type { MembroRepository } from "../infra/membro.repository";
-import type { MembroListItemDto, MembroDetailDto, CreateMembroDto, UpdateMembroDto } from "./dtos";
+import type { MembroListItemDto, MembroDetailDto, CreateMembroDto, UpdateMembroDto, UpdateMembroPorLiderDto } from "./dtos";
 import { toListItemDto, toDetailDto } from "./mapper";
 
 export class MembroService {
@@ -62,6 +62,32 @@ export class MembroService {
       discipulando: dto.discipulando !== undefined ? dto.discipulando : membro.discipulando,
       ministerio: dto.ministerio !== undefined ? dto.ministerio : membro.ministerio,
       ativo: dto.ativo !== undefined ? dto.ativo : membro.ativo,
+      atualizadoEm: now,
+      atualizadoPor,
+    });
+  }
+
+  async updatePorLider(
+    id: number,
+    dto: UpdateMembroPorLiderDto,
+    atualizadoPor: string,
+  ): Promise<void> {
+    const membro = await this.repo.findById(id);
+    if (!membro) throw new Error("Membro não encontrado.");
+
+    const now = new Date().toISOString();
+    await this.repo.save({
+      ...membro,
+      telefone: dto.telefone !== undefined ? dto.telefone : membro.telefone,
+      email: dto.email !== undefined ? dto.email : membro.email,
+      dataNascimento: dto.dataNascimento !== undefined ? dto.dataNascimento : membro.dataNascimento,
+      endereco: dto.endereco !== undefined ? dto.endereco : membro.endereco,
+      estadoCivil: dto.estadoCivil !== undefined ? dto.estadoCivil : membro.estadoCivil,
+      conjuge: dto.conjuge !== undefined ? dto.conjuge : membro.conjuge,
+      filhos: dto.filhos !== undefined ? dto.filhos : membro.filhos,
+      discipulador: dto.discipulador !== undefined ? dto.discipulador : membro.discipulador,
+      discipulando: dto.discipulando !== undefined ? dto.discipulando : membro.discipulando,
+      ministerio: dto.ministerio !== undefined ? dto.ministerio : membro.ministerio,
       atualizadoEm: now,
       atualizadoPor,
     });

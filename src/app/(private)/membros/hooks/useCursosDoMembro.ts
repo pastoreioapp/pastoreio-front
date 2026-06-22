@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getCursosDoMembro } from "@/app/actions/cursos";
 import type { CursoDoMembroDto } from "@/modules/cursos/application/dtos";
 
@@ -8,6 +8,11 @@ export function useCursosDoMembro(membroId: number) {
     const [cursos, setCursos] = useState<CursoDoMembroDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
+    const [fetchTrigger, setFetchTrigger] = useState(0);
+
+    const refetch = useCallback(() => {
+        setFetchTrigger((prev) => prev + 1);
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
@@ -32,7 +37,7 @@ export function useCursosDoMembro(membroId: number) {
         return () => {
             isMounted = false;
         };
-    }, [membroId]);
+    }, [membroId, fetchTrigger]);
 
-    return { cursos, loading, erro };
+    return { cursos, loading, erro, refetch };
 }

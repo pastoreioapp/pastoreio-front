@@ -1,15 +1,20 @@
-import { Box, Chip, Paper, Typography } from "@mui/material";
+import { Box, Button, Chip, CircularProgress, Paper, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { IconBook, IconCalendar } from "@tabler/icons-react";
 import { StatusTurma } from "@/modules/cursos/domain/status-turma";
 
 type Props = {
+    inscricaoId: number;
     cursoNome: string;
     turmaNome: string;
     status: string;
     statusLabel: string;
     dataInicio: string | null;
     dataFim: string | null;
+    concluidoEm: string | null;
+    podeRegistrarAvancos?: boolean;
+    registrando?: boolean;
+    onMarcarConcluido?: (inscricaoId: number) => void;
 };
 
 function getStatusChipColor(status: string): "default" | "warning" | "success" {
@@ -29,9 +34,23 @@ function formatDate(value: string | null): string | null {
     return `${day}/${month}/${year}`;
 }
 
-export function CursoCard({ cursoNome, turmaNome, status, statusLabel, dataInicio, dataFim }: Props) {
+export function CursoCard({
+    inscricaoId,
+    cursoNome,
+    turmaNome,
+    status,
+    statusLabel,
+    dataInicio,
+    dataFim,
+    concluidoEm,
+    podeRegistrarAvancos = false,
+    registrando = false,
+    onMarcarConcluido,
+}: Props) {
     const theme = useTheme();
-    const chipColor = getStatusChipColor(status);
+    const concluido = !!concluidoEm;
+    const chipColor = concluido ? "success" : getStatusChipColor(status);
+    const chipLabel = concluido ? "Concluído" : statusLabel;
     const periodoLabel = buildPeriodoLabel(dataInicio, dataFim);
 
     return (
@@ -43,7 +62,7 @@ export function CursoCard({ cursoNome, turmaNome, status, statusLabel, dataInici
                 borderRadius: 2,
                 display: "flex",
                 flexDirection: "column",
-                bgcolor: "#F9F9F9",
+                bgcolor: concluido ? "#F1F8F1" : "#F9F9F9",
                 p: 3,
                 gap: 1.5,
             }}
@@ -60,7 +79,7 @@ export function CursoCard({ cursoNome, turmaNome, status, statusLabel, dataInici
             </Typography>
 
             <Chip
-                label={statusLabel}
+                label={chipLabel}
                 color={chipColor}
                 size="small"
                 sx={{ alignSelf: "flex-start", fontWeight: 500 }}
@@ -73,6 +92,33 @@ export function CursoCard({ cursoNome, turmaNome, status, statusLabel, dataInici
                         {periodoLabel}
                     </Typography>
                 </Box>
+            )}
+
+            {concluidoEm && (
+                <Typography sx={{ fontSize: "0.8rem", color: "success.main" }}>
+                    Concluído em {formatDate(concluidoEm)}
+                </Typography>
+            )}
+
+            {podeRegistrarAvancos && !concluido && onMarcarConcluido && (
+                <Button
+                    variant="outlined"
+                    size="small"
+                    disabled={registrando}
+                    onClick={() => onMarcarConcluido(inscricaoId)}
+                    sx={{
+                        mt: 0.5,
+                        textTransform: "none",
+                        borderColor: "#5E79B3",
+                        color: "#5E79B3",
+                    }}
+                >
+                    {registrando ? (
+                        <CircularProgress size={16} sx={{ color: "#5E79B3" }} />
+                    ) : (
+                        "Marcar como concluído"
+                    )}
+                </Button>
             )}
         </Paper>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getTrajetoriaDoMembro } from "@/app/actions/trajetoria";
 import type { TrajetoriaDoMembroDto } from "@/modules/trajetoria/application/dtos";
 
@@ -8,6 +8,11 @@ export function useTrajetoriaMembro(membroId: number) {
     const [trajetoria, setTrajetoria] = useState<TrajetoriaDoMembroDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
+    const [fetchTrigger, setFetchTrigger] = useState(0);
+
+    const refetch = useCallback(() => {
+        setFetchTrigger((prev) => prev + 1);
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
@@ -30,10 +35,9 @@ export function useTrajetoriaMembro(membroId: number) {
         fetchData();
 
         return () => {
-            // Evita race condition ao trocar de membro com requisição em andamento
             isMounted = false;
         };
-    }, [membroId]);
+    }, [membroId, fetchTrigger]);
 
-    return { trajetoria, loading, erro };
+    return { trajetoria, loading, erro, refetch };
 }

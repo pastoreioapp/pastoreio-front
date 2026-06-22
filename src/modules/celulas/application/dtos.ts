@@ -21,3 +21,24 @@ export interface MembroDaCelulaListItemDto {
   ativo: boolean;
   dataEntrada: string | null;
 }
+
+export interface CelulaAtualDto {
+  celulaId: number;
+  celulaNome: string;
+  papelCelula: PapelCelula;
+  dataEntrada: string | null;
+}
+
+export interface VinculoHistoricoDto {
+  vinculoId: number;
+  celulaId: number;
+  celulaNome: string;
+  papelCelula: PapelCelula | null;
+  dataEntrada: string | null;
+  dataSaida: string | null;
+}
+
+export interface VinculosDoMembroDto {
+  celulaAtual: CelulaAtualDto | null;
+  historico: VinculoHistoricoDto[];
+}

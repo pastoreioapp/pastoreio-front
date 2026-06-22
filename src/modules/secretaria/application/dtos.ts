@@ -68,3 +68,16 @@ export interface UpdateMembroDto {
   ministerio?: string | null;
   ativo?: boolean;
 }
+
+export interface UpdateMembroPorLiderDto {
+  telefone?: string | null;
+  email?: string | null;
+  dataNascimento?: string | null;
+  endereco?: string | null;
+  estadoCivil?: string | null;
+  conjuge?: string | null;
+  filhos?: string | null;
+  discipulador?: string | null;
+  discipulando?: string | null;
+  ministerio?: string | null;
+}
