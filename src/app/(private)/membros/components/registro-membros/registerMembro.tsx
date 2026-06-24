@@ -26,6 +26,7 @@ import { getTrajetoriaAtivaParaCadastro } from "@/app/actions/trajetoria";
 import { getCursosAtivosParaCadastro } from "@/app/actions/cursos";
 import type { CursoCadastro } from "./components/cursos";
 import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
+import { StatusTurma } from "@/modules/cursos/domain/status-turma";
 
 interface RegisterMembroProps {
     open: boolean;
@@ -55,7 +56,7 @@ export interface CursoPayload {
     cursoId: number;
     nome: string;
     turmaNome: string;
-    status: string;
+    status: StatusTurma;
     ano?: string;
 }
 
@@ -104,10 +105,10 @@ export function RegisterMembro({
                             title: g.nome,
                             items: g.passos
                                 ? g.passos.map((p: any) => ({
-                                      id: p.id,
-                                      label: p.nome,
-                                      checked: false,
-                                  }))
+                                    id: p.id,
+                                    label: p.nome,
+                                    checked: false,
+                                }))
                                 : [],
                         }));
                         setTrajetoriaData(calculateState(fasesMapeadas));
@@ -121,15 +122,15 @@ export function RegisterMembro({
                 .then((res) => {
                     if (res && res.length > 0) {
                         const cursosMapeados: CursoCadastro[] = res.map(
-                            (t: any) => ({
-                                turmaId: t.id,
-                                cursoId: t.cursos.id,
-                                nome: t.cursos.nome,
-                                turmaNome: t.nome,
-                                status: "A_FAZER",
+                            (t) => ({
+                                turmaId: t.turmaId,
+                                cursoId: t.cursoId,
+                                nome: t.cursoNome,
+                                turmaNome: t.turmaNome,
+                                status: StatusTurma.NAO_INICIADO,
                                 dataConclusao: null,
-                                dataInicio: t.data_inicio,
-                                dataFim: t.data_fim,
+                                dataInicio: t.dataInicio,
+                                dataFim: t.dataFim,
                             }),
                         );
 
@@ -142,8 +143,10 @@ export function RegisterMembro({
         }
     }, [open]);
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: string) =>
-        setTabValue(newValue);
+    const handleTabChange = (
+        _event: React.SyntheticEvent,
+        newValue: string,
+    ) => setTabValue(newValue);
     const handleDadosChange = (field: string, value: any) =>
         setFormData((prev) => ({
             ...prev,
@@ -202,15 +205,16 @@ export function RegisterMembro({
         setIsSaving(true);
         try {
             const passosMarcadosIds = trajetoriaData.flatMap((fase) => {
-                if (!fase || !fase.items || !Array.isArray(fase.items))
+                if (!fase || !fase.items || !Array.isArray(fase.items)) {
                     return [];
+                }
                 return fase.items
                     .filter((item: any) => item.checked)
                     .map((item: any) => item.id);
             });
 
             const cursosSelecionados = cursosData.filter(
-                (curso) => curso.status !== "A_FAZER",
+                (curso) => curso.status !== StatusTurma.NAO_INICIADO,
             );
 
             const payloadCompleto = {

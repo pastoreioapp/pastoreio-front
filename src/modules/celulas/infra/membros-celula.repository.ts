@@ -117,4 +117,24 @@ export class MembrosCelulaRepository {
 
     if (error) throw new Error(error.message);
   }
+
+  async vincular(
+    celulaId: number,
+    membroId: number,
+    papel: PapelCelula,
+    criadoPor: string,
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const { error } = await this.supabase.from(TABLE).insert({
+      celula_id: celulaId,
+      membro_id: membroId,
+      papel_celula: papel,
+      data_entrada: now.split("T")[0],
+      criado_em: now,
+      criado_por: criadoPor,
+      deletado: false,
+    });
+
+    if (error) throw new Error(error.message);
+  }
 }

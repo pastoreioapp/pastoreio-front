@@ -4,14 +4,12 @@ import {
     Box,
     FormControl,
     Grid,
-    InputAdornment,
     Select,
     TextField,
     Typography,
     MenuItem,
     FormHelperText,
 } from "@mui/material";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { ReactNode, useState } from "react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
@@ -240,54 +238,54 @@ export function Dados({ data, onChange }: DadosProps) {
                                     error: !!errors.nascimento,
                                     sx: {
                                         "& .MuiInputBase-root, & .MuiOutlinedInput-root, & .MuiPickersInputBase-root, & .MuiPickersOutlinedInput-root":
-                                            {
-                                                backgroundColor: "#F4F6F8",
-                                                borderRadius: "8px",
-                                                minHeight: "48px",
-                                                height: "48px",
-                                                padding: "5px",
-                                                alignItems: "center",
+                                        {
+                                            backgroundColor: "#F4F6F8",
+                                            borderRadius: "8px",
+                                            minHeight: "48px",
+                                            height: "48px",
+                                            padding: "5px",
+                                            alignItems: "center",
 
-                                                "& fieldset": {
-                                                    border: errors.nascimento
-                                                        ? "1px solid #d32f2f"
-                                                        : "none",
-                                                },
-
-                                                "&:hover fieldset": {
-                                                    border: errors.nascimento
-                                                        ? "1px solid #d32f2f"
-                                                        : "none",
-                                                },
-
-                                                "&.Mui-focused fieldset": {
-                                                    border: errors.nascimento
-                                                        ? "1px solid #d32f2f"
-                                                        : "none",
-                                                },
+                                            "& fieldset": {
+                                                border: errors.nascimento
+                                                    ? "1px solid #d32f2f"
+                                                    : "none",
                                             },
+
+                                            "&:hover fieldset": {
+                                                border: errors.nascimento
+                                                    ? "1px solid #d32f2f"
+                                                    : "none",
+                                            },
+
+                                            "&.Mui-focused fieldset": {
+                                                border: errors.nascimento
+                                                    ? "1px solid #d32f2f"
+                                                    : "none",
+                                            },
+                                        },
 
                                         "& .MuiInputBase-input": {
                                             color: "#1F2937",
                                             padding: "0 14px 0 16px",
                                             height: "100%",
                                             boxSizing: "border-box",
-                                            
+
                                             "&::placeholder": {
                                                 color: "#9CA3AF",
                                                 opacity: 1,
                                             },
                                         },
-                                        
+
                                         "& .MuiPickersInputBase-sectionsContainer":
-                                            {
-                                                color: "#1F2937",
-                                                padding: "0 14px 0 16px",
-                                                height: "100%",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                ml: 1.5,
-                                            },
+                                        {
+                                            color: "#1F2937",
+                                            padding: "0 14px 0 16px",
+                                            height: "100%",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            ml: 1.5,
+                                        },
 
                                         "& .MuiPickersSectionList-root": {
                                             padding: 0,

@@ -60,4 +60,25 @@ export class TrajetoriaRepository {
     if (error) throw new Error(error.message);
     return (data as MembroPassoRow[] ?? []).map((r) => rowToMembroPasso(r, membroId));
   }
+
+  async insertPassosConcluidos(
+    membroId: number,
+    passoIds: number[],
+  ): Promise<void> {
+    if (passoIds.length === 0) return;
+
+    const hoje = new Date().toISOString().split("T")[0];
+    const insercoes = passoIds.map((passoId) => ({
+      membro_id: membroId,
+      passo_id: passoId,
+      status: "Concluído",
+      data_conclusao: hoje,
+    }));
+
+    const { error } = await this.supabase
+      .from("membros_passos")
+      .insert(insercoes);
+
+    if (error) throw new Error(error.message);
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { Filtro } from "./components/lista-membros/filtro";
@@ -17,6 +17,7 @@ function MembrosContent() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const searchParams = useSearchParams();
+    const router = useRouter();
     const { loggedUser } = useAppAuthentication();
     const celulaId = loggedUser?.celulaId;
     const membroIdParam = searchParams.get("membroId");
@@ -47,9 +48,10 @@ function MembrosContent() {
         setIsOpenRegister(false);
     };
 
-    const handleRegisterSuccess = () => {
+    const handleRegisterSuccess = async () => {
         setIsOpenRegister(false);
-        refetch();
+        await refetch();
+        router.refresh();
     };
 
     return (
@@ -82,7 +84,7 @@ function MembrosContent() {
                                 data={membros}
                                 onSelect={toggleMembroSelecionado}
                                 membroSelecionado={membroSelecionado}
-                                onRegistrar={handleClickRegister} // Corrigido para abrir o modal
+                                onRegistrar={handleClickRegister}
                             />
                         </Box>
                     )}

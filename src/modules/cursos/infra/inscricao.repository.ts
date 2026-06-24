@@ -1,6 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { InscricaoComCursoRow } from "./mapper";
 
+const TABLE = "inscricoes";
+
+export interface InscricaoInsertPayload {
+    turma_id: number;
+    participante_id: number;
+    data_inscricao: string;
+    status: string;
+    data_conclusao: string | null;
+    criado_em: string;
+    criado_por: string;
+    deletado: boolean;
+}
+
 export class InscricaoRepository {
     constructor(private readonly supabase: SupabaseClient) {}
 
@@ -8,7 +21,7 @@ export class InscricaoRepository {
         membroId: number,
     ): Promise<InscricaoComCursoRow[]> {
         const { data, error } = await this.supabase
-            .from("inscricoes")
+            .from(TABLE)
             .select(
                 `
                 id,
@@ -36,5 +49,13 @@ export class InscricaoRepository {
         if (error) throw new Error(error.message);
 
         return (data ?? []) as unknown as InscricaoComCursoRow[];
+    }
+
+    async insertMany(payloads: InscricaoInsertPayload[]): Promise<void> {
+        if (payloads.length === 0) return;
+
+        const { error } = await this.supabase.from(TABLE).insert(payloads);
+
+        if (error) throw new Error(error.message);
     }
 }

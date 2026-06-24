@@ -23,4 +23,12 @@ export class TrajetoriaService {
 
     return toTrajetoriaDoMembroDto(trajetoria, [], []);
   }
+
+  async registrarPassosConcluidos(
+    membroId: number,
+    passoIds: unknown[],
+  ): Promise<void> {
+    const ids = passoIds.filter((id): id is number => typeof id === "number");
+    await this.repo.insertPassosConcluidos(membroId, ids);
+  }
 }
