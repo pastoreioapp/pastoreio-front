@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageContainer from "@/ui/components/pages/PageContainer";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { Filtro } from "./components/lista-membros/filtro";
@@ -10,17 +10,20 @@ import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { Informacao } from "./components/informacoes/informacao";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
-import { enqueueSnackbar } from "notistack";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
+import { RegisterMembro } from "./components/registro-membros/registerMembro";
 
 function MembrosContent() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const searchParams = useSearchParams();
+    const router = useRouter();
     const { loggedUser } = useAppAuthentication();
     const celulaId = loggedUser?.celulaId;
     const membroIdParam = searchParams.get("membroId");
     const membroIdInicial = membroIdParam ? Number(membroIdParam) : null;
+    const [isOpenRegister, setIsOpenRegister] = useState(false);
+
     const {
         membros,
         membroSelecionado,
@@ -31,32 +34,57 @@ function MembrosContent() {
         erro,
     } = useMembrosSelecionados(
         celulaId,
-        Number.isFinite(membroIdInicial) ? membroIdInicial : null
+        Number.isFinite(membroIdInicial) ? membroIdInicial : null,
     );
 
     const mostrarLista = !isMobile || !membroSelecionado;
     const mostrarInfo = !isMobile || !!membroSelecionado;
 
+    const handleClickRegister = () => {
+        setIsOpenRegister(true);
+    };
+
+    const handleCloseRegister = () => {
+        setIsOpenRegister(false);
+    };
+
+    const handleRegisterSuccess = async () => {
+        setIsOpenRegister(false);
+        await refetch();
+        router.refresh();
+    };
+
     return (
-        <PageContainer title="Membros" description="Página Membros" allowedRoles={LIDER_AUXILIAR_ROLES}>
+        <PageContainer
+            title="Membros"
+            description="Página Membros"
+            allowedRoles={LIDER_AUXILIAR_ROLES}
+        >
             {loading ? (
                 <LoadingBox />
             ) : erro ? (
                 <ErrorBox message={erro} />
             ) : (
-                <Box sx={{
-                    display: "flex",
-                    pt: 2,
-                    gap: { xs: 3, md: 5 },
-                    flexDirection: { xs: "column", md: "row" },
-                }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        pt: 2,
+                        gap: { xs: 3, md: 5 },
+                        flexDirection: { xs: "column", md: "row" },
+                    }}
+                >
                     {mostrarLista && (
-                        <Box sx={{ width: { xs: "100%", md: 348 }, flexShrink: 0 }}>
+                        <Box
+                            sx={{
+                                width: { xs: "100%", md: 348 },
+                                flexShrink: 0,
+                            }}
+                        >
                             <Filtro
                                 data={membros}
                                 onSelect={toggleMembroSelecionado}
                                 membroSelecionado={membroSelecionado}
-                                onRegistrar={() => enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 })}
+                                onRegistrar={handleClickRegister}
                             />
                         </Box>
                     )}
@@ -69,6 +97,14 @@ function MembrosContent() {
                                 onDesvincular={refetch}
                             />
                         </Box>
+                    )}
+                    {isOpenRegister && (
+                        <RegisterMembro
+                            open={isOpenRegister}
+                            onClose={handleCloseRegister}
+                            onSuccess={handleRegisterSuccess}
+                            celulaId={celulaId}
+                        />
                     )}
                 </Box>
             )}

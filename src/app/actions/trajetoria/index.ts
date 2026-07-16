@@ -15,3 +15,8 @@ export async function getTrajetoriaDoMembro(membroId: number): Promise<Trajetori
   const service = await getTrajetoriaService();
   return service.getTrajetoriaDoMembro(membroId);
 }
+
+export async function getTrajetoriaAtivaParaCadastro() {
+  const service = await getTrajetoriaService();
+  return service.getAtiva();
+}

@@ -36,14 +36,16 @@ export function useMembros(celulaId?: number | null) {
                 if (!isMounted) {
                     return;
                 }
-
                 setMembros(data);
             } catch (error: unknown) {
                 if (!isMounted) {
                     return;
                 }
-
-                setErro(error instanceof Error ? error.message : "Erro ao carregar membros");
+                setErro(
+                    error instanceof Error
+                        ? error.message
+                        : "Erro ao carregar membros",
+                );
             } finally {
                 if (isMounted) {
                     setLoading(false);

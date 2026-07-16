@@ -16,4 +16,19 @@ export class TrajetoriaService {
 
     return toTrajetoriaDoMembroDto(trajetoria, passosDoMembro, passosSoltos);
   }
+
+  async getAtiva(): Promise<TrajetoriaDoMembroDto | null> {
+    const trajetoria = await this.repo.findAtiva();
+    if (!trajetoria) return null;
+
+    return toTrajetoriaDoMembroDto(trajetoria, [], []);
+  }
+
+  async registrarPassosConcluidos(
+    membroId: number,
+    passoIds: unknown[],
+  ): Promise<void> {
+    const ids = passoIds.filter((id): id is number => typeof id === "number");
+    await this.repo.insertPassosConcluidos(membroId, ids);
+  }
 }
