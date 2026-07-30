@@ -12,6 +12,10 @@ export class MembrosCelulaService {
     return this.repo.findMembrosByCelulaId(celulaId);
   }
 
+  async listTodosMembros(celulaId: number): Promise<MembroDaCelulaListItemDto[]> {
+    return this.repo.findTodosMembrosAtivosByCelulaId(celulaId);
+  }
+
   async listMembrosNaData(celulaId: number, data: string): Promise<MembroDaCelulaListItemDto[]> {
     return this.repo.findMembrosByCelulaIdNaData(celulaId, data);
   }

@@ -5,7 +5,8 @@ export type AppRoutePath =
   | "/membros"
   | "/organograma"
   | "/encontros"
-  | "/multiplicacao";
+  | "/multiplicacao"
+  | "/celulas";
 
 export interface RouteAccessConfig {
   title: string;
@@ -46,6 +47,11 @@ export const APP_ROUTE_ACCESS: RouteAccessConfig[] = [
   {
     title: "Multiplicação",
     href: "/multiplicacao",
+    allowedRoles: LIDER_ONLY_ROLES,
+  },
+  {
+    title: "Células",
+    href: "/celulas",
     allowedRoles: LIDER_ONLY_ROLES,
   },
 ];

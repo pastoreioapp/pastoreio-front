@@ -38,6 +38,29 @@ export class MembrosCelulaRepository {
       .map(rowToMembroDaCelulaListItemDto);
   }
 
+  async findTodosMembrosAtivosByCelulaId(
+    celulaId: number,
+  ): Promise<MembroDaCelulaListItemDto[]> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select(
+        "id, celula_id, membro_id, papel_celula, data_entrada, deletado, membros(*)",
+      )
+      .eq("celula_id", celulaId)
+      .eq("deletado", false)
+      .is("data_saida", null)
+      .order("papel_celula", { ascending: true });
+
+    if (error) throw new Error(error.message);
+
+    const rows = (data ?? []) as unknown as Parameters<
+      typeof rowToMembroDaCelulaListItemDto
+    >[0][];
+    return rows
+      .filter((row) => row.membros && !row.membros.deletado)
+      .map(rowToMembroDaCelulaListItemDto);
+  }
+
   async findCelulaContextByMembroId(
     membroId: number,
     allowedRoles: readonly PapelCelula[],

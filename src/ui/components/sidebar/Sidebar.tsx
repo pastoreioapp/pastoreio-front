@@ -90,7 +90,10 @@ const NavItem = ({
             <ListItemButton
                 component={Link}
                 href={item.href}
-                selected={pathDirect === item.href}
+                selected={
+                    pathDirect === item.href ||
+                    pathDirect.startsWith(`${item.href}/`)
+                }
                 onClick={onNavigate}
             >
                 <ListItemIcon>{itemIcon}</ListItemIcon>

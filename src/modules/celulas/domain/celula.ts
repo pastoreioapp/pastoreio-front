@@ -2,6 +2,7 @@ export interface Celula {
   id: number;
   grupoId: number | null;
   nome: string;
+  rede: string | null;
   diaSemana: string | null;
   horario: string | null;
   local: string | null;
