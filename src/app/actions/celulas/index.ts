@@ -1,14 +1,26 @@
 "use server";
 
-import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
-import { createClient } from "@/shared/supabase/server";
-import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
+import type {
+  CelulaDetalheDto,
+  CelulaListItemDto,
+  MembroDaCelulaListItemDto,
+} from "@/modules/celulas/application/dtos";
+import { CelulaService } from "@/modules/celulas/application/celula.service";
 import { MembrosCelulaService } from "@/modules/celulas/application/membros-celula.service";
+import { CelulaRepository } from "@/modules/celulas/infra/celula.repository";
+import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
+import { createClient } from "@/shared/supabase/server";
 
 async function getMembrosCelulaService(): Promise<MembrosCelulaService> {
   const supabase = await createClient();
   const repo = new MembrosCelulaRepository(supabase);
   return new MembrosCelulaService(repo);
+}
+
+async function getCelulaService(): Promise<CelulaService> {
+  const supabase = await createClient();
+  const repo = new CelulaRepository(supabase);
+  return new CelulaService(repo);
 }
 
 async function getAuditUserId(): Promise<string> {
@@ -17,11 +29,28 @@ async function getAuditUserId(): Promise<string> {
   return user?.email ?? user?.id ?? "sistema";
 }
 
+export async function listCelulas(): Promise<CelulaListItemDto[]> {
+  const service = await getCelulaService();
+  return service.list();
+}
+
+export async function getCelula(id: number): Promise<CelulaDetalheDto> {
+  const service = await getCelulaService();
+  return service.get(id);
+}
+
 export async function listMembrosDaCelula(
   celulaId: number
 ): Promise<MembroDaCelulaListItemDto[]> {
   const service = await getMembrosCelulaService();
   return service.listMembros(celulaId);
+}
+
+export async function listTodosMembrosDaCelula(
+  celulaId: number,
+): Promise<MembroDaCelulaListItemDto[]> {
+  const service = await getMembrosCelulaService();
+  return service.listTodosMembros(celulaId);
 }
 
 export async function listMembrosDaCelulaParaData(

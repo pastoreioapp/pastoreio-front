@@ -21,3 +21,24 @@ export interface MembroDaCelulaListItemDto {
   ativo: boolean;
   dataEntrada: string | null;
 }
+
+export interface CelulaListItemDto {
+  id: number;
+  nome: string;
+  liderNome: string | null;
+  rede: string | null;
+  ativa: boolean;
+  totalMembros: number;
+}
+
+export interface CelulaDetalheDto {
+  id: number;
+  nome: string;
+  liderNome: string | null;
+  rede: string | null;
+  ativa: boolean;
+  diaSemana: string | null;
+  horario: string | null;
+  local: string | null;
+  totalMembros: number;
+}

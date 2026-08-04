@@ -47,6 +47,9 @@ export default function PrivateShell({
         <Box
           sx={{
             flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
             backgroundColor: "#FFFFFF",
             borderRadius: "30px",
             boxShadow: "0px 0px 20px rgba(183, 202, 255, 0.25)",

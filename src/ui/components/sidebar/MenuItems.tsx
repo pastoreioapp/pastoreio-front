@@ -4,6 +4,7 @@ import {
   IconLayoutDashboard,
   IconMessage2,
   IconUsersGroup,
+  IconLayoutGrid,
 } from "@tabler/icons-react";
 import {
   APP_ROUTE_ACCESS,
@@ -30,6 +31,7 @@ const MENU_ITEM_ICONS: Record<AppRoutePath, MenuIconType> = {
   "/organograma": IconLayoutDashboard,
   "/encontros": IconMessage2,
   "/multiplicacao": IconUsersGroup,
+  "/celulas": IconLayoutGrid,
 };
 
 export const Menuitems: MenuItemType[] = APP_ROUTE_ACCESS.map((route) => ({
