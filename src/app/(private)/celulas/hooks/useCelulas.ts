@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { listCelulas } from "@/app/actions/celulas";
-import type { CelulaListItemDto } from "@/modules/celulas/application/dtos";
+import { createCelula, listCelulas } from "@/app/actions/celulas";
+import type {
+  CelulaListItemDto,
+  CreateCelulaDto,
+} from "@/modules/celulas/application/dtos";
 
 export function useCelulas() {
   const [celulas, setCelulas] = useState<CelulaListItemDto[]>([]);
@@ -19,7 +22,7 @@ export function useCelulas() {
 
     async function fetchData() {
       try {
-        setLoading(true);
+        if (fetchTrigger === 0) setLoading(true);
         setErro(null);
         const data = await listCelulas();
         if (!isMounted) return;
@@ -43,5 +46,13 @@ export function useCelulas() {
     };
   }, [fetchTrigger]);
 
-  return { celulas, loading, erro, refetch };
+  const criarCelula = useCallback(
+    async (dto: CreateCelulaDto) => {
+      await createCelula(dto);
+      refetch();
+    },
+    [refetch],
+  );
+
+  return { celulas, loading, erro, refetch, criarCelula };
 }

@@ -18,29 +18,34 @@ export function InformacaoHeader({
             sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: { xs: "center", md: "flex-start" },
                 flexShrink: 0,
-                minWidth: { md: 200 },
-                mt: { xs: "-40px", md: "-65px" },
+                mt: { xs: -5, md: -6 },
             }}
         >
             <Avatar
                 src={avatarUrl || undefined}
                 sx={{
-                    width: "130px",
-                    height: "130px",
+                    width: 96,
+                    height: 96,
                     fontSize: 32,
-                    fontWeight: "bold",
-                    backgroundColor: "#5E79B3",
+                    fontWeight: 700,
+                    bgcolor: "#5E79B3",
                     color: "#fff",
                     border: "4px solid #fff",
-                    boxShadow: "inset 0 0 0 4px #91A3D8, 0 4px 12px rgba(0,0,0,0.12)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
                 }}
             >
                 {displayNome.charAt(0) || "?"}
             </Avatar>
             <Typography
-                sx={{ mt: 2, fontSize: "18px", fontWeight: "500" }}
+                sx={{
+                    mt: 1.5,
+                    fontSize: "1.125rem",
+                    fontWeight: 700,
+                    color: "#000",
+                    textAlign: { xs: "center", md: "left" },
+                }}
             >
                 {displayNome}
             </Typography>
@@ -48,12 +53,12 @@ export function InformacaoHeader({
                 sx={{
                     ...getFuncaoCores(funcao),
                     mt: 1,
-                    py: .5,
+                    py: 0.5,
                     px: 2,
                     borderRadius: 1,
                 }}
             >
-                <Typography sx={{ fontSize: "15px", fontWeight: "600" }}>
+                <Typography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>
                     {displayFuncao}
                 </Typography>
             </Box>

@@ -42,4 +42,55 @@ export class InscricaoService {
 
     await this.repo.insertMany(payloads);
   }
+
+  async syncFromCadastro(
+    membroId: number,
+    cursos: InscricaoCadastroDto[],
+    atualizadoPor: string,
+  ): Promise<void> {
+    const existentes = await this.listCursosDoMembro(membroId);
+    const porTurma = new Map(
+      existentes.map((curso) => [curso.turmaId, curso]),
+    );
+    const agora = new Date().toISOString();
+
+    const paraInserir: InscricaoCadastroDto[] = [];
+
+    for (const curso of cursos) {
+      if (!curso.turmaId || !curso.status) continue;
+
+      const existente = porTurma.get(curso.turmaId);
+
+      if (curso.status === StatusTurma.NAO_INICIADO) {
+        if (existente) {
+          await this.repo.softDelete(existente.inscricaoId, atualizadoPor);
+        }
+        continue;
+      }
+
+      if (!existente) {
+        paraInserir.push(curso);
+        continue;
+      }
+
+      const dataConclusao =
+        curso.status === StatusTurma.CONCLUIDO
+          ? (curso.dataConclusao ?? existente.dataConclusao)
+          : null;
+
+      if (
+        existente.status !== curso.status ||
+        existente.dataConclusao !== dataConclusao
+      ) {
+        await this.repo.update(existente.inscricaoId, {
+          status: curso.status,
+          data_conclusao: dataConclusao,
+          atualizado_em: agora,
+          atualizado_por: atualizadoPor,
+        });
+      }
+    }
+
+    await this.createFromCadastro(membroId, paraInserir, atualizadoPor);
+  }
 }

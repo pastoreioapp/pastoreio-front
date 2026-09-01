@@ -77,7 +77,26 @@ export class TrajetoriaRepository {
 
     const { error } = await this.supabase
       .from("membros_passos")
-      .insert(insercoes);
+      .upsert(insercoes, { onConflict: "membro_id,passo_id" });
+
+    if (error) {
+      if (/row-level security/i.test(error.message)) {
+        throw new Error(
+          "Sem permissão para registrar a trajetória do membro.",
+        );
+      }
+      throw new Error(error.message);
+    }
+  }
+
+  async deletePassos(membroId: number, passoIds: number[]): Promise<void> {
+    if (passoIds.length === 0) return;
+
+    const { error } = await this.supabase
+      .from("membros_passos")
+      .delete()
+      .eq("membro_id", membroId)
+      .in("passo_id", passoIds);
 
     if (error) throw new Error(error.message);
   }
