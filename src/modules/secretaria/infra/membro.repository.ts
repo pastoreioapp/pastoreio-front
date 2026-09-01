@@ -14,11 +14,13 @@ export class MembroRepository {
       .eq("deletado", false)
       .order("id", { ascending: true });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return (data ?? []).map(rowToMembro);
   }
 
   async findById(id: number): Promise<Membro | null> {
+    if (!Number.isFinite(id) || id <= 0) return null;
+
     const { data, error } = await this.supabase
       .from(TABLE)
       .select("*")
@@ -26,32 +28,51 @@ export class MembroRepository {
       .eq("deletado", false)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data ? rowToMembro(data) : null;
+  }
+
+  async updateCampos(
+    id: number,
+    campos: Record<string, unknown>,
+  ): Promise<void> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .update(campos)
+      .eq("id", id)
+      .select("id");
+
+    if (error) throw new Error(error.message);
+    if (!data?.length) {
+      throw new Error(
+        "Sem permissão para atualizar o membro. Execute a policy de UPDATE em membros no Supabase.",
+      );
+    }
   }
 
   async save(membro: Membro): Promise<Membro> {
     if (membro.id) {
       const row = membroToRow(membro);
       delete (row as Record<string, unknown>).id;
-      const { data, error } = await this.supabase
+      const { error } = await this.supabase
         .from(TABLE)
         .update(row)
-        .eq("id", membro.id)
-        .select()
-        .single();
-      if (error) throw error;
-      return rowToMembro(data);
+        .eq("id", membro.id);
+
+      if (error) throw new Error(error.message);
+      return membro;
     }
 
     const row = membroToRow(membro);
     const { data, error } = await this.supabase
       .from(TABLE)
       .insert(row)
-      .select()
-      .single();
-    if (error) throw error;
-    return rowToMembro(data);
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Não foi possível cadastrar o membro.");
+    return { ...membro, id: Number(data.id) };
   }
 
   async delete(id: number): Promise<void> {
@@ -59,6 +80,6 @@ export class MembroRepository {
       .from(TABLE)
       .update({ deletado: true, atualizado_em: new Date().toISOString() })
       .eq("id", id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
   }
 }

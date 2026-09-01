@@ -24,6 +24,7 @@ interface CadastroMembroPayload {
     };
     cursos?: InscricaoCadastroDto[];
     trajetoria?: number[];
+    vinculoId?: number;
 }
 
 export class CadastroMembroService {
@@ -84,5 +85,54 @@ export class CadastroMembroService {
         }
 
         return membro;
+    }
+
+    async updateFromUI(
+        membroId: number,
+        payload: CadastroMembroPayload,
+        atualizadoPor: string,
+    ): Promise<void> {
+        const { dadosPessoais, cursos, trajetoria, vinculoId } = payload;
+
+        await this.membroService.update(
+            membroId,
+            {
+                nome: dadosPessoais.nome,
+                email: dadosPessoais.email,
+                telefone: dadosPessoais.telefone,
+                dataNascimento: dadosPessoais.nascimento,
+                endereco: dadosPessoais.endereco,
+                estadoCivil: dadosPessoais.estadoCivil,
+                conjuge: dadosPessoais.conjuge || null,
+                filhos: dadosPessoais.filhos,
+                discipulador: dadosPessoais.discipulador,
+                discipulando: dadosPessoais.discipulo,
+                ministerio: dadosPessoais.ministerio,
+            },
+            atualizadoPor,
+        );
+
+        if (vinculoId != null && dadosPessoais.cargo) {
+            await this.membrosCelulaService.atualizarPapel(
+                vinculoId,
+                dadosPessoais.cargo,
+                atualizadoPor,
+            );
+        }
+
+        if (Array.isArray(trajetoria)) {
+            await this.trajetoriaService.syncPassosConcluidos(
+                membroId,
+                trajetoria,
+            );
+        }
+
+        if (Array.isArray(cursos)) {
+            await this.inscricaoService.syncFromCadastro(
+                membroId,
+                cursos,
+                atualizadoPor,
+            );
+        }
     }
 }

@@ -15,6 +15,7 @@ export function InformacoesGroup({
                 p: 2.5,
                 bgcolor: "#FAFBFC",
                 width: "100%",
+                height: "100%",
             }}
         >
             <Typography
@@ -30,7 +31,7 @@ export function InformacoesGroup({
                 {titulo}
             </Typography>
             {campos.map((campo, index) => (
-                <Box key={index} sx={{ mb: 1.5 }}>
+                <Box key={index} sx={{ mb: index === campos.length - 1 ? 0 : 1.5 }}>
                     <Typography
                         variant="body2"
                         sx={{ color: "text.secondary", fontWeight: 600 }}

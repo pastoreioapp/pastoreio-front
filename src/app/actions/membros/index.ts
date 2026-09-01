@@ -85,6 +85,34 @@ export async function updateMembro(id: number, dto: UpdateMembroDto) {
     await service.update(id, dto, audit);
 }
 
+export async function updateMembroFromUI(
+    id: number,
+    payload: any,
+    celulaId?: number,
+) {
+    try {
+        const service = await getCadastroMembroService();
+        const audit = await getAuditUserId();
+        await service.updateFromUI(id, payload, audit);
+
+        revalidatePath("/membros");
+        if (celulaId) {
+            revalidatePath("/celulas");
+            revalidatePath(`/celulas/${celulaId}`);
+        }
+        return { success: true };
+    } catch (error: unknown) {
+        console.error("Erro na Server Action updateMembroFromUI:", error);
+        return {
+            success: false,
+            error:
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível atualizar o membro.",
+        };
+    }
+}
+
 export async function deleteMembro(id: number) {
     const service = await getMembroService();
     await service.delete(id);
@@ -98,6 +126,10 @@ export async function createMembroFromUI(payload: any, celulaId?: number) {
         const membro = await service.createFromUI(payload, celulaId, audit);
 
         revalidatePath("/membros");
+        if (celulaId) {
+            revalidatePath("/celulas");
+            revalidatePath(`/celulas/${celulaId}`);
+        }
         return { success: true, data: { id: membro.id } };
     } catch (error: any) {
         console.error("Erro na Server Action createMembroFromUI:", error);

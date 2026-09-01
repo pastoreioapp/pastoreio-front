@@ -2,6 +2,7 @@ import type { Membro } from "../domain/membro";
 import type { MembroRepository } from "../infra/membro.repository";
 import type { MembroListItemDto, MembroDetailDto, CreateMembroDto, UpdateMembroDto } from "./dtos";
 import { toListItemDto, toDetailDto } from "./mapper";
+import { membroToRow } from "../infra/mapper";
 
 export class MembroService {
   constructor(private repo: MembroRepository) {}
@@ -45,26 +46,46 @@ export class MembroService {
 
   async update(id: number, dto: UpdateMembroDto, atualizadoPor: string): Promise<void> {
     const membro = await this.repo.findById(id);
-    if (!membro) return;
+    if (!membro) throw new Error("Membro não encontrado.");
 
     const now = new Date().toISOString();
-    await this.repo.save({
-      ...membro,
+    const campos = membroToRow({
       nome: dto.nome !== undefined ? dto.nome : membro.nome,
       email: dto.email !== undefined ? dto.email : membro.email,
       telefone: dto.telefone !== undefined ? dto.telefone : membro.telefone,
-      dataNascimento: dto.dataNascimento !== undefined ? dto.dataNascimento : membro.dataNascimento,
+      dataNascimento:
+        dto.dataNascimento !== undefined
+          ? dto.dataNascimento
+          : membro.dataNascimento,
       endereco: dto.endereco !== undefined ? dto.endereco : membro.endereco,
-      estadoCivil: dto.estadoCivil !== undefined ? dto.estadoCivil : membro.estadoCivil,
+      estadoCivil:
+        dto.estadoCivil !== undefined ? dto.estadoCivil : membro.estadoCivil,
       conjuge: dto.conjuge !== undefined ? dto.conjuge : membro.conjuge,
       filhos: dto.filhos !== undefined ? dto.filhos : membro.filhos,
-      discipulador: dto.discipulador !== undefined ? dto.discipulador : membro.discipulador,
-      discipulando: dto.discipulando !== undefined ? dto.discipulando : membro.discipulando,
-      ministerio: dto.ministerio !== undefined ? dto.ministerio : membro.ministerio,
+      discipulador:
+        dto.discipulador !== undefined ? dto.discipulador : membro.discipulador,
+      discipulando:
+        dto.discipulando !== undefined
+          ? dto.discipulando
+          : membro.discipulando,
+      ministerio:
+        dto.ministerio !== undefined ? dto.ministerio : membro.ministerio,
       ativo: dto.ativo !== undefined ? dto.ativo : membro.ativo,
       atualizadoEm: now,
       atualizadoPor,
     });
+
+    await this.repo.updateCampos(id, campos);
+
+    const conferido = await this.repo.findById(id);
+    if (
+      !conferido ||
+      (dto.nome !== undefined && (conferido.nome ?? "") !== (dto.nome ?? ""))
+    ) {
+      throw new Error(
+        "As alterações não foram gravadas. Execute a policy de UPDATE em membros no Supabase.",
+      );
+    }
   }
 
   async delete(id: number): Promise<void> {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { listMembrosDaCelula } from "@/app/actions/celulas";
+import { listTodosMembrosDaCelula } from "@/app/actions/celulas";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
 const CELULA_NAO_VINCULADA_MESSAGE =
@@ -16,6 +16,20 @@ export function useMembros(celulaId?: number | null) {
     const refetch = useCallback(() => {
         setFetchTrigger((prev) => prev + 1);
     }, []);
+
+    const aplicarEdicaoMembro = useCallback(
+        (atualizado: Partial<MembroDaCelulaListItemDto>) => {
+            if (atualizado.id == null) return;
+            setMembros((atual) =>
+                atual.map((membro) =>
+                    membro.id === atualizado.id
+                        ? { ...membro, ...atualizado }
+                        : membro,
+                ),
+            );
+        },
+        [],
+    );
 
     useEffect(() => {
         if (celulaId == null) {
@@ -32,7 +46,7 @@ export function useMembros(celulaId?: number | null) {
             try {
                 setLoading(true);
                 setErro(null);
-                const data = await listMembrosDaCelula(resolvedCelulaId);
+                const data = await listTodosMembrosDaCelula(resolvedCelulaId);
                 if (!isMounted) {
                     return;
                 }
@@ -59,5 +73,5 @@ export function useMembros(celulaId?: number | null) {
         };
     }, [celulaId, fetchTrigger]);
 
-    return { membros, loading, erro, refetch };
+    return { membros, loading, erro, refetch, aplicarEdicaoMembro };
 }

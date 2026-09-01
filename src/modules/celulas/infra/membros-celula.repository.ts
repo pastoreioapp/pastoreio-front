@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MembroDaCelulaListItemDto } from "../application/dtos";
-import type { PapelCelula } from "../domain/papel-celula";
 import {
+  PapelCelula,
   PAPEIS_CELULA_LIDERANCA,
   parsePapelCelula,
 } from "../domain/papel-celula";
@@ -113,17 +113,29 @@ export class MembrosCelulaRepository {
 
   async findVinculoById(
     vinculoId: number,
-  ): Promise<{ id: number; dataSaida: string | null } | null> {
+  ): Promise<{
+    id: number;
+    celulaId: number;
+    membroId: number;
+    papelCelula: PapelCelula | null;
+    dataSaida: string | null;
+  } | null> {
     const { data, error } = await this.supabase
       .from(TABLE)
-      .select("id, data_saida")
+      .select("id, celula_id, membro_id, papel_celula, data_saida")
       .eq("id", vinculoId)
       .eq("deletado", false)
       .maybeSingle();
 
     if (error) throw new Error(error.message);
     if (!data) return null;
-    return { id: data.id, dataSaida: data.data_saida };
+    return {
+      id: Number(data.id),
+      celulaId: Number(data.celula_id),
+      membroId: Number(data.membro_id),
+      papelCelula: parsePapelCelula(data.papel_celula),
+      dataSaida: data.data_saida,
+    };
   }
 
   async desvincular(vinculoId: number, desvinculadoPor: string): Promise<void> {
@@ -139,6 +151,73 @@ export class MembrosCelulaRepository {
       .eq("id", vinculoId);
 
     if (error) throw new Error(error.message);
+  }
+
+  async findMembroIdsLideresAtivos(): Promise<number[]> {
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .select("membro_id, celulas!inner(id)")
+      .eq("papel_celula", PapelCelula.LIDER_CELULA)
+      .eq("deletado", false)
+      .is("data_saida", null)
+      .eq("celulas.deletado", false);
+
+    if (error) throw new Error(error.message);
+
+    return [
+      ...new Set(
+        (data ?? [])
+          .map((row) => Number(row.membro_id))
+          .filter((id) => Number.isFinite(id) && id > 0),
+      ),
+    ];
+  }
+
+  async existeLiderancaAtiva(
+    membroId: number,
+    celulaIdExcecao?: number,
+  ): Promise<boolean> {
+    let query = this.supabase
+      .from(TABLE)
+      .select("id, celulas!inner(id)")
+      .eq("membro_id", membroId)
+      .eq("papel_celula", PapelCelula.LIDER_CELULA)
+      .eq("deletado", false)
+      .is("data_saida", null)
+      .eq("celulas.deletado", false);
+
+    if (celulaIdExcecao != null) {
+      query = query.neq("celula_id", celulaIdExcecao);
+    }
+
+    const { data, error } = await query.limit(1);
+
+    if (error) throw new Error(error.message);
+    return (data ?? []).length > 0;
+  }
+
+  async atualizarPapel(
+    vinculoId: number,
+    papel: PapelCelula,
+    atualizadoPor: string,
+  ): Promise<void> {
+    const now = new Date().toISOString();
+    const { data, error } = await this.supabase
+      .from(TABLE)
+      .update({
+        papel_celula: papel,
+        atualizado_em: now,
+        atualizado_por: atualizadoPor,
+      })
+      .eq("id", vinculoId)
+      .select("id");
+
+    if (error) throw new Error(error.message);
+    if (!data?.length) {
+      throw new Error(
+        "Sem permissão para atualizar o cargo do membro na célula.",
+      );
+    }
   }
 
   async vincular(
@@ -158,6 +237,13 @@ export class MembrosCelulaRepository {
       deletado: false,
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (/row-level security/i.test(error.message)) {
+        throw new Error(
+          "Sem permissão para vincular o líder à célula. Execute a policy de INSERT em membros_celula no Supabase.",
+        );
+      }
+      throw new Error(error.message);
+    }
   }
 }

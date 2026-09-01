@@ -1,5 +1,7 @@
 export interface CursoDoMembroDto {
     inscricaoId: number;
+    turmaId: number;
+    cursoId: number;
     cursoNome: string;
     turmaNome: string;
     status: string;
