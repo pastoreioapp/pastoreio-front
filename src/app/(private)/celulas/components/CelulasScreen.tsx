@@ -33,8 +33,12 @@ import { enqueueSnackbar } from "notistack";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import { REDES_CELULA } from "@/modules/celulas/domain/rede-celula";
-import type { CelulaListItemDto } from "@/modules/celulas/application/dtos";
+import type {
+  CelulaListItemDto,
+  CreateCelulaDto,
+} from "@/modules/celulas/application/dtos";
 import { useCelulas } from "../hooks/useCelulas";
+import { ModalCadastroCelula } from "./ModalCadastroCelula";
 
 const PAGE_SIZE = 10;
 const TODOS = "Todos";
@@ -108,11 +112,12 @@ function filterCelulas(
 
 export function CelulasScreen() {
   const router = useRouter();
-  const { celulas, loading, erro } = useCelulas();
+  const { celulas, loading, erro, criarCelula } = useCelulas();
   const [search, setSearch] = useState("");
   const [statusFiltro, setStatusFiltro] = useState<StatusFiltro>(TODOS);
   const [redeFiltro, setRedeFiltro] = useState<RedeFiltro>(TODOS);
   const [page, setPage] = useState(1);
+  const [modalAberto, setModalAberto] = useState(false);
 
   const filtradas = useMemo(
     () => filterCelulas(celulas, search, statusFiltro, redeFiltro),
@@ -127,6 +132,15 @@ export function CelulasScreen() {
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setPage(1);
+  };
+
+  const handleCriarCelula = async (dto: CreateCelulaDto) => {
+    await criarCelula(dto);
+    enqueueSnackbar("Célula criada com sucesso!", {
+      variant: "success",
+      autoHideDuration: 2000,
+    });
+    setModalAberto(false);
   };
 
   if (loading) {
@@ -244,7 +258,7 @@ export function CelulasScreen() {
         <Button
           variant="contained"
           startIcon={<IconPlus size={18} />}
-          onClick={emBreve}
+          onClick={() => setModalAberto(true)}
           sx={{
             height: 40,
             px: 2.5,
@@ -261,20 +275,21 @@ export function CelulasScreen() {
       </Stack>
 
       <TableContainer sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
-        <Table sx={{ minWidth: 720 }}>
+        <Table sx={{ width: "100%", minWidth: 720, tableLayout: "fixed" }}>
           <TableHead>
             <TableRow>
               {[
-                "Nome da Célula",
-                "Líder",
-                "Rede",
-                "Status",
-                "Membros",
-                "Ações",
+                { label: "Nome da Célula", width: "24%" },
+                { label: "Líder", width: "20%" },
+                { label: "Rede", width: "14%" },
+                { label: "Status", width: "12%" },
+                { label: "Membros", width: "10%" },
+                { label: "Ações", width: "20%" },
               ].map((header) => (
                 <TableCell
-                  key={header}
+                  key={header.label}
                   sx={{
+                    width: header.width,
                     fontWeight: 700,
                     fontSize: "0.8rem",
                     color: "text.secondary",
@@ -282,7 +297,7 @@ export function CelulasScreen() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {header}
+                  {header.label}
                 </TableCell>
               ))}
             </TableRow>
@@ -374,6 +389,12 @@ export function CelulasScreen() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <ModalCadastroCelula
+        open={modalAberto}
+        onClose={() => setModalAberto(false)}
+        onSave={handleCriarCelula}
+      />
 
       <Box
         sx={{

@@ -39,21 +39,19 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
 
     return (
         <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            paddingTop="10px"
-            marginX="auto"
             sx={{
-                overflowX: "auto",
+                display: "flex",
+                flexDirection: "column",
+                pt: 2,
+                width: "100%",
             }}
         >
             <TabContext value={tab}>
                 <Box
-                    display="flex"
-                    justifyContent="center"
-                    borderBottom={1}
-                    borderColor="divider"
+                    sx={{
+                        borderBottom: 1,
+                        borderColor: "divider",
+                    }}
                 >
                     <TabList
                         onChange={(e, v) => setTab(v)}
@@ -71,9 +69,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                 </Box>
                 <TabPanel
                     value="1"
-                    sx={{
-                        paddingTop: 3,
-                    }}
+                    sx={{ px: 0, pt: 3, pb: 0 }}
                 >
                     {loading && <LoadingBox />}
                     {erro && <ErrorBox message={erro} />}
@@ -119,7 +115,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                         </Box>
                     )}
                 </TabPanel>
-                <TabPanel value="2" sx={{ paddingTop: 3 }}>
+                <TabPanel value="2" sx={{ px: 0, pt: 3, pb: 0 }}>
                     {cursosLoading && <LoadingBox />}
                     {cursosErro && <ErrorBox message={cursosErro} />}
                     {!cursosLoading && !cursosErro && cursos.length > 0 && (
@@ -166,7 +162,7 @@ export function EtapasTabs({ membroId }: { membroId: number }) {
                 </TabPanel>
                 <TabPanel
                     value="3"
-                    sx={{ paddingTop: 3, px: { xs: 0, md: 3 } }}
+                    sx={{ px: 0, pt: 3, pb: 0 }}
                 >
                     {freqLoading && <LoadingBox />}
                     {freqErro && <ErrorBox message={freqErro} />}

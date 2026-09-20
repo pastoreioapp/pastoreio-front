@@ -3,13 +3,18 @@
 import type {
   CelulaDetalheDto,
   CelulaListItemDto,
+  CreateCelulaDto,
   MembroDaCelulaListItemDto,
 } from "@/modules/celulas/application/dtos";
 import { CelulaService } from "@/modules/celulas/application/celula.service";
 import { MembrosCelulaService } from "@/modules/celulas/application/membros-celula.service";
 import { CelulaRepository } from "@/modules/celulas/infra/celula.repository";
 import { MembrosCelulaRepository } from "@/modules/celulas/infra/membros-celula.repository";
+import { MembroService } from "@/modules/secretaria/application/membro.service";
+import type { MembroListItemDto } from "@/modules/secretaria/application/dtos";
+import { MembroRepository } from "@/modules/secretaria/infra/membro.repository";
 import { createClient } from "@/shared/supabase/server";
+import { revalidatePath } from "next/cache";
 
 async function getMembrosCelulaService(): Promise<MembrosCelulaService> {
   const supabase = await createClient();
@@ -20,7 +25,10 @@ async function getMembrosCelulaService(): Promise<MembrosCelulaService> {
 async function getCelulaService(): Promise<CelulaService> {
   const supabase = await createClient();
   const repo = new CelulaRepository(supabase);
-  return new CelulaService(repo);
+  const membrosCelulaService = new MembrosCelulaService(
+    new MembrosCelulaRepository(supabase),
+  );
+  return new CelulaService(repo, membrosCelulaService);
 }
 
 async function getAuditUserId(): Promise<string> {
@@ -37,6 +45,36 @@ export async function listCelulas(): Promise<CelulaListItemDto[]> {
 export async function getCelula(id: number): Promise<CelulaDetalheDto> {
   const service = await getCelulaService();
   return service.get(id);
+}
+
+export async function listMembrosDisponiveisParaLiderar(): Promise<
+  MembroListItemDto[]
+> {
+  const supabase = await createClient();
+  const membroService = new MembroService(new MembroRepository(supabase));
+  const membrosCelulaService = new MembrosCelulaService(
+    new MembrosCelulaRepository(supabase),
+  );
+
+  const [membros, liderIds] = await Promise.all([
+    membroService.list(),
+    membrosCelulaService.listMembroIdsLideresAtivos(),
+  ]);
+
+  const lideres = new Set(liderIds);
+  return membros.filter((membro) => membro.ativo && !lideres.has(membro.id));
+}
+
+export async function createCelula(
+  dto: CreateCelulaDto,
+): Promise<{ id: number }> {
+  const [service, audit] = await Promise.all([
+    getCelulaService(),
+    getAuditUserId(),
+  ]);
+  const celula = await service.create(dto, audit);
+  revalidatePath("/celulas");
+  return { id: celula.id };
 }
 
 export async function listMembrosDaCelula(

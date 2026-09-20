@@ -21,18 +21,31 @@ import {
     calculateState,
     initialFases,
 } from "./components/trajetoria";
-import { createMembroFromUI } from "@/app/actions/membros";
-import { getTrajetoriaAtivaParaCadastro } from "@/app/actions/trajetoria";
-import { getCursosAtivosParaCadastro } from "@/app/actions/cursos";
+import { createMembroFromUI, updateMembroFromUI } from "@/app/actions/membros";
+import {
+    getTrajetoriaAtivaParaCadastro,
+    getTrajetoriaDoMembro,
+} from "@/app/actions/trajetoria";
+import {
+    getCursosAtivosParaCadastro,
+    getCursosDoMembro,
+} from "@/app/actions/cursos";
 import type { CursoCadastro } from "./components/cursos";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import type { TrajetoriaDoMembroDto } from "@/modules/trajetoria/application/dtos";
+import type {
+    CursoDoMembroDto,
+    TurmaParaCadastroDto,
+} from "@/modules/cursos/application/dtos";
 import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
-import { StatusTurma } from "@/modules/cursos/domain/status-turma";
+import { parseStatusTurma, StatusTurma } from "@/modules/cursos/domain/status-turma";
 
 interface RegisterMembroProps {
     open: boolean;
     onClose: () => void;
-    onSuccess: () => void;
+    onSuccess: (membroAtualizado?: Partial<MembroDaCelulaListItemDto>) => void;
     celulaId?: number;
+    membro?: MembroDaCelulaListItemDto | null;
 }
 
 export interface MembroPayload {
@@ -77,17 +90,95 @@ const initialPayload: MembroPayload = {
     },
 };
 
+function fasesFromTrajetoria(trajetoria: TrajetoriaDoMembroDto) {
+    return trajetoria.grupos.map((grupo) => ({
+        id: grupo.ordem || grupo.id,
+        title: grupo.nome,
+        items: grupo.passos.map((passo) => ({
+            id: passo.id,
+            label: passo.nome,
+            checked: passo.concluido,
+        })),
+    }));
+}
+
+function mergeCursosCadastro(
+    catalogo: TurmaParaCadastroDto[],
+    inscricoes: CursoDoMembroDto[],
+): CursoCadastro[] {
+    const porTurma = new Map(
+        inscricoes.map((inscricao) => [inscricao.turmaId, inscricao]),
+    );
+    const usados = new Set<number>();
+
+    const lista = catalogo.map((turma) => {
+        const existente = porTurma.get(turma.turmaId);
+        if (existente) usados.add(turma.turmaId);
+
+        return {
+            turmaId: turma.turmaId,
+            cursoId: turma.cursoId,
+            nome: turma.cursoNome,
+            turmaNome: turma.turmaNome,
+            status: existente
+                ? parseStatusTurma(existente.status)
+                : StatusTurma.NAO_INICIADO,
+            dataConclusao: existente?.dataConclusao ?? null,
+            dataInicio: turma.dataInicio,
+            dataFim: turma.dataFim,
+        };
+    });
+
+    for (const inscricao of inscricoes) {
+        if (usados.has(inscricao.turmaId)) continue;
+        lista.push({
+            turmaId: inscricao.turmaId,
+            cursoId: inscricao.cursoId,
+            nome: inscricao.cursoNome,
+            turmaNome: inscricao.turmaNome,
+            status: parseStatusTurma(inscricao.status),
+            dataConclusao: inscricao.dataConclusao,
+            dataInicio: inscricao.dataInicio,
+            dataFim: inscricao.dataFim,
+        });
+    }
+
+    return lista;
+}
+
+function payloadFromMembro(membro: MembroDaCelulaListItemDto): MembroPayload {
+    return {
+        dadosPessoais: {
+            nome: membro.nome ?? "",
+            nascimento: membro.dataNascimento,
+            email: membro.email ?? "",
+            telefone: membro.telefone ?? "",
+            endereco: membro.endereco ?? "",
+            cargo: membro.funcao ?? PapelCelula.MEMBRO,
+            ministerio: membro.ministerio ?? "Nenhum",
+            discipulador: membro.discipulador ?? "",
+            discipulo: membro.discipulando ?? "",
+            estadoCivil: membro.estadoCivil ?? "Solteiro",
+            conjuge: membro.conjuge ?? "",
+            filhos: membro.filhos ?? "Nao",
+        },
+    };
+}
+
 export function RegisterMembro({
     open,
     onClose,
     onSuccess,
     celulaId,
+    membro,
 }: RegisterMembroProps) {
     const [tabValue, setTabValue] = useState("1");
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<MembroPayload>(initialPayload);
     const [cursosData, setCursosData] = useState<CursoCadastro[]>([]);
     const [trajetoriaData, setTrajetoriaData] = useState<any[]>([]);
+    const [trajetoriaPronta, setTrajetoriaPronta] = useState(false);
+    const [cursosProntos, setCursosProntos] = useState(false);
 
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -95,53 +186,82 @@ export function RegisterMembro({
         severity: "error" as "error" | "success",
     });
 
+    const isEdicao = membro != null;
+
     useEffect(() => {
-        if (open) {
-            getTrajetoriaAtivaParaCadastro()
-                .then((res) => {
-                    if (res && res.grupos && res.grupos.length > 0) {
-                        const fasesMapeadas = res.grupos.map((g: any) => ({
-                            id: g.ordem || g.id,
-                            title: g.nome,
-                            items: g.passos
-                                ? g.passos.map((p: any) => ({
-                                    id: p.id,
-                                    label: p.nome,
-                                    checked: false,
-                                }))
-                                : [],
-                        }));
-                        setTrajetoriaData(calculateState(fasesMapeadas));
+        if (!open) return;
+
+        let ativo = true;
+        setFormData(membro ? payloadFromMembro(membro) : initialPayload);
+        setTrajetoriaPronta(false);
+        setCursosProntos(false);
+
+        async function carregarAbas() {
+            try {
+                if (membro) {
+                    const [trajetoria, cursosMembro, cursosCatalogo] =
+                        await Promise.all([
+                            getTrajetoriaDoMembro(membro.id).catch(() => null),
+                            getCursosDoMembro(membro.id).catch(() => []),
+                            getCursosAtivosParaCadastro().catch(() => []),
+                        ]);
+                    if (!ativo) return;
+
+                    if (trajetoria && trajetoria.grupos.length > 0) {
+                        setTrajetoriaData(
+                            calculateState(fasesFromTrajetoria(trajetoria)),
+                        );
                     } else {
                         setTrajetoriaData(calculateState(initialFases));
                     }
-                })
-                .catch((err) => console.error(err));
+                    setTrajetoriaPronta(trajetoria != null);
 
-            getCursosAtivosParaCadastro()
-                .then((res) => {
-                    if (res && res.length > 0) {
-                        const cursosMapeados: CursoCadastro[] = res.map(
-                            (t) => ({
-                                turmaId: t.turmaId,
-                                cursoId: t.cursoId,
-                                nome: t.cursoNome,
-                                turmaNome: t.turmaNome,
-                                status: StatusTurma.NAO_INICIADO,
-                                dataConclusao: null,
-                                dataInicio: t.dataInicio,
-                                dataFim: t.dataFim,
-                            }),
-                        );
+                    setCursosData(
+                        mergeCursosCadastro(cursosCatalogo, cursosMembro),
+                    );
+                    setCursosProntos(true);
+                    return;
+                }
 
-                        setCursosData(cursosMapeados);
-                    } else {
-                        setCursosData([]);
-                    }
-                })
-                .catch((err) => console.error(err));
+                const [trajetoriaAtiva, cursosCatalogo] = await Promise.all([
+                    getTrajetoriaAtivaParaCadastro().catch(() => null),
+                    getCursosAtivosParaCadastro().catch(() => []),
+                ]);
+                if (!ativo) return;
+
+                if (trajetoriaAtiva && trajetoriaAtiva.grupos.length > 0) {
+                    setTrajetoriaData(
+                        calculateState(fasesFromTrajetoria(trajetoriaAtiva)),
+                    );
+                } else {
+                    setTrajetoriaData(calculateState(initialFases));
+                }
+                setTrajetoriaPronta(true);
+
+                setCursosData(
+                    cursosCatalogo.map((turma) => ({
+                        turmaId: turma.turmaId,
+                        cursoId: turma.cursoId,
+                        nome: turma.cursoNome,
+                        turmaNome: turma.turmaNome,
+                        status: StatusTurma.NAO_INICIADO,
+                        dataConclusao: null,
+                        dataInicio: turma.dataInicio,
+                        dataFim: turma.dataFim,
+                    })),
+                );
+                setCursosProntos(true);
+            } catch (error) {
+                console.error(error);
+            }
         }
-    }, [open]);
+
+        void carregarAbas();
+
+        return () => {
+            ativo = false;
+        };
+    }, [open, membro]);
 
     const handleTabChange = (
         _event: React.SyntheticEvent,
@@ -153,6 +273,15 @@ export function RegisterMembro({
             dadosPessoais: { ...prev.dadosPessoais, [field]: value },
         }));
 
+    const mostrarErro = (message: string) => {
+        setSnackbar({
+            open: true,
+            message,
+            severity: "error",
+        });
+        setTabValue("1");
+    };
+
     const validateForm = () => {
         const {
             nome,
@@ -162,39 +291,38 @@ export function RegisterMembro({
             endereco,
             cargo,
             ministerio,
-            discipulador,
-            discipulo,
         } = formData.dadosPessoais;
+
+        if (!nome || nome.trim() === "") {
+            mostrarErro("O campo Nome é obrigatório.");
+            return false;
+        }
+
+        if (isEdicao) {
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                mostrarErro("E-mail inválido.");
+                return false;
+            }
+            return true;
+        }
+
         const requiredFields = [
-            { key: nome, name: "Nome" },
             { key: nascimento, name: "Data de Nascimento" },
             { key: email, name: "Email" },
             { key: telefone, name: "Telefone" },
             { key: endereco, name: "Endereço" },
             { key: cargo, name: "Cargo" },
             { key: ministerio, name: "Ministério" },
-            { key: discipulador, name: "Discipulador" },
-            { key: discipulo, name: "Discípulo" },
         ];
 
         for (const field of requiredFields) {
             if (!field.key || String(field.key).trim() === "") {
-                setSnackbar({
-                    open: true,
-                    message: `O campo ${field.name} é obrigatório.`,
-                    severity: "error",
-                });
-                setTabValue("1");
+                mostrarErro(`O campo ${field.name} é obrigatório.`);
                 return false;
             }
         }
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setSnackbar({
-                open: true,
-                message: "E-mail inválido.",
-                severity: "error",
-            });
-            setTabValue("1");
+            mostrarErro("E-mail inválido.");
             return false;
         }
         return true;
@@ -213,33 +341,64 @@ export function RegisterMembro({
                     .map((item: any) => item.id);
             });
 
-            const cursosSelecionados = cursosData.filter(
-                (curso) => curso.status !== StatusTurma.NAO_INICIADO,
-            );
+            const cursosSelecionados = isEdicao
+                ? cursosData
+                : cursosData.filter(
+                    (curso) => curso.status !== StatusTurma.NAO_INICIADO,
+                );
 
+            const nascimento = formData.dadosPessoais.nascimento;
             const payloadCompleto = {
-                dadosPessoais: formData.dadosPessoais,
-                cursos: cursosSelecionados,
-                trajetoria: passosMarcadosIds,
+                dadosPessoais: {
+                    ...formData.dadosPessoais,
+                    nascimento:
+                        nascimento && nascimento.includes("T")
+                            ? nascimento.split("T")[0]
+                            : nascimento,
+                },
+                cursos: cursosProntos ? cursosSelecionados : undefined,
+                trajetoria: trajetoriaPronta ? passosMarcadosIds : undefined,
+                vinculoId: membro?.vinculoId,
             };
 
-            const result = await createMembroFromUI(payloadCompleto, celulaId);
+            const result = isEdicao
+                ? await updateMembroFromUI(membro.id, payloadCompleto, celulaId)
+                : await createMembroFromUI(payloadCompleto, celulaId);
 
             if (!result.success) throw new Error(result.error);
 
             setSnackbar({
                 open: true,
-                message: "Membro salvo com sucesso!",
+                message: isEdicao
+                    ? "Membro atualizado com sucesso!"
+                    : "Membro salvo com sucesso!",
                 severity: "success",
             });
 
+            const dados = payloadCompleto.dadosPessoais;
             setTimeout(() => {
                 setFormData(initialPayload);
                 setCursosData([]);
                 setTrajetoriaData([]);
+                setTrajetoriaPronta(false);
+                setCursosProntos(false);
                 setTabValue("1");
-                onSuccess();
-            }, 1000);
+                onSuccess({
+                    id: membro?.id,
+                    nome: dados.nome,
+                    email: dados.email,
+                    telefone: dados.telefone,
+                    dataNascimento: dados.nascimento,
+                    endereco: dados.endereco,
+                    estadoCivil: dados.estadoCivil,
+                    conjuge: dados.conjuge,
+                    filhos: dados.filhos,
+                    discipulador: dados.discipulador,
+                    discipulando: dados.discipulo,
+                    ministerio: dados.ministerio,
+                    funcao: dados.cargo,
+                });
+            }, 400);
         } catch (error: any) {
             setSnackbar({
                 open: true,
@@ -256,6 +415,8 @@ export function RegisterMembro({
             setFormData(initialPayload);
             setCursosData([]);
             setTrajetoriaData([]);
+            setTrajetoriaPronta(false);
+            setCursosProntos(false);
             setTabValue("1");
             onClose();
         }
@@ -285,7 +446,7 @@ export function RegisterMembro({
                     <CloseIcon />
                 </IconButton>
                 <Typography variant="h4" fontWeight={800} color="#1F2937">
-                    Membro
+                    {isEdicao ? "Editar membro" : "Novo membro"}
                 </Typography>
             </Box>
             <TabContext value={tabValue}>
@@ -339,7 +500,19 @@ export function RegisterMembro({
                     value="3"
                     sx={{ p: 0, height: "60vh", overflowY: "auto" }}
                 >
-                    {cursosData.length > 0 ? (
+                    {cursosProntos && cursosData.length === 0 ? (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100%"
+                            px={4}
+                        >
+                            <Typography color="text.secondary">
+                                Nenhum curso EMP disponível para este cadastro.
+                            </Typography>
+                        </Box>
+                    ) : cursosData.length > 0 ? (
                         <Cursos
                             cursosList={cursosData}
                             setCursosList={setCursosData}
@@ -356,6 +529,17 @@ export function RegisterMembro({
                     )}
                 </TabPanel>
             </TabContext>
+            {snackbar.open && snackbar.severity === "error" ? (
+                <Alert
+                    severity="error"
+                    sx={{ mx: 4, mt: 1 }}
+                    onClose={() =>
+                        setSnackbar((prev) => ({ ...prev, open: false }))
+                    }
+                >
+                    {snackbar.message}
+                </Alert>
+            ) : null}
             <Box
                 sx={{
                     backgroundColor: "#F4F6F8",

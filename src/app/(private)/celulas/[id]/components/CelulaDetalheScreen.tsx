@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Chip,
+  Dialog,
   Grid,
   IconButton,
   InputAdornment,
@@ -24,6 +25,7 @@ import {
 import { Search } from "@mui/icons-material";
 import {
   IconArrowLeft,
+  IconEye,
   IconPencil,
   IconPlus,
   IconTrash,
@@ -32,15 +34,19 @@ import { enqueueSnackbar } from "notistack";
 import { LoadingBox } from "@/ui/components/feedback/LoadingBox";
 import { ErrorBox } from "@/ui/components/feedback/ErrorBox";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
+import { RegisterMembro } from "@/app/(private)/membros/components/registro-membros/registerMembro";
+import { Informacao } from "@/app/(private)/membros/components/informacoes/informacao";
+import { ModalConfirmarDesvinculo } from "@/app/(private)/membros/components/informacoes/ModalConfirmarDesvinculo";
+import { desvincularMembroDaCelula } from "@/app/actions/celulas";
+import { PapelCelula } from "@/modules/celulas/domain/papel-celula";
 import { useCelulaDetalhe } from "../hooks/useCelulaDetalhe";
 
-const PAGE_SIZE = 10;
+const FUNCOES_DESVINCULAVEIS = [
+  PapelCelula.MEMBRO,
+  PapelCelula.VISITANTE,
+] as const;
 
-const emBreve = () =>
-  enqueueSnackbar("Funcionalidade disponível em breve!", {
-    variant: "info",
-    autoHideDuration: 2000,
-  });
+const PAGE_SIZE = 10;
 
 function displayValue(value: string | null | undefined): string {
   if (value == null || value.trim() === "") return "—";
@@ -85,27 +91,38 @@ function InfoItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
+function ehLiderCelula(membro: MembroDaCelulaListItemDto): boolean {
+  return membro.funcao === PapelCelula.LIDER_CELULA;
+}
+
 function filterMembros(
   membros: MembroDaCelulaListItemDto[],
   search: string,
 ): MembroDaCelulaListItemDto[] {
   const termo = search.trim().toLowerCase();
-  if (!termo) return membros;
+  const filtrados = !termo
+    ? [...membros]
+    : membros.filter((membro) => {
+        const campos = [
+          membro.nome,
+          membro.ministerio,
+          membro.telefone,
+          membro.email,
+          membro.dataNascimento,
+          membro.estadoCivil,
+          membro.conjuge,
+          membro.discipulador,
+        ];
+        return campos.some(
+          (campo) => campo != null && campo.toLowerCase().includes(termo),
+        );
+      });
 
-  return membros.filter((membro) => {
-    const campos = [
-      membro.nome,
-      membro.ministerio,
-      membro.telefone,
-      membro.email,
-      membro.dataNascimento,
-      membro.estadoCivil,
-      membro.conjuge,
-      membro.discipulador,
-    ];
-    return campos.some(
-      (campo) => campo != null && campo.toLowerCase().includes(termo),
-    );
+  return filtrados.sort((a, b) => {
+    const liderA = ehLiderCelula(a) ? 0 : 1;
+    const liderB = ehLiderCelula(b) ? 0 : 1;
+    if (liderA !== liderB) return liderA - liderB;
+    return (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR");
   });
 }
 
@@ -115,9 +132,62 @@ type Props = {
 
 export function CelulaDetalheScreen({ celulaId }: Props) {
   const router = useRouter();
-  const { celula, membros, loading, erro } = useCelulaDetalhe(celulaId);
+  const { celula, membros, loading, erro, refetch, aplicarEdicaoMembro } =
+    useCelulaDetalhe(celulaId);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [modalCadastroAberto, setModalCadastroAberto] = useState(false);
+  const [membroDetalhe, setMembroDetalhe] =
+    useState<MembroDaCelulaListItemDto | null>(null);
+  const [membroEditando, setMembroEditando] =
+    useState<MembroDaCelulaListItemDto | null>(null);
+  const [membroExcluindo, setMembroExcluindo] =
+    useState<MembroDaCelulaListItemDto | null>(null);
+  const [desvinculando, setDesvinculando] = useState(false);
+
+  const podeDesvincular = (membro: MembroDaCelulaListItemDto) =>
+    !!membro.funcao &&
+    (FUNCOES_DESVINCULAVEIS as readonly PapelCelula[]).includes(membro.funcao);
+
+  const handleEditarMembro = (membro: MembroDaCelulaListItemDto) => {
+    setMembroDetalhe(null);
+    setMembroEditando(membro);
+  };
+
+  const handlePedirExclusao = (membro: MembroDaCelulaListItemDto) => {
+    if (!podeDesvincular(membro)) {
+      enqueueSnackbar(
+        "Líderes e auxiliares não podem ser desvinculados por aqui.",
+        { variant: "info", autoHideDuration: 2500 },
+      );
+      return;
+    }
+    setMembroExcluindo(membro);
+  };
+
+  const handleConfirmarExclusao = async () => {
+    if (!membroExcluindo) return;
+    try {
+      setDesvinculando(true);
+      await desvincularMembroDaCelula(membroExcluindo.vinculoId);
+      enqueueSnackbar("Membro desvinculado da célula com sucesso!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
+      setMembroExcluindo(null);
+      setMembroDetalhe(null);
+      refetch();
+    } catch (error: unknown) {
+      enqueueSnackbar(
+        error instanceof Error
+          ? error.message
+          : "Erro ao desvincular membro",
+        { variant: "error", autoHideDuration: 3000 },
+      );
+    } finally {
+      setDesvinculando(false);
+    }
+  };
 
   const filtrados = useMemo(
     () => filterMembros(membros, search),
@@ -302,7 +372,7 @@ export function CelulaDetalheScreen({ celulaId }: Props) {
         <Button
           variant="contained"
           startIcon={<IconPlus size={18} />}
-          onClick={emBreve}
+          onClick={() => setModalCadastroAberto(true)}
           sx={{
             height: 40,
             px: 2.5,
@@ -359,14 +429,58 @@ export function CelulaDetalheScreen({ celulaId }: Props) {
                 </TableCell>
               </TableRow>
             ) : (
-              paginaItens.map((membro) => (
+              paginaItens.map((membro) => {
+                const lider = ehLiderCelula(membro);
+                return (
                 <TableRow
                   key={membro.vinculoId}
                   hover
-                  sx={{ "& td": { borderBottom: "1px solid #ECECEC" } }}
+                  onClick={() => setMembroDetalhe(membro)}
+                  sx={{
+                    cursor: "pointer",
+                    bgcolor: lider ? "rgba(94, 121, 179, 0.08)" : undefined,
+                    "& td": { borderBottom: "1px solid #ECECEC" },
+                    "&:hover": {
+                      bgcolor: lider
+                        ? "rgba(94, 121, 179, 0.14)"
+                        : undefined,
+                    },
+                  }}
                 >
-                  <TableCell sx={{ fontWeight: 600, color: "#000" }}>
-                    {displayValue(membro.nome)}
+                  <TableCell sx={{ fontWeight: lider ? 700 : 600, color: "#000" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        minWidth: 0,
+                      }}
+                    >
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontSize: "inherit",
+                          fontWeight: "inherit",
+                          color: "inherit",
+                        }}
+                      >
+                        {displayValue(membro.nome)}
+                      </Typography>
+                      {lider ? (
+                        <Chip
+                          label="Líder"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.68rem",
+                            fontWeight: 700,
+                            bgcolor: "#5E79B3",
+                            color: "#fff",
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : null}
+                    </Box>
                   </TableCell>
                   <TableCell>{displayValue(membro.ministerio)}</TableCell>
                   <TableCell>{displayValue(membro.telefone)}</TableCell>
@@ -376,10 +490,28 @@ export function CelulaDetalheScreen({ celulaId }: Props) {
                   <TableCell>{displayValue(membro.conjuge)}</TableCell>
                   <TableCell>{displayValue(membro.discipulador)}</TableCell>
                   <TableCell>
-                    <Stack direction="row" spacing={0.75}>
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <IconButton
                         size="small"
-                        onClick={emBreve}
+                        onClick={() => setMembroDetalhe(membro)}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 1.5,
+                          bgcolor: "#5E79B3",
+                          color: "#fff",
+                          "&:hover": { bgcolor: "#4A6499" },
+                        }}
+                      >
+                        <IconEye size={16} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditarMembro(membro)}
                         sx={{
                           width: 32,
                           height: 32,
@@ -393,7 +525,7 @@ export function CelulaDetalheScreen({ celulaId }: Props) {
                       </IconButton>
                       <IconButton
                         size="small"
-                        onClick={emBreve}
+                        onClick={() => handlePedirExclusao(membro)}
                         sx={{
                           width: 32,
                           height: 32,
@@ -408,11 +540,83 @@ export function CelulaDetalheScreen({ celulaId }: Props) {
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog
+        open={membroDetalhe != null}
+        onClose={() => setMembroDetalhe(null)}
+        fullWidth
+        maxWidth="lg"
+        scroll="paper"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            maxHeight: "calc(100vh - 64px)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            bgcolor: "#fff",
+          },
+        }}
+      >
+        {membroDetalhe && (
+          <Box
+            sx={{
+              overflowY: "auto",
+              flex: 1,
+              minHeight: 0,
+              "&::-webkit-scrollbar": { width: "6px" },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#C9C9C9",
+                borderRadius: "10px",
+              },
+              "&::-webkit-scrollbar-track": { backgroundColor: "#F5F5F5" },
+            }}
+          >
+            <Informacao
+              data={membroDetalhe}
+              onBack={() => setMembroDetalhe(null)}
+            onEditar={() => handleEditarMembro(membroDetalhe)}
+            onDesvincular={() => {
+              setMembroDetalhe(null);
+              refetch();
+            }}
+              sx={{ height: "auto", overflow: "visible", boxShadow: "none" }}
+            />
+          </Box>
+        )}
+      </Dialog>
+
+      {(modalCadastroAberto || membroEditando) && (
+        <RegisterMembro
+          open={modalCadastroAberto || membroEditando != null}
+          membro={membroEditando}
+          onClose={() => {
+            setModalCadastroAberto(false);
+            setMembroEditando(null);
+          }}
+          onSuccess={(membroAtualizado) => {
+            setModalCadastroAberto(false);
+            setMembroEditando(null);
+            if (membroAtualizado) aplicarEdicaoMembro(membroAtualizado);
+            refetch();
+          }}
+          celulaId={celulaId}
+        />
+      )}
+
+      <ModalConfirmarDesvinculo
+        open={membroExcluindo != null}
+        nomeDoMembro={membroExcluindo?.nome ?? "este membro"}
+        loading={desvinculando}
+        onClose={() => setMembroExcluindo(null)}
+        onConfirm={() => void handleConfirmarExclusao()}
+      />
 
       <Box
         sx={{

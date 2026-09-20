@@ -1,11 +1,13 @@
 export enum RedeCelula {
   JOVENS = "Jovens",
+  ADULTOS = "Adultos",
   CASAIS = "Casais",
   CRIANCAS = "Crianças",
 }
 
 export const REDES_CELULA = [
   RedeCelula.JOVENS,
+  RedeCelula.ADULTOS,
   RedeCelula.CASAIS,
   RedeCelula.CRIANCAS,
 ] as const;

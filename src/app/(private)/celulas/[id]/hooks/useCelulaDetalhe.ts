@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getCelula,
   listTodosMembrosDaCelula,
@@ -15,6 +15,23 @@ export function useCelulaDetalhe(celulaId: number | null) {
   const [membros, setMembros] = useState<MembroDaCelulaListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  const refetch = useCallback(() => {
+    setFetchTrigger((prev) => prev + 1);
+  }, []);
+
+  const aplicarEdicaoMembro = useCallback(
+    (atualizado: Partial<MembroDaCelulaListItemDto>) => {
+      if (atualizado.id == null) return;
+      setMembros((atual) =>
+        atual.map((membro) =>
+          membro.id === atualizado.id ? { ...membro, ...atualizado } : membro,
+        ),
+      );
+    },
+    [],
+  );
 
   useEffect(() => {
     if (celulaId == null || !Number.isFinite(celulaId)) {
@@ -30,7 +47,7 @@ export function useCelulaDetalhe(celulaId: number | null) {
 
     async function fetchData() {
       try {
-        setLoading(true);
+        if (fetchTrigger === 0) setLoading(true);
         setErro(null);
         const [celulaData, membrosData] = await Promise.all([
           getCelula(resolvedCelulaId),
@@ -56,7 +73,7 @@ export function useCelulaDetalhe(celulaId: number | null) {
     return () => {
       isMounted = false;
     };
-  }, [celulaId]);
+  }, [celulaId, fetchTrigger]);
 
-  return { celula, membros, loading, erro };
+  return { celula, membros, loading, erro, refetch, aplicarEdicaoMembro };
 }

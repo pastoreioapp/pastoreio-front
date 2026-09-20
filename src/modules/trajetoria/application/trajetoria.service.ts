@@ -31,4 +31,25 @@ export class TrajetoriaService {
     const ids = passoIds.filter((id): id is number => typeof id === "number");
     await this.repo.insertPassosConcluidos(membroId, ids);
   }
+
+  async syncPassosConcluidos(
+    membroId: number,
+    passoIds: unknown[],
+  ): Promise<void> {
+    const desejados = new Set(
+      passoIds.filter((id): id is number => typeof id === "number"),
+    );
+    const atuais = await this.repo.findPassosDoMembro(membroId);
+    const concluidos = new Set(
+      atuais
+        .filter((passo) => passo.dataConclusao != null)
+        .map((passo) => passo.passoId),
+    );
+
+    const inserir = [...desejados].filter((id) => !concluidos.has(id));
+    const remover = [...concluidos].filter((id) => !desejados.has(id));
+
+    await this.repo.insertPassosConcluidos(membroId, inserir);
+    await this.repo.deletePassos(membroId, remover);
+  }
 }

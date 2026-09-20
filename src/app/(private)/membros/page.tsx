@@ -12,6 +12,7 @@ import { Informacao } from "./components/informacoes/informacao";
 import { LIDER_AUXILIAR_ROLES } from "@/modules/controleacesso/domain/navigation";
 import { useAppAuthentication } from "@/ui/hooks/useAppAuthentication";
 import { RegisterMembro } from "./components/registro-membros/registerMembro";
+import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 
 function MembrosContent() {
     const theme = useTheme();
@@ -23,6 +24,9 @@ function MembrosContent() {
     const membroIdParam = searchParams.get("membroId");
     const membroIdInicial = membroIdParam ? Number(membroIdParam) : null;
     const [isOpenRegister, setIsOpenRegister] = useState(false);
+    const [membroEditando, setMembroEditando] =
+        useState<MembroDaCelulaListItemDto | null>(null);
+    const [cursosRefreshKey, setCursosRefreshKey] = useState(0);
 
     const {
         membros,
@@ -30,6 +34,7 @@ function MembrosContent() {
         toggleMembroSelecionado,
         deselectMembro,
         refetch,
+        aplicarEdicao,
         loading,
         erro,
     } = useMembrosSelecionados(
@@ -46,10 +51,16 @@ function MembrosContent() {
 
     const handleCloseRegister = () => {
         setIsOpenRegister(false);
+        setMembroEditando(null);
     };
 
-    const handleRegisterSuccess = async () => {
+    const handleRegisterSuccess = async (
+        membroAtualizado?: Partial<MembroDaCelulaListItemDto>,
+    ) => {
         setIsOpenRegister(false);
+        setMembroEditando(null);
+        if (membroAtualizado) aplicarEdicao(membroAtualizado);
+        setCursosRefreshKey((atual) => atual + 1);
         await refetch();
         router.refresh();
     };
@@ -95,12 +106,19 @@ function MembrosContent() {
                                 data={membroSelecionado || null}
                                 onBack={isMobile ? deselectMembro : undefined}
                                 onDesvincular={refetch}
+                                refreshKey={cursosRefreshKey}
+                                onEditar={() => {
+                                    if (membroSelecionado) {
+                                        setMembroEditando(membroSelecionado);
+                                    }
+                                }}
                             />
                         </Box>
                     )}
-                    {isOpenRegister && (
+                    {(isOpenRegister || membroEditando) && (
                         <RegisterMembro
-                            open={isOpenRegister}
+                            open={isOpenRegister || membroEditando != null}
+                            membro={membroEditando}
                             onClose={handleCloseRegister}
                             onSuccess={handleRegisterSuccess}
                             celulaId={celulaId}

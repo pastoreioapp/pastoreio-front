@@ -365,7 +365,13 @@ export function Dados({ data, onChange }: DadosProps) {
                                 displayEmpty
                                 sx={selectStyles}
                             >
-                                {CARGO_OPTIONS.map((papel) => (
+                                {(
+                                    (
+                                        CARGO_OPTIONS as readonly PapelCelula[]
+                                    ).includes(data.cargo)
+                                        ? CARGO_OPTIONS
+                                        : [data.cargo, ...CARGO_OPTIONS]
+                                ).map((papel) => (
                                     <MenuItem key={papel} value={papel}>
                                         {getFuncaoLabel(papel)}
                                     </MenuItem>
@@ -394,7 +400,13 @@ export function Dados({ data, onChange }: DadosProps) {
                                 displayEmpty
                                 sx={selectStyles}
                             >
-                                {MINISTERIOS_OPTIONS.map((ministerio) => (
+                                {(
+                                    (
+                                        MINISTERIOS_OPTIONS as readonly string[]
+                                    ).includes(data.ministerio)
+                                        ? MINISTERIOS_OPTIONS
+                                        : [data.ministerio, ...MINISTERIOS_OPTIONS]
+                                ).map((ministerio) => (
                                     <MenuItem
                                         key={ministerio}
                                         value={ministerio}

@@ -28,10 +28,17 @@ type MembrosCelulaRow = {
   } | null;
 };
 
+function membroDaRelacao(
+  membros: MembrosCelulaRow["membros"] | MembrosCelulaRow["membros"][],
+): MembrosCelulaRow["membros"] {
+  if (membros == null) return null;
+  return Array.isArray(membros) ? (membros[0] ?? null) : membros;
+}
+
 export function rowToMembroDaCelulaListItemDto(
   row: MembrosCelulaRow
 ): MembroDaCelulaListItemDto {
-  const m = row.membros;
+  const m = membroDaRelacao(row.membros);
   const papelCelula = parsePapelCelula(row.papel_celula);
 
   if (!m) {

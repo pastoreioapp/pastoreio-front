@@ -42,3 +42,13 @@ export interface CelulaDetalheDto {
   local: string | null;
   totalMembros: number;
 }
+
+export interface CreateCelulaDto {
+  nome: string;
+  rede: string;
+  liderMembroId?: number | null;
+  diaSemana?: string | null;
+  horario?: string | null;
+  local?: string | null;
+  ativa?: boolean;
+}

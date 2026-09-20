@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Grid, IconButton, Tooltip, Typography, type SxProps, type Theme } from "@mui/material";
 import { IconArrowLeft, IconPencil, IconUserMinus, IconUserSearch } from "@tabler/icons-react";
 import type { MembroDaCelulaListItemDto } from "@/modules/celulas/application/dtos";
 import { formatarDataCompleta } from "@/ui/utils/datas";
@@ -43,10 +43,16 @@ export function Informacao({
     data,
     onBack,
     onDesvincular,
+    onEditar,
+    refreshKey = 0,
+    sx,
 }: {
     data: MembroDaCelulaListItemDto | null;
     onBack?: () => void;
     onDesvincular?: () => void;
+    onEditar?: () => void;
+    refreshKey?: number;
+    sx?: SxProps<Theme>;
 }) {
     const [modalAberto, setModalAberto] = useState(false);
     const [desvinculando, setDesvinculando] = useState(false);
@@ -81,8 +87,13 @@ export function Informacao({
         },
     ];
 
-    const handleEditar = () =>
+    const handleEditar = () => {
+        if (onEditar) {
+            onEditar();
+            return;
+        }
         enqueueSnackbar("Funcionalidade disponível em breve!", { variant: "info", autoHideDuration: 2000 });
+    };
 
     const podeDesvincular =
         !!data.funcao && (FUNCOES_DESVINCULAVEIS as readonly PapelCelula[]).includes(data.funcao);
@@ -114,6 +125,7 @@ export function Informacao({
                 bgcolor: "#fff",
                 width: "100%",
                 height: "100%",
+                ...sx,
             }}
         >
             <Box
@@ -192,42 +204,26 @@ export function Informacao({
             </Box>
 
             <Box sx={{ px: { xs: 3, md: 5 }, pb: { xs: 3, md: 5 } }}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: { xs: "column", md: "row" },
-                        gap: { xs: 3, md: 4 },
-                        alignItems: { md: "flex-start" },
-                    }}
-                >
+                <Box sx={{ mb: 3 }}>
                     <InformacaoHeader
                         nome={data.nome}
                         funcao={data.funcao}
                         avatarUrl={data.avatarUrl}
                     />
-
-                    <Box
-                        sx={{
-                            flex: 1,
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 2,
-                            pt: { md: 7 },
-                            pb: { md: 3 },
-                        }}
-                    >
-                        {grupos.map((grupo, i) => (
-                            <Box key={i} sx={{ flex: "1 1 220px", minWidth: 0 }}>
-                                <InformacoesGroup
-                                    titulo={grupo.titulo}
-                                    campos={grupo.campos}
-                                />
-                            </Box>
-                        ))}
-                    </Box>
                 </Box>
 
-                <EtapasTabs membroId={data.id} />
+                <Grid container spacing={2} sx={{ mb: 1 }}>
+                    {grupos.map((grupo) => (
+                        <Grid item xs={12} md={4} key={grupo.titulo}>
+                            <InformacoesGroup
+                                titulo={grupo.titulo}
+                                campos={grupo.campos}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
+
+                <EtapasTabs key={`${data.id}-${refreshKey}`} membroId={data.id} />
             </Box>
 
             <ModalConfirmarDesvinculo
