@@ -50,13 +50,13 @@ export class InscricaoRepository {
         const linhas = inscricoes ?? [];
         if (linhas.length === 0) return [];
 
-        const turmaIds = [
-            ...new Set(
+        const turmaIds = Array.from(
+            new Set(
                 linhas
                     .map((linha) => Number(linha.turma_id))
                     .filter((id) => Number.isFinite(id) && id > 0),
             ),
-        ];
+        );
 
         const { data: turmas, error: erroTurmas } = await this.supabase
             .from("turmas")

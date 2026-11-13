@@ -129,7 +129,7 @@ export function ModalCadastroCelula({ open, onClose, onSave }: Props) {
       unicos.set(membro.id, membro);
     }
 
-    return [...unicos.values()].sort((a, b) =>
+    return Array.from(unicos.values()).sort((a, b) =>
       (a.nome ?? "").localeCompare(b.nome ?? "", "pt-BR"),
     );
   }, [membros]);

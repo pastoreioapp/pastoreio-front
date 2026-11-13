@@ -164,13 +164,13 @@ export class MembrosCelulaRepository {
 
     if (error) throw new Error(error.message);
 
-    return [
-      ...new Set(
+    return Array.from(
+      new Set(
         (data ?? [])
           .map((row) => Number(row.membro_id))
           .filter((id) => Number.isFinite(id) && id > 0),
       ),
-    ];
+    );
   }
 
   async existeLiderancaAtiva(

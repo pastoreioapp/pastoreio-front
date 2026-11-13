@@ -46,8 +46,8 @@ export class TrajetoriaService {
         .map((passo) => passo.passoId),
     );
 
-    const inserir = [...desejados].filter((id) => !concluidos.has(id));
-    const remover = [...concluidos].filter((id) => !desejados.has(id));
+    const inserir = Array.from(desejados).filter((id) => !concluidos.has(id));
+    const remover = Array.from(concluidos).filter((id) => !desejados.has(id));
 
     await this.repo.insertPassosConcluidos(membroId, inserir);
     await this.repo.deletePassos(membroId, remover);
